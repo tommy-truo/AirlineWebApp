@@ -51,6 +51,16 @@ const FlightSearch = ({ userID }) => {
     });
   };
 
+  // New Helper to convert total minutes to "Xh Ym" format
+  const formatDuration = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (hours === 0) return `${minutes}m`;
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
+  };
+
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Search Flights</h1>
@@ -110,7 +120,7 @@ const FlightSearch = ({ userID }) => {
                 <th style={{ padding: '12px' }}>Route Details (Origin → Destination)</th>
                 <th style={{ padding: '12px' }}>Departure</th>
                 <th style={{ padding: '12px' }}>Arrival</th>
-                <th style={{ padding: '12px' }}>Dist / Dur</th>
+                <th style={{ padding: '12px' }}>Duration</th>
                 <th style={{ padding: '12px' }}>Status</th>
               </tr>
             </thead>
@@ -136,10 +146,9 @@ const FlightSearch = ({ userID }) => {
                   <td style={{ padding: '12px' }}>{formatDateTime(flight.departure.time)}</td>
                   <td style={{ padding: '12px' }}>{formatDateTime(flight.arrival.time)}</td>
                   
-                  {/* Distance and Duration */}
+                  {/* Duration */}
                   <td style={{ padding: '12px' }}>
-                    <div>{flight.estimatedDistanceKm} km</div>
-                    <div style={{ color: '#666', fontSize: '0.85em' }}>{flight.durationMinutes} mins</div>
+                    <div>{formatDuration(flight.durationMinutes)}</div>
                   </td>
 
                   <td style={{ padding: '12px' }}>
