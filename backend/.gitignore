@@ -1,0 +1,14 @@
+node_modules
+
+# Environment Variables
+.env
+
+# Certificates
+certs/*
+!certs/.gitkeep
+
+# Tests
+tests/*
+
+#Certificate
+*.pem

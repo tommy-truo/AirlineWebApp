@@ -1,0 +1,145 @@
+.login-page{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #fdf2f2;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.light-red-page{
+    background-color: transparent;
+    height: auto;
+  }
+
+.navbar-light-red{
+    background-color: #dd0e0e;
+}
+
+
+.form-wrapper{
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+
+.signup-container{
+    margin: auto;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 90%;
+    max-width: 400px;
+    Margin-top: 100px;
+}
+
+.signup-container h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+
+.brand-text{                                                /*Acme airlines text formatting*/
+    color: white !important;
+    font-weight: bolder !important;
+    font-size:x-large;
+}
+
+.navbar-logo{
+
+    height: 50px;
+    width: auto;
+}
+
+.form-field{
+    margin-bottom: 20px;
+}
+
+.form-field label{
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.form-field input{
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.form-field input:focus{
+    outline: none;
+    border-color: #d32f2f;
+}
+
+.loyalty-field{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 8px, 12px;
+    background-color: #fff8f8;
+    border-radius: 6px;
+    border: 1px solid #f2e0e0;
+    cursor: pointer;
+}
+
+.loyalty-field input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #d32f2f;
+}
+
+.loyalty-field label{
+    margin-bottom: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    display: inline;
+}
+
+.loyalty-field:hover {
+    border-color: #d32f2f;
+    background-color: #fdf2f2;
+}
+
+.login-button{
+    width: 100%;
+    padding: 14px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-bottom: 20px;
+}
+
+.login-button:hover{
+    background-color: #b71c1c;
+}
+
+.Sign-Up .signup-link{
+    color: #d32f2f;
+    text-decoration: none;
+    cursor: pointer;
+}
