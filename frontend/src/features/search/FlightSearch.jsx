@@ -162,7 +162,7 @@ const FlightSearch = ({ userID }) => {
                     }}>
                       {flight.status.name}
                     </span>
-                    {flight.status.reason && (
+                    {flight.status.reason !== 'On Time' && (
                       <div style={{ fontSize: '0.75em', marginTop: '4px', color: '#dc3545' }}>
                         {flight.status.reason}
                       </div>
