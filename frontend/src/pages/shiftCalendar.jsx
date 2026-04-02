@@ -11,8 +11,9 @@ function ShiftCalendar({ employeeId = 1 }) {
   const [requests, setRequests] = useState([]);
   const [requestError, setRequestError] = useState('');
 
-  const API_URL = 'https://airline-web-app.onrender.com';
-  //const API_URL = 'http://localhost:5001';
+  //const API_URL = 'https://airline-web-app.onrender.com';
+    //const API_URL = 'http://localhost:5001';
+    const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
 
