@@ -25,7 +25,7 @@ const App = () => {
   const handleLoginSuccess = (userData) => {
     console.log("User logged in:", userData.user);
 
-    let storedId = userData.user.id;
+    let storedId = null;
 
     // ROLE-BASED REDIRECTION
     if (userData.user.role === 'passenger') { // FOR PASSENGER ACCOUNTS
