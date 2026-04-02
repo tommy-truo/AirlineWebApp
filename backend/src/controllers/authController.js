@@ -9,8 +9,8 @@ export const signup = async (req, res) => {
 
     try {
         // Inserts into accounts table
-        const accountSql = 'INSERT INTO accounts (email, password, is_active) VALUES (?, ?, ?)';
-        const [accountResult] = await db.execute(accountSql, [email, password, 1]);
+        const accountSql = 'INSERT INTO accounts (email, password, is_active, role) VALUES (?, ?, ?, ?)';
+        const [accountResult] = await db.execute(accountSql, [email, password, 1, 'passenger']);
         const accountId = accountResult.insertId;
 
         // Inserts into passengers table
@@ -50,7 +50,17 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const sql = 'SELECT * FROM accounts WHERE email = ? AND password = ?';
+        const sql = `SELECT 
+                a.account_id,
+                a.email,
+                a.password,
+                a.is_active,
+                a.role,
+                e.employee_id
+            FROM accounts a
+            LEFT JOIN employees e
+                ON a.account_id = e.account_id
+            WHERE a.email = ? AND a.password = ?`;
         
         const [rows] = await db.execute(sql, [email, password]);
 
