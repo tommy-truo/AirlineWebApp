@@ -4,9 +4,9 @@ function ScheduledFlights({ employeeId = 1 }) {
   const [flights, setFlights] = useState([]);
   const [error, setError] = useState('');
 
-  const API_URL = 'https://airline-web-app.onrender.com';
+  //const API_URL = 'https://airline-web-app.onrender.com';
     //const API_URL = 'http://localhost:5001';
-    //const API_URL = import.meta.env.VITE_API_URL;
+    const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
 
     fetch(`${API_URL}/api/pilot/scheduled_flights?employee_id=${employeeId}`)
