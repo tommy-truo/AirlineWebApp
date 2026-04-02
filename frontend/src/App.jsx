@@ -81,8 +81,7 @@ const App = () => {
       )}
 
       {view === 'shiftCalendar' && (
-        <PilotDashboard employeeId={currentUserId} />
-      )}
+        <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
 
     </div>
   );

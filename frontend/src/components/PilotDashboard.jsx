@@ -4,12 +4,27 @@ import ScheduledFlights from '../pages/scheduledFlights.jsx';
 import PersonalInfo from '../pages/personalInfo.jsx';
 import './PilotDashboard.css';
 
-function PilotDashboard({ employeeId }) {
+function PilotDashboard({ employeeId, onLogout }) {
   const [page, setPage] = useState('shift');
 
   return (
     <div>
-      <div className="navbar">ACME Airlines</div>
+      <div className="navbar">ACME Airlines
+        <button
+        onClick={onLogout}
+        style={{
+          float: 'right',
+          backgroundColor: '#e53935',
+          color: 'white',
+          border: 'none',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          cursor: 'pointer'
+        }}
+      >
+        Logout
+      </button>
+      </div>
 
       <div className="nav-buttons">
         <button
