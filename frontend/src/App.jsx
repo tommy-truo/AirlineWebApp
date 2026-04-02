@@ -3,9 +3,7 @@ import Login from './components/Login.jsx';
 import Signup from './components/SignUp.jsx';
 import PassengerDashboard from './components/Layout.jsx';
 // IMPORT YALLS SPECIFIC COMPONENTS HERE
-import ShiftCalendar from './pages/shiftCalendar.jsx'; //dex
-import ScheduledFlights from './pages/scheduledFlights.jsx'; //dex
-import PersonalInfo from './pages/personalInfo.jsx'; //dex
+import PilotDashboard from './components/PilotDashboard.jsx'; //dex
 
 const App = () => {
   // Initialize view from localStorage so the user stays logged in on refresh
@@ -84,14 +82,6 @@ const App = () => {
 
       {view === 'shiftCalendar' && (
         <ShiftCalendar employeeId={currentUserId} />
-      )}
-
-      {view === 'scheduledFlights' && (
-        <ScheduledFlights employeeId={currentUserId} />
-      )}
-
-      {view === 'personalInfo' && (
-        <PersonalInfo employeeId={currentUserId} />
       )}
 
     </div>
