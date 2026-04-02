@@ -10,12 +10,17 @@ const App = () => {
 
   // Function to handle successful login
   const handleLoginSuccess = (userData) => {
-    // You can store user details (like name or ID) in localStorage here if needed
+    // Store user details (like ID) in localStorage here if needed
     console.log("User logged in:", userData);
-    localStorage.setItem('activeView', 'dashboard');
     localStorage.setItem('userID', userData.user.id);
     setCurrentUserId(userData.user.id); // Store user ID in state
-    setView('dashboard');
+
+    // ROLE-BASED REDIRECTION
+    if (userData.user.role == 'passenger') { // FOR PASSENGER ACCOUNTS
+      localStorage.setItem('activeView', 'passenger');
+      setView('passenger');
+    }
+    // ADD 'else if' FOR OTHER ROLES
   };
 
   const handleLogout = () => {
@@ -48,8 +53,8 @@ const App = () => {
         />
       )}
 
-      {/* 3. Dashboard View (The Passenger Profile) */}
-      {view === 'dashboard' && (
+      {/* 3. Passenger View (The Passenger Profile) */}
+      {view === 'passenger' && (
         <PassengerDashboard userID={currentUserId} onLogout={handleLogout} />
       )}
     </div>

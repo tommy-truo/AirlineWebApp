@@ -10,11 +10,17 @@ export const signup = async (req, res) => {
     try {
         // Inserts into accounts table
         const accountSql = 'INSERT INTO accounts (email, password, is_active) VALUES (?, ?, ?)';
-        await db.execute(accountSql, [email, password, 1]);
+        const [accountResult] = await db.execute(accountSql, [email, password, 1]);
+        const accountId = accountResult.insertId;
 
         // Inserts into passengers table
         const passengerSql = 'INSERT INTO passengers (first_name, middle_initial, last_name, date_of_birth, is_loyalty_member) VALUES (?, ?, ?, ?, ?)';
-        await db.execute(passengerSql, [firstName, middleInitial || null, lastName, dob, loyaltyValue]);
+        const [passengerResult] = await db.execute(passengerSql, [firstName, middleInitial || null, lastName, dob, loyaltyValue]);
+        const passengerId = passengerResult.insertId;
+
+        // Links account and passenger in account-passengers table
+        const linkSql = 'INSERT INTO account_passengers (account_id, passenger_id, relationship, is_primary) VALUES (?, ?, ?, ?)';
+        const [linkResult] = await db.execute(linkSql, [accountId, passengerId, 'Self', 1]);
 
         // Successful Message
         return res.status(201).json({ 
@@ -56,7 +62,7 @@ export const login = async (req, res) => {
 
             return res.status(200).json({ 
                 message: "Login successful!",
-                user: { id: user.account_id, email: user.email } 
+                user: { id: user.account_id, email: user.email, role: user.role } 
             });
         } else {
             return res.status(401).json({ message: "The account or password is not valid" });
