@@ -81,7 +81,7 @@ const App = () => {
       )}
 
       {view === 'shiftCalendar' && (
-        <ShiftCalendar employeeId={currentUserId} />
+        <PassengerDashboard employeeId={currentUserId} />
       )}
 
     </div>
