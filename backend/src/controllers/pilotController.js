@@ -1,6 +1,5 @@
 import { json } from 'express';
-import { db } from '../db.js';
-
+import { db } from '../config/db.js';
 // Shift Calendar
 export const getShiftCalendar = async (req, res, next) => {
   const employeeId = req.query.employee_id;
