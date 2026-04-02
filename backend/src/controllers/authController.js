@@ -73,7 +73,7 @@ export const login = async (req, res) => {
 
             return res.status(200).json({ 
                 message: "Login successful!",
-                user: { id: user.account_id, email: user.email, role: user.role } 
+                user: { account_id: user.account_id, employee_id: user.employee_id, email: user.email, role: user.role } 
             });
         } else {
             return res.status(401).json({ message: "The account or password is not valid" });
