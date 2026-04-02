@@ -1,0 +1,374 @@
+import { json } from 'express';
+import { db } from '../db.js';
+
+// Shift Calendar
+export const getShiftCalendar = async (req, res, next) => {
+  const employeeId = req.query.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    SELECT
+      fea.assignment_id AS shift_id,
+      DATE(fi.scheduled_departure_datetime) AS shift_date,
+      TIME(fi.scheduled_departure_datetime) AS start_time,
+      TIME(fi.scheduled_arrival_datetime) AS end_time,
+      DAYNAME(fi.scheduled_departure_datetime) AS day_name,
+      fr.flight_number,
+      da.city AS departure_city,
+      aa.city AS arrival_city,
+      fi.aircraft_id,
+      feat.type_name AS assignment_role,
+      e.first_name,
+      e.last_name,
+      fs.status_name AS flight_status
+    FROM airline.flight_employee_assignments fea
+    JOIN airline.employees e
+      ON fea.employee_id = e.employee_id
+    JOIN airline.flight_employee_assignment_types feat
+      ON fea.assignment_type_id = feat.assignment_type_id
+    JOIN airline.flight_instances fi
+      ON fea.flight_instance_id = fi.flight_instance_id
+    JOIN airline.flight_routes fr
+      ON fi.flight_route_id = fr.flight_route_id
+    JOIN airline.airports da
+      ON fr.departure_airport_id = da.airport_id
+    JOIN airline.airports aa
+      ON fr.arrival_airport_id = aa.airport_id
+    JOIN airline.flight_statuses fs
+      ON fi.status_id = fs.flight_status_id
+    WHERE e.employee_id = ?
+    ORDER BY fi.scheduled_departure_datetime
+  `;
+
+  //db.query(sql, [employeeId], (err, results) => {
+   // if (err) return next(err);
+   // res.json(results);
+  //});
+
+  try{
+    const [results] = await db.query(sql, [employeeId]);
+    res.json(results);
+  } 
+  catch(err){
+    return next(err);
+  }
+};
+
+// add, swap, drop shifts
+export const submitShiftRequest = async (req, res, next) => {
+  const { employee_id, assignment_id, request_type, reason } = req.body;
+
+  const sql = `
+    INSERT INTO airline.shift_requests
+    (employee_id, assignment_id, request_type, reason, status, submitted_datetime)
+    VALUES (?, ?, ?, ?, 'Pending', NOW())
+  `;
+
+  //db.query(sql, [employee_id, assignment_id, request_type, reason], (err) => {
+    //if (err) return next(err);
+    //res.json({ message: 'Request submitted successfully' });
+  //});
+  
+  try{
+    const [results] = await db.query(sql, [employee_id, assignment_id, request_type, reason]);
+    res.json ({ message: 'Request submitted successfully '});
+  } 
+  catch(err){
+    return next(err);
+  }
+};
+
+// scheduled flights
+export const getScheduledFlights = async (req, res, next) => {
+  const employeeId = req.query.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    SELECT
+      fea.assignment_id,
+      e.employee_id,
+      e.first_name,
+      e.last_name,
+      fr.flight_number,
+      da.city AS departure_city,
+      aa.city AS arrival_city,
+      fi.scheduled_departure_datetime,
+      fi.scheduled_arrival_datetime,
+      fr.estimated_distance_km,
+      fr.estimated_duration_minutes,
+      fi.aircraft_id
+    FROM airline.flight_employee_assignments fea
+    JOIN airline.employees e
+      ON fea.employee_id = e.employee_id
+    JOIN airline.flight_instances fi
+      ON fea.flight_instance_id = fi.flight_instance_id
+    JOIN airline.flight_routes fr
+      ON fi.flight_route_id = fr.flight_route_id
+    JOIN airline.airports da
+      ON fr.departure_airport_id = da.airport_id
+    JOIN airline.airports aa
+      ON fr.arrival_airport_id = aa.airport_id
+    WHERE e.employee_id = ?
+    ORDER BY fi.scheduled_departure_datetime
+  `;
+
+ // db.query(sql, [employeeId], (err, results) => {
+   // if (err) return next(err);
+    //res.json(results);
+  //});
+  
+  try{
+    const [results] = await db.query(sql, [employeeId]);
+    res.json(results);
+  } 
+  catch(err){
+    return next(err);
+  }
+};
+
+// to see shift requests
+export const getShiftRequests = async (req, res, next) => {
+  const employeeId = req.query.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    SELECT
+      sr.shift_request_id,
+      sr.request_type,
+      sr.status,
+      sr.reason,
+      sr.submitted_datetime,
+      sr.reviewed_datetime,
+      fr.flight_number,
+      da.city AS departure_city,
+      aa.city AS arrival_city
+    FROM airline.shift_requests sr
+    LEFT JOIN airline.flight_employee_assignments fea
+      ON sr.assignment_id = fea.assignment_id
+    LEFT JOIN airline.flight_instances fi
+      ON COALESCE(sr.requested_flight_instance_id, fea.flight_instance_id) = fi.flight_instance_id
+    LEFT JOIN airline.flight_routes fr
+      ON fi.flight_route_id = fr.flight_route_id
+    LEFT JOIN airline.airports da
+      ON fr.departure_airport_id = da.airport_id
+    LEFT JOIN airline.airports aa
+      ON fr.arrival_airport_id = aa.airport_id
+    WHERE sr.employee_id = ?
+    ORDER BY sr.submitted_datetime DESC
+  `;
+
+ // db.query(sql, [employeeId], (err, results) => {
+   // if (err) return next(err);
+    //res.json(results);
+  //});
+
+  try{
+    const [results] = await db.query(sql, [employeeId]);
+    res.json(results);
+  } 
+  catch(err){
+    return next(err);
+  }
+};
+
+// personal info / HR
+export const getProfile = async (req, res, next) => {
+  const employeeId = req.query.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    SELECT
+      e.employee_id,
+      e.first_name,
+      e.middle_initial,
+      e.last_name,
+      e.date_of_birth,
+      e.salary,
+      e.start_date,
+      e.emergency_contact_name,
+      e.emergency_contact_phone,
+      e.emergency_contact_relationship,
+      a.email,
+      d.department_name,
+      jt.title_name
+    FROM airline.employees e
+    JOIN airline.accounts a
+      ON e.account_id = a.account_id
+    JOIN airline.departments d
+      ON e.department_id = d.department_id
+    JOIN airline.job_titles jt
+      ON e.job_title_id = jt.job_title_id
+    WHERE e.employee_id = ?
+  `;
+
+  //db.query(sql, [employeeId], (err, results) => {
+    //if (err) return next(err);
+    //if (results.length === 0) {
+      //return res.status(404).json({ error: 'Employee not found' });
+    //}
+    //res.json(results[0]);
+  //});
+
+  try{
+    const [results] = await db.query(sql, [employeeId]);
+    if(results.length === 0) {
+      return res.status(404).json({ errror: 'Employee not found' });
+    }
+    res.json(results[0]);
+  } 
+  catch(err){
+    return next(err);
+  }
+};
+
+// updating basic contact info
+/*export const updateProfile = async (req, res, next) => {
+
+  const {
+    employee_id,
+    first_name,
+    middle_initial,
+    last_name,
+    email,
+    emergency_contact_name,
+    emergency_contact_phone,
+    emergency_contact_relationship
+  } = req.body;
+
+  if (!employee_id) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const getAccountSql = `
+    SELECT account_id
+    FROM airline.employees
+    WHERE employee_id = ?
+  `;
+
+  db.query(getAccountSql, [employee_id], (err, results) => {
+    if (err) return next(err);
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const accountId = results[0].account_id;
+
+    const updateEmployeeSql = `
+      UPDATE airline.employees
+      SET
+        first_name = ?,
+        middle_initial = ?,
+        last_name = ?,
+        emergency_contact_name = ?,
+        emergency_contact_phone = ?,
+        emergency_contact_relationship = ?
+      WHERE employee_id = ?
+    `;
+
+    db.query(
+      updateEmployeeSql,
+      [
+        first_name,
+        middle_initial,
+        last_name,
+        emergency_contact_name,
+        emergency_contact_phone,
+        emergency_contact_relationship,
+        employee_id
+      ],
+      (err2) => {
+        if (err2) return next(err2);
+
+        const updateAccountSql = `
+          UPDATE airline.accounts
+          SET email = ?
+          WHERE account_id = ?
+        `;
+
+        db.query(updateAccountSql, [email, accountId], (err3) => {
+          if (err3) return next(err3);
+          res.json({ message: 'Personal info updated successfully' });
+        });
+      }
+    );
+  });
+}; */
+export const updateProfile = async (req, res, next) => {
+  const {
+    employee_id,
+    first_name,
+    middle_initial,
+    last_name,
+    email,
+    emergency_contact_name,
+    emergency_contact_phone,
+    emergency_contact_relationship
+  } = req.body;
+
+  if (!employee_id) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const getAccountSql = `
+    SELECT account_id
+    FROM airline.employees
+    WHERE employee_id = ?
+  `;
+
+  const updateEmployeeSql = `
+    UPDATE airline.employees
+    SET
+      first_name = ?,
+      middle_initial = ?,
+      last_name = ?,
+      emergency_contact_name = ?,
+      emergency_contact_phone = ?,
+      emergency_contact_relationship = ?
+    WHERE employee_id = ?
+  `;
+
+  const updateAccountSql = `
+    UPDATE airline.accounts
+    SET email = ?
+    WHERE account_id = ?
+  `;
+
+  try {
+    const [results] = await db.query(getAccountSql, [employee_id]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const accountId = results[0].account_id;
+
+    await db.query(updateEmployeeSql, [
+      first_name,
+      middle_initial,
+      last_name,
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      employee_id
+    ]);
+
+    await db.query(updateAccountSql, [email, accountId]);
+
+    res.json({ message: 'Personal info updated successfully' });
+  } catch (err) {
+    return next(err);
+  }
+};
