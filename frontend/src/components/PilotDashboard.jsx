@@ -8,25 +8,10 @@ function PilotDashboard({ employeeId, onLogout }) {
   const [page, setPage] = useState('shift');
 
   return (
-    <div>
-      <div className="navbar">ACME Airlines
-        <button
-        onClick={onLogout}
-        style={{
-          float: 'right',
-          backgroundColor: '#e53935',
-          color: 'white',
-          border: 'none',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          cursor: 'pointer'
-        }}
-      >
-        Logout
-      </button>
-      </div>
+    <div className="dashboard-layout">
+      <div className="sidebar">
+        <h2 className="logo">ACME Airlines</h2>
 
-      <div className="nav-buttons">
         <button
           className={page === 'shift' ? 'active' : ''}
           onClick={() => setPage('shift')}
@@ -47,9 +32,13 @@ function PilotDashboard({ employeeId, onLogout }) {
         >
           Personal Info
         </button>
+
+        <button className="logout-btn" onClick={onLogout}>
+          Logout
+        </button>
       </div>
 
-      <div className="page-container">
+      <div className="main-content">
         {page === 'shift' && <ShiftCalendar employeeId={employeeId} />}
         {page === 'flights' && <ScheduledFlights employeeId={employeeId} />}
         {page === 'personal' && <PersonalInfo employeeId={employeeId} />}
