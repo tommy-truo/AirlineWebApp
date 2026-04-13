@@ -13,6 +13,7 @@ export const mapFlightInstance = (row) => {
             country: row.departure_country,
             city: row.departure_city,
             airportName: row.departure_airport_name,
+            iata: row.departure_iata,
             time: row.departure_time
         },
 
@@ -21,6 +22,7 @@ export const mapFlightInstance = (row) => {
             country: row.arrival_country,
             city: row.arrival_city,
             airportName: row.arrival_airport_name,
+            iata: row.arrival_iata,
             time: row.arrival_time
         },
 
@@ -43,4 +45,28 @@ function calculateDuration(start, end) {
     if (!start || !end) return 0;
     const diff = new Date(end) - new Date(start);
     return Math.floor(diff / 1000 / 60);
+}
+
+export const mapFlightSeats = (row) => {
+    if (!row) return null;
+
+    return {
+        id: row.seat_id,
+        row: row.seat_row,
+        col: row.column_letter,
+        class: row.class_name,
+
+        status: row.seat_status,
+        isAvailable: validateSeatAvailability(row.seat_status)
+    };
+}
+
+function validateSeatAvailability(status) {
+    if (!status) return false;
+
+    if (status === 'Available') {
+        return true;
+    } else {
+        return false;
+    }
 }

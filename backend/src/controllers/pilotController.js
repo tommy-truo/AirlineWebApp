@@ -89,33 +89,34 @@ export const getScheduledFlights = async (req, res, next) => {
   }
 
   const sql = `
-    SELECT
-      fea.assignment_id,
-      e.employee_id,
-      e.first_name,
-      e.last_name,
-      fr.flight_number,
-      da.city AS departure_city,
-      aa.city AS arrival_city,
-      fi.scheduled_departure_datetime,
-      fi.scheduled_arrival_datetime,
-      fr.estimated_distance_km,
-      fr.estimated_duration_minutes,
-      fi.aircraft_id
-    FROM airline.flight_employee_assignments fea
-    JOIN airline.employees e
-      ON fea.employee_id = e.employee_id
-    JOIN airline.flight_instances fi
-      ON fea.flight_instance_id = fi.flight_instance_id
-    JOIN airline.flight_routes fr
-      ON fi.flight_route_id = fr.flight_route_id
-    JOIN airline.airports da
-      ON fr.departure_airport_id = da.airport_id
-    JOIN airline.airports aa
-      ON fr.arrival_airport_id = aa.airport_id
-    WHERE e.employee_id = ?
-    ORDER BY fi.scheduled_departure_datetime
-  `;
+  SELECT
+    fea.assignment_id,
+    fi.flight_instance_id,
+    e.employee_id,
+    e.first_name,
+    e.last_name,
+    fr.flight_number,
+    da.city AS departure_city,
+    aa.city AS arrival_city,
+    fi.scheduled_departure_datetime,
+    fi.scheduled_arrival_datetime,
+    fr.estimated_distance_km,
+    fr.estimated_duration_minutes,
+    fi.aircraft_id
+  FROM airline.flight_employee_assignments fea
+  JOIN airline.employees e
+    ON fea.employee_id = e.employee_id
+  JOIN airline.flight_instances fi
+    ON fea.flight_instance_id = fi.flight_instance_id
+  JOIN airline.flight_routes fr
+    ON fi.flight_route_id = fr.flight_route_id
+  JOIN airline.airports da
+    ON fr.departure_airport_id = da.airport_id
+  JOIN airline.airports aa
+    ON fr.arrival_airport_id = aa.airport_id
+  WHERE e.employee_id = ?
+  ORDER BY fi.scheduled_departure_datetime
+`;
 
  // db.query(sql, [employeeId], (err, results) => {
    // if (err) return next(err);
@@ -367,6 +368,96 @@ export const updateProfile = async (req, res, next) => {
     await db.query(updateAccountSql, [email, accountId]);
 
     res.json({ message: 'Personal info updated successfully' });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getCrewManifest = async (req, res, next) => {
+  const { employee_id, flight_id } = req.query;
+
+  if (!employee_id || !flight_id) {
+    return res.status(400).json({
+      error: 'employee_id and flight_id are required'
+    });
+  }
+
+  const verifySql = `
+    SELECT 1
+    FROM airline.flight_employee_assignments
+    WHERE employee_id = ?
+      AND flight_instance_id = ?
+    LIMIT 1
+  `;
+
+  const crewSql = `
+    SELECT
+      e.employee_id,
+      e.first_name,
+      e.last_name,
+      feat.type_name AS assignment_role,
+      d.department_name
+    FROM airline.flight_employee_assignments fea
+    JOIN airline.employees e
+      ON fea.employee_id = e.employee_id
+    JOIN airline.flight_employee_assignment_types feat
+      ON fea.assignment_type_id = feat.assignment_type_id
+    LEFT JOIN airline.departments d
+      ON e.department_id = d.department_id
+    WHERE fea.flight_instance_id = ?
+    ORDER BY feat.type_name, e.last_name, e.first_name
+  `;
+
+  try {
+    const [allowed] = await db.query(verifySql, [employee_id, flight_id]);
+
+    if (allowed.length === 0) {
+      return res.status(403).json({
+        error: 'You are not assigned to this flight'
+      });
+    }
+
+    const [results] = await db.query(crewSql, [flight_id]);
+    res.json(results);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const updateEmergencyContact = async (req, res, next) => {
+  const {
+    employee_id,
+    emergency_contact_name,
+    emergency_contact_phone,
+    emergency_contact_relationship
+  } = req.body;
+
+  if (!employee_id) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    UPDATE airline.employees
+    SET
+      emergency_contact_name = ?,
+      emergency_contact_phone = ?,
+      emergency_contact_relationship = ?
+    WHERE employee_id = ?
+  `;
+
+  try {
+    const [result] = await db.query(sql, [
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      employee_id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.json({ message: 'Emergency contact updated successfully' });
   } catch (err) {
     return next(err);
   }

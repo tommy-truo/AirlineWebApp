@@ -5,6 +5,9 @@
   --card-white: #ffffff;
   --text-dark: #333;
   --border-light: #dddddd;
+  --sidebar-dark: #1f2937;
+  --sidebar-hover: #374151;
+  --sidebar-active: #c62828;
 }
 
 /* Base */
@@ -92,7 +95,7 @@ body {
   background-color: #f9f9f9;
 }
 
-/* Button */
+/* General buttons */
 .action-button {
   background-color: var(--primary-red);
   color: white;
@@ -167,6 +170,14 @@ body {
 
 /* Responsive */
 @media (max-width: 900px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
   .page {
     padding: 20px;
   }
