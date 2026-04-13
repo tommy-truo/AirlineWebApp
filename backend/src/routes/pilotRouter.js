@@ -9,7 +9,8 @@ import {
   getCrewManifest,
   updateEmergencyContact,
   getFlightReports,
-  getPendingFlightReports
+  getPendingFlightReports,
+  submitFlightReport
 } from '../controllers/pilotController.js';
 
 const router = express.Router();
@@ -41,5 +42,7 @@ router.put('/profile/emergency-contact', updateEmergencyContact);
 router.get('/flight_reports', getFlightReports);
 
 router.get('/flight_reports/pending', getPendingFlightReports);
+
+router.post('/flight_reports', submitFlightReport);
 
 export default router;

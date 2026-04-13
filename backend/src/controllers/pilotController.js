@@ -468,10 +468,28 @@ export const getFlightReports = async (req, res, next) => {
         const { employee_id } = req.query;
 
         const [rows] = await db.query(`
-            SELECT *
-            FROM airline.flight_reports
-            WHERE employee_id = ?
-            ORDER BY submitted_at DESC
+            SELECT
+              rep.report_id,
+              rep.flight_instance_id,
+              rep.employee_id,
+              rep.aircraft_id,
+              rep.hours_flown,
+              rep.distance_flown_km,
+              rep.final_status,
+              rep.irregular_reason,
+              rep.notes,
+              rep.submitted_at,
+              fr.flight_number,
+              fi.scheduled_departure_datetime AS scheduled_departure_datetime,
+              fi.scheduled_arrival_datetime AS scheduled_arrival_datetime
+            FROM airline.flight_reports rep
+            JOIN airline.flight_instances fi
+              ON rep.flight_instance_id = fi.flight_instance_id
+            JOIN airline.flight_routes fr
+              ON fi.flight_route_id = fr.flight_route_id
+            WHERE rep.employee_id = ?
+            ORDER BY rep.submitted_at DESC
+
         `, [employee_id]);
 
         res.json(rows);
@@ -522,4 +540,60 @@ export const getPendingFlightReports = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const submitFlightReport = async (req, res, next) => {
+    try {
+        const {
+            employee_id,
+            flight_instance_id,
+            aircraft_id,
+            hours_flown,
+            distance_flown_km,
+            status,
+            irregular_reason,
+            notes
+        } = req.body;
+
+        if (!employee_id || !flight_instance_id || !aircraft_id || !hours_flown || !distance_flown_km || !status) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        if (status !== 'Completed' && !irregular_reason) {
+            return res.status(400).json({ error: 'Irregular reason is required for non-completed flights' });
+        }
+
+        const [result] = await db.query(
+            `
+            INSERT INTO airline.flight_reports (
+                flight_instance_id,
+                employee_id,
+                aircraft_id,
+                hours_flown,
+                distance_flown_km,
+                final_status,
+                irregular_reason,
+                notes
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+            [
+                flight_instance_id,
+                employee_id,
+                aircraft_id,
+                hours_flown,
+                distance_flown_km,
+                status,
+                irregular_reason || null,
+                notes || null
+            ]
+        );
+
+        res.status(201).json({
+            message: 'Flight report submitted successfully',
+            report_id: result.insertId
+        });
+    } catch (err) {
+        next(err);
+    }
 };
