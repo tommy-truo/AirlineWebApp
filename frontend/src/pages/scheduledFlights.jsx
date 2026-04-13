@@ -110,7 +110,9 @@ function ScheduledFlights({ employeeId = 1 }) {
                 Pilot Dashboard
             </h2>
 
-            <h1 className="title">Scheduled Flights</h1>
+            <h1 className="title">
+                Scheduled Flights
+            </h1>
 
             {error && (
                 <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>

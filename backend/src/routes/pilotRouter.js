@@ -7,7 +7,9 @@ import {
   getProfile,
   updateProfile,
   getCrewManifest,
-  updateEmergencyContact
+  updateEmergencyContact,
+  getFlightReports,
+  getPendingFlightReports
 } from '../controllers/pilotController.js';
 
 const router = express.Router();
@@ -35,5 +37,9 @@ router.get('/crew_manifest', getCrewManifest);
 
 // updates for emergency contact only
 router.put('/profile/emergency-contact', updateEmergencyContact);
+
+router.get('/flight_reports', getFlightReports);
+
+router.get('/flight_reports/pending', getPendingFlightReports);
 
 export default router;

@@ -5,7 +5,7 @@ import ShiftCalendar from '../pages/shiftCalendar.jsx';
 //scheduled flights is for viewing flight assignments, both future and past
 import ScheduledFlights from '../pages/scheduledFlights.jsx';
 import PersonalInfo from '../pages/personalInfo.jsx';
-//import FlightReports from '../pages/flightReports.jsx';
+import FlightReports from '../pages/flightReports.jsx';
 import './PilotDashboard.css';
 
 function PilotDashboard({ employeeId, onLogout }) {
@@ -58,16 +58,7 @@ function PilotDashboard({ employeeId, onLogout }) {
         {page === 'shift' && <ShiftCalendar employeeId={employeeId} />}
         {page === 'flights' && <ScheduledFlights employeeId={employeeId} />}
         {page === 'personal' && <PersonalInfo employeeId={employeeId} />}
-
-    
-        {page === 'reports' && (
-          <div className="page">
-            <h1 className="title">Flight Reports / Logs</h1>
-            <p style={{ textAlign: 'center', color: '#777' }}>
-              Flight reports page coming next.
-            </p>
-          </div>
-        )}
+        {page === 'reports' && <FlightReports employeeId={employeeId} />}
       </main>
     </div>
   );

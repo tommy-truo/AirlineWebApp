@@ -462,3 +462,64 @@ export const updateEmergencyContact = async (req, res, next) => {
     return next(err);
   }
 };
+
+export const getFlightReports = async (req, res, next) => {
+    try {
+        const { employee_id } = req.query;
+
+        const [rows] = await db.query(`
+            SELECT *
+            FROM airline.flight_reports
+            WHERE employee_id = ?
+            ORDER BY submitted_at DESC
+        `, [employee_id]);
+
+        res.json(rows);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getPendingFlightReports = async (req, res, next) => {
+  try {
+    const { employee_id } = req.query;
+
+    if (!employee_id) {
+      return res.status(400).json({ error: 'employee_id is required' });
+    }
+
+    const [rows] = await db.query(
+      `
+      SELECT
+        fi.flight_instance_id,
+        fr.flight_number,
+        da.city AS departure_city,
+        aa.city AS arrival_city,
+        fi.scheduled_departure_datetime,
+        fi.scheduled_arrival_datetime,
+        fi.aircraft_id
+      FROM airline.flight_employee_assignments fea
+      JOIN airline.flight_instances fi
+        ON fea.flight_instance_id = fi.flight_instance_id
+      JOIN airline.flight_routes fr
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airline.airports da
+        ON fr.departure_airport_id = da.airport_id
+      JOIN airline.airports aa
+        ON fr.arrival_airport_id = aa.airport_id
+      LEFT JOIN airline.flight_reports rep
+        ON rep.flight_instance_id = fi.flight_instance_id
+       AND rep.employee_id = fea.employee_id
+      WHERE fea.employee_id = ?
+        AND fi.scheduled_arrival_datetime < NOW()
+        AND rep.report_id IS NULL
+      ORDER BY fi.scheduled_departure_datetime DESC
+      `,
+      [employee_id]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+};
