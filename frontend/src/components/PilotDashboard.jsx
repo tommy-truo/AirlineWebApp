@@ -1,5 +1,8 @@
 import { useState } from 'react';
+//shift calendar is for managing schedule requests
 import ShiftCalendar from '../pages/shiftCalendar.jsx';
+
+//scheduled flights is for viewing flight assignments, both future and past
 import ScheduledFlights from '../pages/scheduledFlights.jsx';
 import PersonalInfo from '../pages/personalInfo.jsx';
 //import FlightReports from '../pages/flightReports.jsx';

@@ -60,11 +60,6 @@ function ShiftCalendar({ employeeId = 1 }) {
         return shiftDateTime >= now;
     });
 
-    const pastShifts = shifts.filter((shift) => {
-        if (!shift.shift_date || !shift.start_time) return false;
-        const shiftDateTime = new Date(`${shift.shift_date}T${shift.start_time}`);
-        return shiftDateTime < now;
-    });
 
     const nextFlight = upcomingShifts.length > 0 ? upcomingShifts[0] : null;
 
@@ -273,71 +268,6 @@ function ShiftCalendar({ employeeId = 1 }) {
                     </table>
                 </div>
 
-                <div className="table-wrapper" style={{ marginTop: '30px' }}>
-                    <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
-                        Past Shifts
-                    </h2>
-
-                    <table className="shift-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Day</th>
-                                <th>Start</th>
-                                <th>End</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Flight</th>
-                                <th>Aircraft</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pastShifts.length === 0 ? (
-                                <tr>
-                                    <td colSpan="10" style={{ textAlign: 'center' }}>
-                                        No past shifts.
-                                    </td>
-                                </tr>
-                            ) : (
-                                pastShifts.map((shift, index) => (
-                                    <tr key={shift.shift_id || index}>
-                                        <td>
-                                            {shift.shift_date
-                                                ? new Date(shift.shift_date).toLocaleDateString()
-                                                : shift.day
-                                                    ? new Date(shift.day).toLocaleDateString()
-                                                    : 'N/A'}
-                                        </td>
-                                        <td>{shift.day_name || 'N/A'}</td>
-                                        <td>{shift.start_time ? String(shift.start_time).slice(0, 5) : 'N/A'}</td>
-                                        <td>{shift.end_time ? String(shift.end_time).slice(0, 5) : 'N/A'}</td>
-                                        <td>{shift.departure_city || shift.start_location || 'N/A'}</td>
-                                        <td>{shift.arrival_city || 'N/A'}</td>
-                                        <td>{shift.flight_number || 'N/A'}</td>
-                                        <td>{shift.aircraft_id || 'N/A'}</td>
-                                        <td>{shift.assignment_role || 'N/A'}</td>
-                                        <td>
-                                            <span
-                                                style={{
-                                                    display: 'inline-block',
-                                                    padding: '6px 10px',
-                                                    borderRadius: '999px',
-                                                    background: '#f3f3f3',
-                                                    fontSize: '14px',
-                                                    fontWeight: '600'
-                                                }}
-                                            >
-                                                {shift.flight_status || 'N/A'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
 
                 <div className="table-wrapper" style={{ marginTop: '30px' }}>
                     <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
