@@ -65,11 +65,6 @@ export const submitShiftRequest = async (req, res, next) => {
     (employee_id, assignment_id, request_type, reason, status, submitted_datetime)
     VALUES (?, ?, ?, ?, 'Pending', NOW())
   `;
-
-  //db.query(sql, [employee_id, assignment_id, request_type, reason], (err) => {
-    //if (err) return next(err);
-    //res.json({ message: 'Request submitted successfully' });
-  //});
   
   try{
     const [results] = await db.query(sql, [employee_id, assignment_id, request_type, reason]);
@@ -118,11 +113,6 @@ export const getScheduledFlights = async (req, res, next) => {
   ORDER BY fi.scheduled_departure_datetime
 `;
 
- // db.query(sql, [employeeId], (err, results) => {
-   // if (err) return next(err);
-    //res.json(results);
-  //});
-  
   try{
     const [results] = await db.query(sql, [employeeId]);
     res.json(results);
@@ -166,11 +156,6 @@ export const getShiftRequests = async (req, res, next) => {
     ORDER BY sr.submitted_datetime DESC
   `;
 
- // db.query(sql, [employeeId], (err, results) => {
-   // if (err) return next(err);
-    //res.json(results);
-  //});
-
   try{
     const [results] = await db.query(sql, [employeeId]);
     res.json(results);
@@ -213,13 +198,6 @@ export const getProfile = async (req, res, next) => {
     WHERE e.employee_id = ?
   `;
 
-  //db.query(sql, [employeeId], (err, results) => {
-    //if (err) return next(err);
-    //if (results.length === 0) {
-      //return res.status(404).json({ error: 'Employee not found' });
-    //}
-    //res.json(results[0]);
-  //});
 
   try{
     const [results] = await db.query(sql, [employeeId]);
@@ -233,79 +211,6 @@ export const getProfile = async (req, res, next) => {
   }
 };
 
-// updating basic contact info
-/*export const updateProfile = async (req, res, next) => {
-
-  const {
-    employee_id,
-    first_name,
-    middle_initial,
-    last_name,
-    email,
-    emergency_contact_name,
-    emergency_contact_phone,
-    emergency_contact_relationship
-  } = req.body;
-
-  if (!employee_id) {
-    return res.status(400).json({ error: 'employee_id is required' });
-  }
-
-  const getAccountSql = `
-    SELECT account_id
-    FROM airline.employees
-    WHERE employee_id = ?
-  `;
-
-  db.query(getAccountSql, [employee_id], (err, results) => {
-    if (err) return next(err);
-
-    if (results.length === 0) {
-      return res.status(404).json({ error: 'Employee not found' });
-    }
-
-    const accountId = results[0].account_id;
-
-    const updateEmployeeSql = `
-      UPDATE airline.employees
-      SET
-        first_name = ?,
-        middle_initial = ?,
-        last_name = ?,
-        emergency_contact_name = ?,
-        emergency_contact_phone = ?,
-        emergency_contact_relationship = ?
-      WHERE employee_id = ?
-    `;
-
-    db.query(
-      updateEmployeeSql,
-      [
-        first_name,
-        middle_initial,
-        last_name,
-        emergency_contact_name,
-        emergency_contact_phone,
-        emergency_contact_relationship,
-        employee_id
-      ],
-      (err2) => {
-        if (err2) return next(err2);
-
-        const updateAccountSql = `
-          UPDATE airline.accounts
-          SET email = ?
-          WHERE account_id = ?
-        `;
-
-        db.query(updateAccountSql, [email, accountId], (err3) => {
-          if (err3) return next(err3);
-          res.json({ message: 'Personal info updated successfully' });
-        });
-      }
-    );
-  });
-}; */
 export const updateProfile = async (req, res, next) => {
   const {
     employee_id,
