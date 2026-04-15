@@ -4,19 +4,21 @@ export const getAllEmployees = async (req, res) => {
   try {
     const sql = `
   SELECT 
-    employee_id,
-    first_name,
-    last_name,
-    department_id,
-    job_title_id,
-    salary,
-    supervisor_id,
-    emergency_contact_name,
-    emergency_contact_phone,
-    emergency_contact_relationship,
-    account_id
-  FROM employees
-  ORDER BY employee_id ASC
+  e.employee_id,
+  e.first_name,
+  e.last_name,
+  e.department_id,
+  e.job_title_id,
+  e.salary,
+  e.supervisor_id,
+  e.emergency_contact_name,
+  e.emergency_contact_phone,
+  e.emergency_contact_relationship,
+  e.account_id
+FROM employees e
+JOIN accounts a ON e.account_id = a.account_id
+WHERE a.is_active = 1
+ORDER BY e.employee_id ASC
 `;
 
     const [rows] = await db.execute(sql);
@@ -29,41 +31,6 @@ export const getAllEmployees = async (req, res) => {
 
 export const createEmployee = async (req, res) => {
   const {
-  first_name,
-  middle_initial,
-  last_name,
-  gender,
-  date_of_birth,
-  ssn,
-  emergency_contact_name,
-  emergency_contact_phone,
-  emergency_contact_relationship,
-  department_id,
-  job_title_id,
-  salary,
-  start_date,
-  supervisor_id,
-  email,
-  password
-} = req.body;
-
-  try {
-    const accountSql = `
-      INSERT INTO accounts (email, password, is_active, role)
-      VALUES (?, ?, ?, ?)
-    `;
-    const [accountResult] = await db.execute(accountSql, [
-      email,
-      password,
-      1,
-      'manager'
-    ]);
-
-    const accountId = accountResult.insertId;
-
-    const employeeSql = `
-  INSERT INTO employees
-  (
     first_name,
     middle_initial,
     last_name,
@@ -78,28 +45,78 @@ export const createEmployee = async (req, res) => {
     salary,
     start_date,
     supervisor_id,
-    account_id
-  )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
+    email,
+    password
+  } = req.body;
+
+  try {
+    const accountSql = `
+      INSERT INTO accounts (email, password, is_active, role)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    const jobTitleIdNum = Number(job_title_id);
+
+    let role = 'passenger';
+
+    if (jobTitleIdNum === 1 || jobTitleIdNum === 2) {
+      role = 'pilot';
+    } else if (jobTitleIdNum === 3) {
+      role = 'flightcrew';
+    } else if (jobTitleIdNum === 6) {
+      role = 'maintenance';
+    } else if (jobTitleIdNum === 8 || jobTitleIdNum === 9) {
+      role = 'manager';
+    }
+
+    const [accountResult] = await db.execute(accountSql, [
+      email,
+      password,
+      1,
+      role
+    ]);
+
+    const accountId = accountResult.insertId;
+
+    const employeeSql = `
+      INSERT INTO employees
+      (
+        first_name,
+        middle_initial,
+        last_name,
+        gender,
+        date_of_birth,
+        ssn,
+        emergency_contact_name,
+        emergency_contact_phone,
+        emergency_contact_relationship,
+        department_id,
+        job_title_id,
+        salary,
+        start_date,
+        supervisor_id,
+        account_id
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
     const [employeeResult] = await db.execute(employeeSql, [
-  first_name,
-  middle_initial || null,
-  last_name,
-  gender,
-  date_of_birth,
-  ssn,
-  emergency_contact_name || null,
-  emergency_contact_phone || null,
-  emergency_contact_relationship || null,
-  department_id,
-  job_title_id,
-  salary,
-  start_date,
-  supervisor_id || null,
-  accountId
-]);
+      first_name,
+      middle_initial || null,
+      last_name,
+      gender,
+      date_of_birth,
+      ssn,
+      emergency_contact_name || null,
+      emergency_contact_phone || null,
+      emergency_contact_relationship || null,
+      department_id,
+      job_title_id,
+      salary,
+      start_date,
+      supervisor_id || null,
+      accountId
+    ]);
 
     return res.status(201).json({
       message: 'Employee registered successfully.',
@@ -107,7 +124,7 @@ export const createEmployee = async (req, res) => {
         employee_id: employeeResult.insertId,
         account_id: accountId,
         email,
-        role: 'manager'
+        role
       }
     });
   } catch (err) {
@@ -138,11 +155,10 @@ export const deleteEmployee = async (req, res) => {
 
     const accountId = rows[0].account_id;
 
-    await db.execute('DELETE FROM employees WHERE employee_id = ?', [id]);
-
-    if (accountId) {
-      await db.execute('DELETE FROM accounts WHERE account_id = ?', [accountId]);
-    }
+    await db.execute(
+      'UPDATE accounts SET is_active = 0 WHERE account_id = ?',
+      [accountId]
+    );
 
     return res.status(200).json({ message: 'Employee deleted successfully.' });
   } catch (err) {
@@ -182,17 +198,17 @@ export const updateEmployee = async (req, res) => {
 `;
 
     await db.execute(sql, [
-  first_name,
-  last_name,
-  department_id,
-  job_title_id,
-  salary,
-  supervisor_id,
-  emergency_contact_name,
-  emergency_contact_phone,
-  emergency_contact_relationship,
-  id
-]);
+      first_name,
+      last_name,
+      department_id,
+      job_title_id,
+      salary,
+      supervisor_id,
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      id
+    ]);
 
     return res.status(200).json({ message: "Employee updated successfully." });
 
