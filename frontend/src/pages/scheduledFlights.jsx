@@ -7,6 +7,7 @@ function ScheduledFlights({ employeeId = 1 }) {
 
     const [crewManifest, setCrewManifest] = useState([]);
     const [loadingCrew, setLoadingCrew] = useState(false);
+    const [loadingFlights, setLoadingFlights] = useState(true);
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -22,6 +23,9 @@ function ScheduledFlights({ employeeId = 1 }) {
             .catch((err) => {
                 console.error(err);
                 setError('Could not load scheduled flights.');
+            })
+            .finally(() => {
+                setLoadingFlights(false);
             });
     }, [API_URL, employeeId]);
 
@@ -65,7 +69,7 @@ function ScheduledFlights({ employeeId = 1 }) {
                 new Date(a.scheduled_departure_datetime) -
                 new Date(b.scheduled_departure_datetime)
         );
-        
+
     const pastFlights = flights.filter(
         (f) => new Date(f.scheduled_departure_datetime) < now
     );
@@ -194,15 +198,24 @@ function ScheduledFlights({ employeeId = 1 }) {
                 </div>
             </div>
 
-            <div className="table-wrapper">
-                <h2>Upcoming Flights</h2>
-                {renderFlightsTable(upcomingFlights, 'No upcoming flights.')}
-            </div>
+            {loadingFlights ? (
+                <div className="table-wrapper" style={{ marginTop: '30px', textAlign: 'center' }}>
+                    <h2>Scheduled Flights</h2>
+                    <p style={{ color: '#666', padding: '30px 0' }}>Loading scheduled flights...</p>
+                </div>
+            ) : (
+                <>
+                    <div className="table-wrapper">
+                        <h2>Upcoming Flights</h2>
+                        {renderFlightsTable(upcomingFlights, 'No upcoming flights.')}
+                    </div>
 
-            <div className="table-wrapper" style={{ marginTop: '30px' }}>
-                <h2>Past Flights</h2>
-                {renderFlightsTable(pastFlights, 'No past flights.')}
-            </div>
+                    <div className="table-wrapper" style={{ marginTop: '30px' }}>
+                        <h2>Past Flights</h2>
+                        {renderFlightsTable(pastFlights, 'No past flights.')}
+                    </div>
+                </>
+            )}
 
             {selectedFlight && (
                 <div
@@ -271,9 +284,9 @@ function ScheduledFlights({ employeeId = 1 }) {
                         </h3>
 
                         {loadingCrew ? (
-                            <p>Loading crew manifest...</p>
+                            <p style={{ color: '#666' }}>Loading crew manifest...</p>
                         ) : crewManifest.length === 0 ? (
-                            <p>No crew assigned yet.</p>
+                            <p style={{ color: '#888' }}>No crew assigned yet.</p>
                         ) : (
                             (() => {
                                 const roleOrder = [
