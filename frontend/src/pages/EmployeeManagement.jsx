@@ -157,13 +157,13 @@ function EmployeeManagement() {
                       {editingId === employee.employee_id ? (
                         <input
                           type="text"
-                          name="emergency_contact"
-                          value={editedEmployee.emergency_contact}
+                          name="emergency_contact_name"
+                          value={editedEmployee.emergency_contact_name}
                           onChange={handleFieldChange}
                           className="form-control form-control-sm"
                         />
                       ) : (
-                        employee.emergency_contact
+                        employee.emergency_contact_name
                       )}
                     </td>
 
