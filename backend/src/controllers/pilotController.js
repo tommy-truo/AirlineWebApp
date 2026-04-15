@@ -370,33 +370,71 @@ export const updateEmergencyContact = async (req, res, next) => {
 
 export const getFlightReports = async (req, res, next) => {
   try {
-    const { employee_id } = req.query;
+    const {
+      employee_id,
+      start_datetime,
+      end_datetime,
+      status,
+      flight_number,
+      irregular_only
+    } = req.query;
 
-    const [rows] = await db.query(`
-            SELECT
-              rep.report_id,
-              rep.flight_instance_id,
-              rep.employee_id,
-              rep.aircraft_id,
-              rep.hours_flown,
-              rep.distance_flown_km,
-              rep.final_status,
-              rep.irregular_reason,
-              rep.notes,
-              rep.submitted_at,
-              fr.flight_number,
-              fi.scheduled_departure_datetime AS scheduled_departure_datetime,
-              fi.scheduled_arrival_datetime AS scheduled_arrival_datetime
-            FROM airline.flight_reports rep
-            JOIN airline.flight_instances fi
-              ON rep.flight_instance_id = fi.flight_instance_id
-            JOIN airline.flight_routes fr
-              ON fi.flight_route_id = fr.flight_route_id
-            WHERE rep.employee_id = ?
-            ORDER BY rep.submitted_at DESC
+    if (!employee_id) {
+      return res.status(400).json({ error: 'employee_id is required' });
+    }
 
-        `, [employee_id]);
+    let sql = `
+      SELECT
+        rep.report_id,
+        rep.flight_instance_id,
+        rep.employee_id,
+        rep.aircraft_id,
+        rep.hours_flown,
+        rep.distance_flown_km,
+        rep.final_status,
+        rep.irregular_reason,
+        rep.notes,
+        rep.submitted_at,
+        fr.flight_number,
+        fi.scheduled_departure_datetime,
+        fi.scheduled_arrival_datetime
+      FROM airline.flight_reports rep
+      JOIN airline.flight_instances fi
+        ON rep.flight_instance_id = fi.flight_instance_id
+      JOIN airline.flight_routes fr
+        ON fi.flight_route_id = fr.flight_route_id
+      WHERE rep.employee_id = ?
+    `;
 
+    const params = [employee_id];
+
+    if (start_datetime) {
+      sql += ` AND fi.scheduled_departure_datetime >= ?`;
+      params.push(start_datetime + ' 00:00:00');
+    }
+
+    if (end_datetime) {
+      sql += ` AND fi.scheduled_departure_datetime <= ?`;
+      params.push(end_datetime + ' 23:59:59');
+    }
+
+    if (status && status !== 'All') {
+      sql += ` AND rep.final_status = ?`;
+      params.push(status);
+    }
+
+    if (flight_number) {
+      sql += ` AND fr.flight_number LIKE ?`;
+      params.push(`%${flight_number}%`);
+    }
+
+    if (irregular_only === 'true') {
+      sql += ` AND rep.final_status != 'Completed'`;
+    }
+
+    sql += ` ORDER BY rep.submitted_at DESC`;
+
+    const [rows] = await db.query(sql, params);
     res.json(rows);
   } catch (err) {
     next(err);
@@ -584,11 +622,10 @@ ORDER BY
 
 
     report.crew_assigned = crewRows.map(
-  (member) =>
-    `${member.first_name} ${member.last_name}${
-      member.assignment_role ? ` (${member.assignment_role})` : ''
-    }`
-);
+      (member) =>
+        `${member.first_name} ${member.last_name}${member.assignment_role ? ` (${member.assignment_role})` : ''
+        }`
+    );
 
     res.json(report);
   } catch (err) {

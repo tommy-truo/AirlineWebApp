@@ -9,6 +9,16 @@ function FlightReports({ employeeId = 1 }) {
     const [reportDetails, setReportDetails] = useState(null);
     const [loadingReportDetails, setLoadingReportDetails] = useState(false);
 
+    const [startDateTime, setStartDateTime] = useState('');
+    const [endDateTime, setEndDateTime] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+
+    const [filteredReports, setFilteredReports] = useState([]);
+    const [showFilteredModal, setShowFilteredModal] = useState(false);
+    const [loadingFilteredReports, setLoadingFilteredReports] = useState(false);
+    const [flightSearch, setFlightSearch] = useState('');
+    const [irregularOnly, setIrregularOnly] = useState(false);
+
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -152,6 +162,65 @@ function FlightReports({ employeeId = 1 }) {
             });
     };
 
+    const handleFilterReports = async () => {
+        if (!startDateTime || !endDateTime) {
+            setError('Please choose both a start and end date.');
+            return;
+        }
+
+        if (startDateTime > endDateTime) {
+            setError('Start date cannot be after end date.');
+            return;
+        }
+
+        setLoadingFilteredReports(true);
+        setError('');
+
+        try {
+            const params = new URLSearchParams({
+                employee_id: employeeId,
+                start_datetime: startDateTime,
+                end_datetime: endDateTime
+            });
+
+            if (statusFilter !== 'All') {
+                params.append('status', statusFilter);
+            }
+
+            if (flightSearch.trim()) {
+                params.append('flight_number', flightSearch.trim());
+            }
+
+            if (irregularOnly) {
+                params.append('irregular_only', 'true');
+            }
+
+            const res = await fetch(`${API_URL}/api/pilot/flight_reports?${params.toString()}`);
+
+            if (!res.ok) {
+                throw new Error('Failed to filter reports');
+            }
+
+            const data = await res.json();
+            setFilteredReports(Array.isArray(data) ? data : []);
+            setShowFilteredModal(true);
+        } catch (err) {
+            console.error(err);
+            setError('Could not filter reports.');
+        } finally {
+            setLoadingFilteredReports(false);
+        }
+    };
+
+    const handleClearFilters = () => {
+        setStartDateTime('');
+        setEndDateTime('');
+        setStatusFilter('All');
+        setFlightSearch('');
+        setIrregularOnly(false);
+        setFilteredReports([]);
+    };
+
     useEffect(() => {
         fetchPendingFlights();
         fetchReports();
@@ -177,9 +246,7 @@ function FlightReports({ employeeId = 1 }) {
                 Pilot Dashboard
             </h2>
 
-            <h1 className="title">
-                Flight Reports / Logs
-            </h1>
+            <h1 className="title">Flight Reports / Logs</h1>
 
             <p
                 style={{
@@ -252,12 +319,16 @@ function FlightReports({ employeeId = 1 }) {
                                     <td>{flight.arrival_city || 'N/A'}</td>
                                     <td>
                                         {flight.scheduled_departure_datetime
-                                            ? new Date(flight.scheduled_departure_datetime).toLocaleString()
+                                            ? new Date(
+                                                flight.scheduled_departure_datetime
+                                            ).toLocaleString()
                                             : 'N/A'}
                                     </td>
                                     <td>
                                         {flight.scheduled_arrival_datetime
-                                            ? new Date(flight.scheduled_arrival_datetime).toLocaleString()
+                                            ? new Date(
+                                                flight.scheduled_arrival_datetime
+                                            ).toLocaleString()
                                             : 'N/A'}
                                     </td>
                                     <td>{flight.aircraft_id || 'N/A'}</td>
@@ -386,6 +457,93 @@ function FlightReports({ employeeId = 1 }) {
                     Report History
                 </h2>
 
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: '12px',
+                        flexWrap: 'wrap',
+                        alignItems: 'end',
+                        marginBottom: '20px'
+                    }}
+                >
+                    <div>
+                        <label
+                            style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}
+                        >
+                            Start Date
+                        </label>
+                        <input
+                            type="date"
+                            value={startDateTime}
+                            onChange={(e) => setStartDateTime(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}
+                        >
+                            End Date
+                        </label>
+                        <input
+                            type="date"
+                            value={endDateTime}
+                            onChange={(e) => setEndDateTime(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}
+                        >
+                            Status
+                        </label>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="All">All</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Delayed">Delayed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Diverted">Diverted</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}>
+                            Flight #
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="e.g. UA202"
+                            value={flightSearch}
+                            onChange={(e) => setFlightSearch(e.target.value)}
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <input
+                            type="checkbox"
+                            checked={irregularOnly}
+                            onChange={(e) => setIrregularOnly(e.target.checked)}
+                        />
+                        <label style={{ fontWeight: 600 }}>Irregular Only</label>
+                    </div>
+
+                    <button className="action-button" onClick={handleFilterReports}>
+                        Filter Reports
+                    </button>
+
+                    <button
+                        className="action-button"
+                        type="button"
+                        onClick={handleClearFilters}
+                    >
+                        Clear
+                    </button>
+                </div>
+
                 <table className="shift-table">
                     <thead>
                         <tr>
@@ -417,10 +575,11 @@ function FlightReports({ employeeId = 1 }) {
                                             {report.flight_number || 'N/A'}
                                         </span>
                                     </td>
-
                                     <td>
                                         {report.scheduled_departure_datetime
-                                            ? new Date(report.scheduled_departure_datetime).toLocaleDateString()
+                                            ? new Date(
+                                                report.scheduled_departure_datetime
+                                            ).toLocaleDateString()
                                             : 'N/A'}
                                     </td>
                                     <td>{report.aircraft_id || 'N/A'}</td>
@@ -439,6 +598,112 @@ function FlightReports({ employeeId = 1 }) {
                     </tbody>
                 </table>
             </div>
+
+            {showFilteredModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000
+                    }}
+                    onClick={() => setShowFilteredModal(false)}
+                >
+                    <div
+                        style={{
+                            background: '#fff',
+                            borderRadius: '18px',
+                            padding: '32px',
+                            width: 'min(1100px, 95%)',
+                            maxHeight: '85vh',
+                            overflowY: 'auto',
+                            boxShadow: '0 18px 45px rgba(0,0,0,0.18)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h1 style={{ marginTop: 0, marginBottom: '20px' }}>
+                            Reports in Selected Time Range
+                        </h1>
+
+                        <p style={{ marginBottom: '20px', color: '#666' }}>
+                            Showing reports from {startDateTime || 'N/A'} to{' '}
+                            {endDateTime || 'N/A'}
+                            {statusFilter !== 'All' ? ` • Status: ${statusFilter}` : ''}
+                        </p>
+
+                        {loadingFilteredReports ? (
+                            <p>Loading filtered reports...</p>
+                        ) : filteredReports.length === 0 ? (
+                            <p>No reports found in that time range.</p>
+                        ) : (
+                            <table className="shift-table">
+                                <thead>
+                                    <tr>
+                                        <th>Flight Number</th>
+                                        <th>Date Flown</th>
+                                        <th>Aircraft</th>
+                                        <th>Hours</th>
+                                        <th>Distance (km)</th>
+                                        <th>Status</th>
+                                        <th>Reason</th>
+                                        <th>Report Submitted On</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredReports.map((report, index) => (
+                                        <tr key={report.report_id || index}>
+                                            <td>
+                                                <span
+                                                    className="clickable-flight"
+                                                    onClick={() => {
+                                                        setShowFilteredModal(false);
+                                                        handleViewReport(report);
+                                                    }}
+                                                >
+                                                    {report.flight_number || 'N/A'}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                {report.scheduled_departure_datetime
+                                                    ? new Date(
+                                                        report.scheduled_departure_datetime
+                                                    ).toLocaleDateString()
+                                                    : 'N/A'}
+                                            </td>
+                                            <td>{report.aircraft_id || 'N/A'}</td>
+                                            <td>{report.hours_flown || 'N/A'}</td>
+                                            <td>{report.distance_flown_km || 'N/A'}</td>
+                                            <td>{report.final_status || 'N/A'}</td>
+                                            <td>{report.irregular_reason || '—'}</td>
+                                            <td>
+                                                {report.submitted_at
+                                                    ? new Date(
+                                                        report.submitted_at
+                                                    ).toLocaleString()
+                                                    : 'N/A'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+
+                        <div style={{ marginTop: '20px' }}>
+                            <button
+                                className="action-button"
+                                onClick={() => setShowFilteredModal(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {selectedReport && (
                 <div
                     style={{
@@ -476,19 +741,29 @@ function FlightReports({ employeeId = 1 }) {
                                 <div className="summary-cards" style={{ marginBottom: '24px' }}>
                                     <div className="summary-card">
                                         <h3>Flight Number</h3>
-                                        <p>{reportDetails?.flight_number || selectedReport.flight_number || 'N/A'}</p>
+                                        <p>
+                                            {reportDetails?.flight_number ||
+                                                selectedReport.flight_number ||
+                                                'N/A'}
+                                        </p>
                                     </div>
 
                                     <div className="summary-card">
                                         <h3>Status</h3>
-                                        <p>{reportDetails?.final_status || selectedReport.final_status || 'N/A'}</p>
+                                        <p>
+                                            {reportDetails?.final_status ||
+                                                selectedReport.final_status ||
+                                                'N/A'}
+                                        </p>
                                     </div>
 
                                     <div className="summary-card">
                                         <h3>Date Flown</h3>
                                         <p>
                                             {reportDetails?.scheduled_departure_datetime
-                                                ? new Date(reportDetails.scheduled_departure_datetime).toLocaleDateString()
+                                                ? new Date(
+                                                    reportDetails.scheduled_departure_datetime
+                                                ).toLocaleDateString()
                                                 : 'N/A'}
                                         </p>
                                     </div>
@@ -497,45 +772,89 @@ function FlightReports({ employeeId = 1 }) {
                                         <h3>Report Submitted On</h3>
                                         <p>
                                             {reportDetails?.submitted_at
-                                                ? new Date(reportDetails.submitted_at).toLocaleString()
+                                                ? new Date(
+                                                    reportDetails.submitted_at
+                                                ).toLocaleString()
                                                 : 'N/A'}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gap: '14px', marginBottom: '24px' }}>
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gap: '14px',
+                                        marginBottom: '24px'
+                                    }}
+                                >
                                     <p>
                                         <strong>Route:</strong>{' '}
                                         {(reportDetails?.departure_city || 'N/A') +
                                             ' → ' +
                                             (reportDetails?.arrival_city || 'N/A')}
                                     </p>
+
                                     <p>
                                         <strong>Departure:</strong>{' '}
                                         {reportDetails?.scheduled_departure_datetime
-                                            ? new Date(reportDetails.scheduled_departure_datetime).toLocaleString()
+                                            ? new Date(
+                                                reportDetails.scheduled_departure_datetime
+                                            ).toLocaleString()
                                             : 'N/A'}
                                     </p>
+
                                     <p>
                                         <strong>Arrival:</strong>{' '}
                                         {reportDetails?.scheduled_arrival_datetime
-                                            ? new Date(reportDetails.scheduled_arrival_datetime).toLocaleString()
+                                            ? new Date(
+                                                reportDetails.scheduled_arrival_datetime
+                                            ).toLocaleString()
                                             : 'N/A'}
                                     </p>
-                                    <p><strong>Aircraft:</strong> {reportDetails?.aircraft_id || 'N/A'}</p>
-                                    <p><strong>Hours Flown:</strong> {reportDetails?.hours_flown || 'N/A'}</p>
-                                    <p><strong>Distance:</strong> {reportDetails?.distance_flown_km || 'N/A'} km</p>
-                                    <p><strong>Duration:</strong> {reportDetails?.estimated_duration || 'N/A'} min</p>
-                                    <p><strong>Reason:</strong> {reportDetails?.irregular_reason || '—'}</p>
-                                    <p><strong>Notes:</strong> {reportDetails?.notes || '—'}</p>
+
                                     <p>
-                                        <p><strong>Crew Assigned:</strong></p>
-                                        <ul>
-                                            {reportDetails?.crew_assigned?.map((member, i) => (
-                                                <li key={i}>{member}</li>
-                                            ))}
-                                        </ul>
+                                        <strong>Aircraft:</strong>{' '}
+                                        {reportDetails?.aircraft_id || 'N/A'}
                                     </p>
+
+                                    <p>
+                                        <strong>Hours Flown:</strong>{' '}
+                                        {reportDetails?.hours_flown || 'N/A'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Distance:</strong>{' '}
+                                        {reportDetails?.distance_flown_km || 'N/A'} km
+                                    </p>
+
+                                    <p>
+                                        <strong>Actual Duration:</strong>{' '}
+                                        {reportDetails?.actual_duration != null
+                                            ? `${reportDetails.actual_duration} min`
+                                            : 'N/A'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Reason:</strong>{' '}
+                                        {reportDetails?.irregular_reason || '—'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Notes:</strong> {reportDetails?.notes || '—'}
+                                    </p>
+
+                                    <div>
+                                        <strong>Crew Assigned:</strong>
+                                        <ul>
+                                            {reportDetails?.crew_assigned?.length ? (
+                                                reportDetails.crew_assigned.map((member, i) => (
+                                                    <li key={i}>{member}</li>
+                                                ))
+                                            ) : (
+                                                <li>N/A</li>
+                                            )}
+                                        </ul>
+                                    </div>
                                 </div>
                             </>
                         )}
