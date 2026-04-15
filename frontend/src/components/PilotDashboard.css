@@ -199,3 +199,14 @@ body {
     min-width: 100%;
   }
 }
+
+.clickable-flight {
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  color: #b91c1c; /* matches your red theme */
+}
+
+.clickable-flight:hover {
+  color: #7f1d1d;
+}

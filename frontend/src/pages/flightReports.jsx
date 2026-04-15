@@ -397,20 +397,27 @@ function FlightReports({ employeeId = 1 }) {
                             <th>Status</th>
                             <th>Reason</th>
                             <th>Report Submitted On</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {reports.length === 0 ? (
                             <tr>
-                                <td colSpan="9" style={{ textAlign: 'center' }}>
+                                <td colSpan="8" style={{ textAlign: 'center' }}>
                                     No flight reports submitted yet.
                                 </td>
                             </tr>
                         ) : (
                             reports.map((report, index) => (
                                 <tr key={report.report_id || index}>
-                                    <td>{report.flight_number || 'N/A'}</td>
+                                    <td>
+                                        <span
+                                            className="clickable-flight"
+                                            onClick={() => handleViewReport(report)}
+                                        >
+                                            {report.flight_number || 'N/A'}
+                                        </span>
+                                    </td>
+
                                     <td>
                                         {report.scheduled_departure_datetime
                                             ? new Date(report.scheduled_departure_datetime).toLocaleDateString()
@@ -425,14 +432,6 @@ function FlightReports({ employeeId = 1 }) {
                                         {report.submitted_at
                                             ? new Date(report.submitted_at).toLocaleString()
                                             : 'N/A'}
-                                    </td>
-                                    <td>
-                                        <button
-                                            className="action-button"
-                                            onClick={() => handleViewReport(report)}
-                                        >
-                                            View Report
-                                        </button>
                                     </td>
                                 </tr>
                             ))
