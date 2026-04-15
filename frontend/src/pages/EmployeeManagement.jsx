@@ -94,28 +94,7 @@ function EmployeeManagement() {
                     <td>{employee.employee_id}</td>
 
                     <td className="text-nowrap">
-                      {editingId === employee.employee_id ? (
-                        <>
-                          <input
-                            type="text"
-                            name="first_name"
-                            value={editedEmployee.first_name}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm mb-1"
-                            placeholder="First Name"
-                          />
-                          <input
-                            type="text"
-                            name="last_name"
-                            value={editedEmployee.last_name}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                            placeholder="Last Name"
-                          />
-                        </>
-                      ) : (
-                        `${employee.first_name} ${employee.last_name}`
-                      )}
+                      {employee.first_name} {employee.last_name}
                     </td>
 
                     <td>
