@@ -677,7 +677,30 @@ function FlightReports({ employeeId = 1 }) {
                                             <td>{report.aircraft_id || 'N/A'}</td>
                                             <td>{report.hours_flown || 'N/A'}</td>
                                             <td>{report.distance_flown_km || 'N/A'}</td>
-                                            <td>{report.final_status || 'N/A'}</td>
+                                            <td>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        padding: '6px 10px',
+                                                        borderRadius: '999px',
+                                                        fontWeight: '600',
+                                                        background:
+                                                            report.final_status === 'Completed' ? '#e6f4ea' :
+                                                            report.final_status === 'Delayed' ? '#fff4e5' :
+                                                            report.final_status === 'Cancelled' ? '#fdecea' :
+                                                            report.final_status === 'Diverted' ? '#e8f0fe' :
+                                                            '#f3f3f3',
+                                                        color:
+                                                            report.final_status === 'Completed' ? '#2e7d32' :
+                                                            report.final_status === 'Delayed' ? '#ed6c02' :
+                                                            report.final_status === 'Cancelled' ? '#c62828' :
+                                                            report.final_status === 'Diverted' ? '#1565c0' :
+                                                            '#333'
+                                                    }}
+                                                >
+                                                    {report.final_status || 'N/A'}
+                                                </span>
+                                            </td>
                                             <td>{report.irregular_reason || '—'}</td>
                                             <td>
                                                 {report.submitted_at

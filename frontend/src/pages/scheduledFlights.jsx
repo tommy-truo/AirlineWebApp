@@ -58,10 +58,14 @@ function ScheduledFlights({ employeeId = 1 }) {
 
     const now = new Date();
 
-    const upcomingFlights = flights.filter(
-        (f) => new Date(f.scheduled_departure_datetime) >= now
-    );
-
+    const upcomingFlights = flights
+        .filter((f) => new Date(f.scheduled_departure_datetime) >= now)
+        .sort(
+            (a, b) =>
+                new Date(a.scheduled_departure_datetime) -
+                new Date(b.scheduled_departure_datetime)
+        );
+        
     const pastFlights = flights.filter(
         (f) => new Date(f.scheduled_departure_datetime) < now
     );
@@ -86,13 +90,23 @@ function ScheduledFlights({ employeeId = 1 }) {
             <tbody>
                 {flightList.length === 0 ? (
                     <tr>
-                        <td colSpan="9" style={{ textAlign: 'center' }}>
-                            {emptyMessage}
+                        <td colSpan="9" style={{ textAlign: 'center', padding: '40px' }}>
+                            <div style={{ color: '#888' }}>
+                                ✈️ {emptyMessage}
+                            </div>
                         </td>
                     </tr>
                 ) : (
                     flightList.map((flight, index) => (
-                        <tr key={flight.assignment_id || index}>
+                        <tr
+                            key={flight.assignment_id || index}
+                            style={{
+                                background:
+                                    flight.flight_instance_id === nextFlight?.flight_instance_id
+                                        ? '#fff5f5'
+                                        : 'transparent'
+                            }}
+                        >
                             <td>{flight.flight_number || 'N/A'}</td>
 
                             <td>
