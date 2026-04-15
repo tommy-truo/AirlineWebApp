@@ -11,7 +11,7 @@ function EmployeeRegisterForm() {
         gender: '',
         date_of_birth: '',
         ssn: '',
-        emergency_contact: '',
+        emergency_contact_name: '',
         emergency_contact_phone: '',
         emergency_contact_relationship: '',
         department_id: '',
@@ -268,9 +268,9 @@ function EmployeeRegisterForm() {
                                         <label>Emergency Contact Name</label>
                                         <input
                                             type="text"
-                                            id="emergency_contact"
+                                            id="emergency_contact_name"
                                             className="form-control"
-                                            value={form.emergency_contact}
+                                            value={form.emergency_contact_name}
                                             onChange={handleChange}
                                             placeholder='Contact Name'
                                         />
