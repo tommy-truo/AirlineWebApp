@@ -5,6 +5,9 @@ function ScheduledFlights({ employeeId = 1 }) {
     const [error, setError] = useState('');
     const [selectedFlight, setSelectedFlight] = useState(null);
 
+    const [crewManifest, setCrewManifest] = useState([]);
+    const [loadingCrew, setLoadingCrew] = useState(false);
+
     const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
@@ -21,6 +24,37 @@ function ScheduledFlights({ employeeId = 1 }) {
                 setError('Could not load scheduled flights.');
             });
     }, [API_URL, employeeId]);
+
+    const handleViewDetails = async (flight) => {
+        setSelectedFlight(flight);
+        setCrewManifest([]);
+        setLoadingCrew(true);
+        setError('');
+
+        try {
+            const res = await fetch(
+                `${API_URL}/api/pilot/crew_manifest?employee_id=${employeeId}&flight_id=${flight.flight_instance_id}`
+            );
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch crew manifest');
+            }
+
+            const data = await res.json();
+            setCrewManifest(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error(err);
+            setCrewManifest([]);
+        } finally {
+            setLoadingCrew(false);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setSelectedFlight(null);
+        setCrewManifest([]);
+        setLoadingCrew(false);
+    };
 
     const now = new Date();
 
@@ -92,7 +126,7 @@ function ScheduledFlights({ employeeId = 1 }) {
                             <td>
                                 <button
                                     className="action-button"
-                                    onClick={() => setSelectedFlight(flight)}
+                                    onClick={() => handleViewDetails(flight)}
                                 >
                                     View Details
                                 </button>
@@ -118,7 +152,6 @@ function ScheduledFlights({ employeeId = 1 }) {
                 <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
             )}
 
-            {/* Summary */}
             <div className="summary-cards">
                 <div className="summary-card">
                     <h3>Total Flights</h3>
@@ -147,45 +180,136 @@ function ScheduledFlights({ employeeId = 1 }) {
                 </div>
             </div>
 
-            {/* Upcoming Flights */}
             <div className="table-wrapper">
                 <h2>Upcoming Flights</h2>
                 {renderFlightsTable(upcomingFlights, 'No upcoming flights.')}
             </div>
 
-            {/* Past Flights */}
             <div className="table-wrapper" style={{ marginTop: '30px' }}>
                 <h2>Past Flights</h2>
                 {renderFlightsTable(pastFlights, 'No past flights.')}
             </div>
 
-            {/* Flight Details */}
             {selectedFlight && (
-                <div className="table-wrapper" style={{ marginTop: '30px' }}>
-                    <h2>Flight Details</h2>
-
-                    <p><strong>Flight Number:</strong> {selectedFlight.flight_number}</p>
-                    <p>
-                        <strong>Route:</strong>{' '}
-                        {selectedFlight.departure_city} → {selectedFlight.arrival_city}
-                    </p>
-                    <p>
-                        <strong>Departure:</strong>{' '}
-                        {new Date(selectedFlight.scheduled_departure_datetime).toLocaleString()}
-                    </p>
-                    <p>
-                        <strong>Arrival:</strong>{' '}
-                        {new Date(selectedFlight.scheduled_arrival_datetime).toLocaleString()}
-                    </p>
-                    <p><strong>Distance:</strong> {selectedFlight.estimated_distance_km} km</p>
-                    <p><strong>Duration:</strong> {selectedFlight.estimated_duration_minutes} min</p>
-
-                    <button
-                        className="action-button"
-                        onClick={() => setSelectedFlight(null)}
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000
+                    }}
+                    onClick={handleCloseModal}
+                >
+                    <div
+                        style={{
+                            background: '#fff',
+                            borderRadius: '18px',
+                            padding: '32px',
+                            width: 'min(850px, 90%)',
+                            maxHeight: '85vh',
+                            overflowY: 'auto',
+                            boxShadow: '0 18px 45px rgba(0,0,0,0.18)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        Close
-                    </button>
+                        <h2 style={{ marginTop: 0, marginBottom: '24px' }}>Flight Details</h2>
+
+                        <p><strong>Flight Number:</strong> {selectedFlight.flight_number || 'N/A'}</p>
+
+                        <p>
+                            <strong>Route:</strong>{' '}
+                            {(selectedFlight.departure_city || 'N/A') +
+                                ' → ' +
+                                (selectedFlight.arrival_city || 'N/A')}
+                        </p>
+
+                        <p>
+                            <strong>Scheduled Departure:</strong>{' '}
+                            {selectedFlight.scheduled_departure_datetime
+                                ? new Date(selectedFlight.scheduled_departure_datetime).toLocaleString()
+                                : 'N/A'}
+                        </p>
+
+                        <p>
+                            <strong>Scheduled Arrival:</strong>{' '}
+                            {selectedFlight.scheduled_arrival_datetime
+                                ? new Date(selectedFlight.scheduled_arrival_datetime).toLocaleString()
+                                : 'N/A'}
+                        </p>
+
+                        <p><strong>Aircraft:</strong> {selectedFlight.aircraft_id || 'N/A'}</p>
+
+                        <p>
+                            <strong>Distance:</strong>{' '}
+                            {selectedFlight.estimated_distance_km ?? 'N/A'} km
+                        </p>
+
+                        <p>
+                            <strong>Estimated Duration:</strong>{' '}
+                            {selectedFlight.estimated_duration_minutes ?? 'N/A'} min
+                        </p>
+
+                        <h3 style={{ marginTop: '28px', marginBottom: '12px' }}>
+                            Crew Manifest
+                        </h3>
+
+                        {loadingCrew ? (
+                            <p>Loading crew manifest...</p>
+                        ) : crewManifest.length === 0 ? (
+                            <p>No crew assigned yet.</p>
+                        ) : (
+                            (() => {
+                                const roleOrder = [
+                                    'Operating Captain',
+                                    'Captain',
+                                    'First Officer',
+                                    'Co-Pilot',
+                                    'Purser',
+                                    'Cabin Crew'
+                                ];
+
+                                // Group crew by role
+                                const grouped = {};
+
+                                crewManifest.forEach((member) => {
+                                    const role = member.assignment_role || 'Other';
+                                    if (!grouped[role]) {
+                                        grouped[role] = [];
+                                    }
+                                    grouped[role].push(member);
+                                });
+
+                                return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {roleOrder.map((role) =>
+                                            grouped[role] ? (
+                                                <div key={role}>
+                                                    <strong style={{ color: '#b91c1c' }}>{role}:</strong>
+                                                    <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                                                        {grouped[role].map((member, index) => (
+                                                            <li key={member.employee_id || index}>
+                                                                {member.first_name} {member.last_name}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : null
+                                        )}
+                                    </div>
+                                );
+                            })()
+                        )}
+
+                        <button
+                            className="action-button"
+                            onClick={handleCloseModal}
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

@@ -20,6 +20,8 @@ body {
 /* Page */
 .page {
   padding: 40px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Title */
@@ -112,29 +114,24 @@ body {
 
 /* Layout */
 .dashboard-layout {
-  display: flex;
-  height: 100vh;
-}
-
-.dashboard-content {
-  flex: 1;
-  padding: 32px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;   /* centers everything horizontally */
+  min-height: 100vh;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 240px;
-  background: linear-gradient(180deg, #7f1d1d, #991b1b);
+  width: 220px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #7f1d1d, #00072d);
   color: white;
   display: flex;
   flex-direction: column;
   padding: 20px;
   gap: 10px;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
 }
 
 /* Logo */
@@ -172,19 +169,24 @@ body {
 }
 
 /* Main content */
-.main-content {
-  flex: 1;
-  overflow-y: auto;
+.dashboard-content {
+  margin-left: 220px;
+  min-height: 100vh;
+  padding: 32px;
+  box-sizing: border-box;
 }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .dashboard-layout {
-    flex-direction: column;
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
   }
 
-  .sidebar {
-    width: 100%;
+  .dashboard-content {
+    margin-left: 0;
+    padding: 20px;
   }
 
   .page {
@@ -204,7 +206,7 @@ body {
   text-decoration: underline;
   cursor: pointer;
   font-weight: 600;
-  color: #b91c1c; /* matches your red theme */
+  color: #b91c1c;
 }
 
 .clickable-flight:hover {
