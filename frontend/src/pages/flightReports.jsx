@@ -5,6 +5,10 @@ function FlightReports({ employeeId = 1 }) {
     const [reports, setReports] = useState([]);
     const [selectedFlight, setSelectedFlight] = useState(null);
 
+    const [selectedReport, setSelectedReport] = useState(null);
+    const [reportDetails, setReportDetails] = useState(null);
+    const [loadingReportDetails, setLoadingReportDetails] = useState(false);
+
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
@@ -50,6 +54,31 @@ function FlightReports({ employeeId = 1 }) {
                 console.error(err);
                 setError('Could not load flight reports.');
             });
+    };
+
+    const handleViewReport = async (report) => {
+        setSelectedReport(report);
+        setReportDetails(null);
+        setLoadingReportDetails(true);
+        setError('');
+
+        try {
+            const res = await fetch(
+                `${API_URL}/api/pilot/flight_reports/${report.report_id}?employee_id=${employeeId}`
+            );
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch report details');
+            }
+
+            const data = await res.json();
+            setReportDetails(data);
+        } catch (err) {
+            console.error(err);
+            setError('Could not load report details.');
+        } finally {
+            setLoadingReportDetails(false);
+        }
     };
 
     const handleSelectFlight = (flight) => {
@@ -360,20 +389,21 @@ function FlightReports({ employeeId = 1 }) {
                 <table className="shift-table">
                     <thead>
                         <tr>
-                            <th>Flight</th>
-                            <th>Date</th>
+                            <th>Flight Number</th>
+                            <th>Date Flown</th>
                             <th>Aircraft</th>
                             <th>Hours</th>
                             <th>Distance (km)</th>
                             <th>Status</th>
                             <th>Reason</th>
-                            <th>Submitted</th>
+                            <th>Report Submitted On</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {reports.length === 0 ? (
                             <tr>
-                                <td colSpan="8" style={{ textAlign: 'center' }}>
+                                <td colSpan="9" style={{ textAlign: 'center' }}>
                                     No flight reports submitted yet.
                                 </td>
                             </tr>
@@ -396,12 +426,133 @@ function FlightReports({ employeeId = 1 }) {
                                             ? new Date(report.submitted_at).toLocaleString()
                                             : 'N/A'}
                                     </td>
+                                    <td>
+                                        <button
+                                            className="action-button"
+                                            onClick={() => handleViewReport(report)}
+                                        >
+                                            View Report
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}
                     </tbody>
                 </table>
             </div>
+            {selectedReport && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 1000
+                    }}
+                    onClick={() => {
+                        setSelectedReport(null);
+                        setReportDetails(null);
+                    }}
+                >
+                    <div
+                        style={{
+                            background: '#fff',
+                            borderRadius: '18px',
+                            padding: '32px',
+                            width: 'min(900px, 92%)',
+                            maxHeight: '85vh',
+                            overflowY: 'auto',
+                            boxShadow: '0 18px 45px rgba(0,0,0,0.18)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h1 style={{ marginTop: 0, marginBottom: '24px' }}>Report Details</h1>
+
+                        {loadingReportDetails ? (
+                            <p>Loading report details...</p>
+                        ) : (
+                            <>
+                                <div className="summary-cards" style={{ marginBottom: '24px' }}>
+                                    <div className="summary-card">
+                                        <h3>Flight Number</h3>
+                                        <p>{reportDetails?.flight_number || selectedReport.flight_number || 'N/A'}</p>
+                                    </div>
+
+                                    <div className="summary-card">
+                                        <h3>Status</h3>
+                                        <p>{reportDetails?.final_status || selectedReport.final_status || 'N/A'}</p>
+                                    </div>
+
+                                    <div className="summary-card">
+                                        <h3>Date Flown</h3>
+                                        <p>
+                                            {reportDetails?.scheduled_departure_datetime
+                                                ? new Date(reportDetails.scheduled_departure_datetime).toLocaleDateString()
+                                                : 'N/A'}
+                                        </p>
+                                    </div>
+
+                                    <div className="summary-card">
+                                        <h3>Report Submitted On</h3>
+                                        <p>
+                                            {reportDetails?.submitted_at
+                                                ? new Date(reportDetails.submitted_at).toLocaleString()
+                                                : 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gap: '14px', marginBottom: '24px' }}>
+                                    <p>
+                                        <strong>Route:</strong>{' '}
+                                        {(reportDetails?.departure_city || 'N/A') +
+                                            ' → ' +
+                                            (reportDetails?.arrival_city || 'N/A')}
+                                    </p>
+                                    <p>
+                                        <strong>Departure:</strong>{' '}
+                                        {reportDetails?.scheduled_departure_datetime
+                                            ? new Date(reportDetails.scheduled_departure_datetime).toLocaleString()
+                                            : 'N/A'}
+                                    </p>
+                                    <p>
+                                        <strong>Arrival:</strong>{' '}
+                                        {reportDetails?.scheduled_arrival_datetime
+                                            ? new Date(reportDetails.scheduled_arrival_datetime).toLocaleString()
+                                            : 'N/A'}
+                                    </p>
+                                    <p><strong>Aircraft:</strong> {reportDetails?.aircraft_id || 'N/A'}</p>
+                                    <p><strong>Hours Flown:</strong> {reportDetails?.hours_flown || 'N/A'}</p>
+                                    <p><strong>Distance:</strong> {reportDetails?.distance_flown_km || 'N/A'} km</p>
+                                    <p><strong>Duration:</strong> {reportDetails?.estimated_duration || 'N/A'} min</p>
+                                    <p><strong>Reason:</strong> {reportDetails?.irregular_reason || '—'}</p>
+                                    <p><strong>Notes:</strong> {reportDetails?.notes || '—'}</p>
+                                    <p>
+                                        <p><strong>Crew Assigned:</strong></p>
+                                        <ul>
+                                            {reportDetails?.crew_assigned?.map((member, i) => (
+                                                <li key={i}>{member}</li>
+                                            ))}
+                                        </ul>
+                                    </p>
+                                </div>
+                            </>
+                        )}
+
+                        <button
+                            className="action-button"
+                            onClick={() => {
+                                setSelectedReport(null);
+                                setReportDetails(null);
+                            }}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

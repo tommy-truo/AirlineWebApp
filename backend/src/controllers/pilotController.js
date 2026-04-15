@@ -43,15 +43,15 @@ export const getShiftCalendar = async (req, res, next) => {
   `;
 
   //db.query(sql, [employeeId], (err, results) => {
-   // if (err) return next(err);
-   // res.json(results);
+  // if (err) return next(err);
+  // res.json(results);
   //});
 
-  try{
+  try {
     const [results] = await db.query(sql, [employeeId]);
     res.json(results);
-  } 
-  catch(err){
+  }
+  catch (err) {
     return next(err);
   }
 };
@@ -65,12 +65,12 @@ export const submitShiftRequest = async (req, res, next) => {
     (employee_id, assignment_id, request_type, reason, status, submitted_datetime)
     VALUES (?, ?, ?, ?, 'Pending', NOW())
   `;
-  
-  try{
+
+  try {
     const [results] = await db.query(sql, [employee_id, assignment_id, request_type, reason]);
-    res.json ({ message: 'Request submitted successfully '});
-  } 
-  catch(err){
+    res.json({ message: 'Request submitted successfully ' });
+  }
+  catch (err) {
     return next(err);
   }
 };
@@ -113,11 +113,11 @@ export const getScheduledFlights = async (req, res, next) => {
   ORDER BY fi.scheduled_departure_datetime
 `;
 
-  try{
+  try {
     const [results] = await db.query(sql, [employeeId]);
     res.json(results);
-  } 
-  catch(err){
+  }
+  catch (err) {
     return next(err);
   }
 };
@@ -156,11 +156,11 @@ export const getShiftRequests = async (req, res, next) => {
     ORDER BY sr.submitted_datetime DESC
   `;
 
-  try{
+  try {
     const [results] = await db.query(sql, [employeeId]);
     res.json(results);
-  } 
-  catch(err){
+  }
+  catch (err) {
     return next(err);
   }
 };
@@ -199,14 +199,14 @@ export const getProfile = async (req, res, next) => {
   `;
 
 
-  try{
+  try {
     const [results] = await db.query(sql, [employeeId]);
-    if(results.length === 0) {
+    if (results.length === 0) {
       return res.status(404).json({ errror: 'Employee not found' });
     }
     res.json(results[0]);
-  } 
-  catch(err){
+  }
+  catch (err) {
     return next(err);
   }
 };
@@ -369,10 +369,10 @@ export const updateEmergencyContact = async (req, res, next) => {
 };
 
 export const getFlightReports = async (req, res, next) => {
-    try {
-        const { employee_id } = req.query;
+  try {
+    const { employee_id } = req.query;
 
-        const [rows] = await db.query(`
+    const [rows] = await db.query(`
             SELECT
               rep.report_id,
               rep.flight_instance_id,
@@ -397,10 +397,10 @@ export const getFlightReports = async (req, res, next) => {
 
         `, [employee_id]);
 
-        res.json(rows);
-    } catch (err) {
-        next(err);
-    }
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getPendingFlightReports = async (req, res, next) => {
@@ -448,28 +448,28 @@ export const getPendingFlightReports = async (req, res, next) => {
 };
 
 export const submitFlightReport = async (req, res, next) => {
-    try {
-        const {
-            employee_id,
-            flight_instance_id,
-            aircraft_id,
-            hours_flown,
-            distance_flown_km,
-            status,
-            irregular_reason,
-            notes
-        } = req.body;
+  try {
+    const {
+      employee_id,
+      flight_instance_id,
+      aircraft_id,
+      hours_flown,
+      distance_flown_km,
+      status,
+      irregular_reason,
+      notes
+    } = req.body;
 
-        if (!employee_id || !flight_instance_id || !aircraft_id || !hours_flown || !distance_flown_km || !status) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
+    if (!employee_id || !flight_instance_id || !aircraft_id || !hours_flown || !distance_flown_km || !status) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-        if (status !== 'Completed' && !irregular_reason) {
-            return res.status(400).json({ error: 'Irregular reason is required for non-completed flights' });
-        }
+    if (status !== 'Completed' && !irregular_reason) {
+      return res.status(400).json({ error: 'Irregular reason is required for non-completed flights' });
+    }
 
-        const [result] = await db.query(
-            `
+    const [result] = await db.query(
+      `
             INSERT INTO airline.flight_reports (
                 flight_instance_id,
                 employee_id,
@@ -482,23 +482,117 @@ export const submitFlightReport = async (req, res, next) => {
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `,
-            [
-                flight_instance_id,
-                employee_id,
-                aircraft_id,
-                hours_flown,
-                distance_flown_km,
-                status,
-                irregular_reason || null,
-                notes || null
-            ]
-        );
+      [
+        flight_instance_id,
+        employee_id,
+        aircraft_id,
+        hours_flown,
+        distance_flown_km,
+        status,
+        irregular_reason || null,
+        notes || null
+      ]
+    );
 
-        res.status(201).json({
-            message: 'Flight report submitted successfully',
-            report_id: result.insertId
-        });
-    } catch (err) {
-        next(err);
+    res.status(201).json({
+      message: 'Flight report submitted successfully',
+      report_id: result.insertId
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getFlightReportDetails = async (req, res, next) => {
+  try {
+    const { reportId } = req.params;
+    const { employee_id } = req.query;
+
+    if (!employee_id) {
+      return res.status(400).json({ error: 'employee_id is required' });
     }
+
+    const [rows] = await db.query(
+      `
+      SELECT
+        fr.report_id,
+        fr.hours_flown,
+        fr.distance_flown_km,
+        fr.final_status,
+        fr.irregular_reason,
+        fr.notes,
+        fr.submitted_at,
+        fi.flight_instance_id,
+        fi.scheduled_departure_datetime,
+        fi.scheduled_arrival_datetime,
+        fi.actual_departure_datetime,
+        fi.actual_arrival_datetime,
+        fi.aircraft_id,
+        TIMESTAMPDIFF(
+          MINUTE,
+          fi.actual_departure_datetime,
+          fi.actual_arrival_datetime
+        ) AS actual_duration,
+        r.flight_number,
+        CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
+        CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
+      FROM flight_reports fr
+      JOIN flight_instances fi
+        ON fr.flight_instance_id = fi.flight_instance_id
+      JOIN flight_routes r
+        ON fi.flight_route_id = r.flight_route_id
+      JOIN airports dep
+        ON r.departure_airport_id = dep.airport_id
+      JOIN airports arr
+        ON r.arrival_airport_id = arr.airport_id
+      WHERE fr.report_id = ?
+        AND fr.employee_id = ?
+      `,
+      [reportId, employee_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
+
+    const report = rows[0];
+
+    const [crewRows] = await db.query(
+      `
+      SELECT
+  e.first_name,
+  e.last_name,
+  feat.type_name AS assignment_role
+FROM flight_employee_assignments fea
+JOIN employees e
+  ON fea.employee_id = e.employee_id
+JOIN flight_employee_assignment_types feat
+  ON fea.assignment_type_id = feat.assignment_type_id
+WHERE fea.flight_instance_id = ?
+ORDER BY
+  CASE
+    WHEN feat.type_name = 'Operating Captain' THEN 1
+    WHEN feat.type_name = 'First Officer' THEN 2
+    WHEN feat.type_name = 'Cabin Crew' THEN 3
+    ELSE 99
+  END,
+  e.last_name,
+  e.first_name
+      `,
+      [report.flight_instance_id]
+    );
+
+
+    report.crew_assigned = crewRows.map(
+  (member) =>
+    `${member.first_name} ${member.last_name}${
+      member.assignment_role ? ` (${member.assignment_role})` : ''
+    }`
+);
+
+    res.json(report);
+  } catch (err) {
+    console.error('getFlightReportDetails error:', err);
+    next(err);
+  }
 };
