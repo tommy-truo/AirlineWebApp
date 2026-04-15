@@ -5,9 +5,6 @@
   --card-white: #ffffff;
   --text-dark: #333;
   --border-light: #dddddd;
-  --sidebar-dark: #1f2937;
-  --sidebar-hover: #374151;
-  --sidebar-active: #c62828;
 }
 
 /* Base */
@@ -17,83 +14,14 @@ body {
   background-color: var(--background-light);
 }
 
-/* Main layout */
-.dashboard-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 250px;
-  background-color: var(--sidebar-dark);
+/* Navbar */
+.navbar {
+  background-color: var(--primary-red);
   color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 24px 18px;
-  box-sizing: border-box;
-}
-
-.sidebar-logo {
-  font-size: 1.7rem;
+  padding: 16px 32px;
+  font-size: 1.6rem;
   font-weight: bold;
-  margin-bottom: 6px;
-}
-
-.sidebar-subtitle {
-  margin-top: 0;
-  margin-bottom: 28px;
-  color: #cbd5e1;
-  font-size: 0.95rem;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sidebar-button {
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  color: white;
-  border: none;
-  padding: 12px 14px;
-  border-radius: 10px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.sidebar-button:hover {
-  background-color: var(--sidebar-hover);
-}
-
-.sidebar-button.active {
-  background-color: var(--sidebar-active);
-  font-weight: 600;
-}
-
-.logout-button {
-  background-color: #e53935;
-  color: white;
-  border: none;
-  padding: 12px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.logout-button:hover {
-  background-color: #c62828;
-}
-
-/* Right content area */
-.dashboard-content {
-  flex: 1;
-  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Page */
@@ -174,7 +102,7 @@ body {
   background-color: #f9f9f9;
 }
 
-/* General buttons */
+/* Button */
 .action-button {
   background-color: var(--primary-red);
   color: white;
@@ -191,14 +119,6 @@ body {
 
 /* Responsive */
 @media (max-width: 900px) {
-  .dashboard-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
   .page {
     padding: 20px;
   }

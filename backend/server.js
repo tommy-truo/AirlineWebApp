@@ -9,7 +9,7 @@ import authRouter from './src/routes/authRoutes.js';
 import pilotRouter from './src/routes/pilotRouter.js';
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT;
 
 app.use(cors()); 
 
