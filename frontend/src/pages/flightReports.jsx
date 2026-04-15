@@ -307,8 +307,10 @@ function FlightReports({ employeeId = 1 }) {
                     <tbody>
                         {pendingFlights.length === 0 ? (
                             <tr>
-                                <td colSpan="7" style={{ textAlign: 'center' }}>
-                                    No flights currently need reports.
+                                <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
+                                    <div style={{ color: '#888' }}>
+                                        ✈️ No flights currently need reports.
+                                    </div>
                                 </td>
                             </tr>
                         ) : (
@@ -453,96 +455,236 @@ function FlightReports({ employeeId = 1 }) {
             )}
 
             <div className="table-wrapper" style={{ marginTop: '30px' }}>
-                <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
+                <h2 className="title" style={{ fontSize: '2rem', marginBottom: '10px' }}>
                     Report History
                 </h2>
 
+                <p style={{ textAlign: 'center', color: '#777', marginBottom: '24px' }}>
+                    View, filter, and inspect submitted flight reports
+                </p>
+
                 <div
                     style={{
-                        display: 'flex',
-                        gap: '12px',
-                        flexWrap: 'wrap',
-                        alignItems: 'end',
-                        marginBottom: '20px'
+                        marginBottom: '24px',
+                        background: '#ffffff',
+                        padding: '20px',
+                        borderRadius: '14px',
+                        border: '2px solid #e5e7eb',
+                        boxShadow: '0 6px 16px rgba(0,0,0,0.05)'
                     }}
                 >
-                    <div>
-                        <label
-                            style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}
-                        >
-                            Start Date
-                        </label>
-                        <input
-                            type="date"
-                            value={startDateTime}
-                            onChange={(e) => setStartDateTime(e.target.value)}
-                        />
-                    </div>
+                    <h3 style={{ marginTop: 0, marginBottom: '18px', color: '#444' }}>
+                        Filter Report History
+                    </h3>
 
-                    <div>
-                        <label
-                            style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}
-                        >
-                            End Date
-                        </label>
-                        <input
-                            type="date"
-                            value={endDateTime}
-                            onChange={(e) => setEndDateTime(e.target.value)}
-                        />
-                    </div>
-
-                    <div>
-                        <label
-                            style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}
-                        >
-                            Status
-                        </label>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="All">All</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Delayed">Delayed</option>
-                            <option value="Cancelled">Cancelled</option>
-                            <option value="Diverted">Diverted</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}>
-                            Flight #
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="e.g. UA202"
-                            value={flightSearch}
-                            onChange={(e) => setFlightSearch(e.target.value)}
-                        />
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <input
-                            type="checkbox"
-                            checked={irregularOnly}
-                            onChange={(e) => setIrregularOnly(e.target.checked)}
-                        />
-                        <label style={{ fontWeight: 600 }}>Irregular Only</label>
-                    </div>
-
-                    <button className="action-button" onClick={handleFilterReports}>
-                        Filter Reports
-                    </button>
-
-                    <button
-                        className="action-button"
-                        type="button"
-                        onClick={handleClearFilters}
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, minmax(180px, 1fr))',
+                            gap: '16px',
+                            marginBottom: '18px'
+                        }}
                     >
-                        Clear
-                    </button>
+                        <div>
+                            <label
+                                style={{
+                                    display: 'block',
+                                    marginBottom: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    color: '#555'
+                                }}
+                            >
+                                Start Date
+                            </label>
+                            <input
+                                type="date"
+                                value={startDateTime}
+                                onChange={(e) => setStartDateTime(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #d1d5db',
+                                    boxSizing: 'border-box'
+                                }}
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                style={{
+                                    display: 'block',
+                                    marginBottom: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    color: '#555'
+                                }}
+                            >
+                                End Date
+                            </label>
+                            <input
+                                type="date"
+                                value={endDateTime}
+                                onChange={(e) => setEndDateTime(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #d1d5db',
+                                    boxSizing: 'border-box'
+                                }}
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                style={{
+                                    display: 'block',
+                                    marginBottom: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    color: '#555'
+                                }}
+                            >
+                                Status
+                            </label>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #d1d5db',
+                                    boxSizing: 'border-box'
+                                }}
+                            >
+                                <option value="All">All</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Delayed">Delayed</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Diverted">Diverted</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label
+                                style={{
+                                    display: 'block',
+                                    marginBottom: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    color: '#555'
+                                }}
+                            >
+                                Flight Number
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="ex. UA001"
+                                value={flightSearch}
+                                onChange={(e) => setFlightSearch(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #d1d5db',
+                                    boxSizing: 'border-box'
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '14px'
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 600, color: '#555' }}>Quick Filters:</span>
+
+                            <button
+                                className="action-button"
+                                type="button"
+                                onClick={() => {
+                                    const today = new Date().toISOString().split('T')[0];
+                                    setStartDateTime(today);
+                                    setEndDateTime(today);
+                                }}
+                            >
+                                Today
+                            </button>
+
+                            <button
+                                className="action-button"
+                                type="button"
+                                onClick={() => {
+                                    const now = new Date();
+                                    const startOfWeek = new Date(now);
+                                    startOfWeek.setDate(now.getDate() - now.getDay());
+
+                                    const endOfWeek = new Date(startOfWeek);
+                                    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+                                    const format = (date) => date.toISOString().split('T')[0];
+
+                                    setStartDateTime(format(startOfWeek));
+                                    setEndDateTime(format(endOfWeek));
+                                }}
+                            >
+                                This Week
+                            </button>
+
+                            <label
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    fontWeight: 600,
+                                    color: '#555'
+                                }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={irregularOnly}
+                                    onChange={(e) => setIrregularOnly(e.target.checked)}
+                                />
+                                Irregular Only
+                            </label>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button className="action-button" onClick={handleFilterReports}>
+                                Filter Reports
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                style={{
+                                    background: '#f3f4f6',
+                                    color: '#333',
+                                    border: '1px solid #d1d5db',
+                                    padding: '8px 14px',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 600
+                                }}
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <p style={{ marginBottom: '12px', color: '#666', fontWeight: 500 }}>
+                    Showing {reports.length} submitted report{reports.length !== 1 ? 's' : ''}
+                </p>
 
                 <table className="shift-table">
                     <thead>
@@ -560,8 +702,10 @@ function FlightReports({ employeeId = 1 }) {
                     <tbody>
                         {reports.length === 0 ? (
                             <tr>
-                                <td colSpan="8" style={{ textAlign: 'center' }}>
-                                    No flight reports submitted yet.
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '40px' }}>
+                                    <div style={{ color: '#888' }}>
+                                        ✈️ No flight reports submitted yet.
+                                    </div>
                                 </td>
                             </tr>
                         ) : (
@@ -577,15 +721,36 @@ function FlightReports({ employeeId = 1 }) {
                                     </td>
                                     <td>
                                         {report.scheduled_departure_datetime
-                                            ? new Date(
-                                                report.scheduled_departure_datetime
-                                            ).toLocaleDateString()
+                                            ? new Date(report.scheduled_departure_datetime).toLocaleDateString()
                                             : 'N/A'}
                                     </td>
                                     <td>{report.aircraft_id || 'N/A'}</td>
                                     <td>{report.hours_flown || 'N/A'}</td>
                                     <td>{report.distance_flown_km || 'N/A'}</td>
-                                    <td>{report.final_status || 'N/A'}</td>
+                                    <td>
+                                        <span
+                                            style={{
+                                                display: 'inline-block',
+                                                padding: '6px 10px',
+                                                borderRadius: '999px',
+                                                fontWeight: '600',
+                                                background:
+                                                    report.final_status === 'Completed' ? '#e6f4ea' :
+                                                        report.final_status === 'Delayed' ? '#fff4e5' :
+                                                            report.final_status === 'Cancelled' ? '#fdecea' :
+                                                                report.final_status === 'Diverted' ? '#e8f0fe' :
+                                                                    '#f3f3f3',
+                                                color:
+                                                    report.final_status === 'Completed' ? '#2e7d32' :
+                                                        report.final_status === 'Delayed' ? '#ed6c02' :
+                                                            report.final_status === 'Cancelled' ? '#c62828' :
+                                                                report.final_status === 'Diverted' ? '#1565c0' :
+                                                                    '#333'
+                                            }}
+                                        >
+                                            {report.final_status || 'N/A'}
+                                        </span>
+                                    </td>
                                     <td>{report.irregular_reason || '—'}</td>
                                     <td>
                                         {report.submitted_at
@@ -629,9 +794,10 @@ function FlightReports({ employeeId = 1 }) {
                         </h1>
 
                         <p style={{ marginBottom: '20px', color: '#666' }}>
-                            Showing reports from {startDateTime || 'N/A'} to{' '}
-                            {endDateTime || 'N/A'}
+                            Showing reports from {startDateTime || 'N/A'} to {endDateTime || 'N/A'}
                             {statusFilter !== 'All' ? ` • Status: ${statusFilter}` : ''}
+                            {flightSearch.trim() ? ` • Flight: ${flightSearch.trim()}` : ''}
+                            {irregularOnly ? ' • Irregular Only' : ''}
                         </p>
 
                         {loadingFilteredReports ? (
@@ -686,16 +852,16 @@ function FlightReports({ employeeId = 1 }) {
                                                         fontWeight: '600',
                                                         background:
                                                             report.final_status === 'Completed' ? '#e6f4ea' :
-                                                            report.final_status === 'Delayed' ? '#fff4e5' :
-                                                            report.final_status === 'Cancelled' ? '#fdecea' :
-                                                            report.final_status === 'Diverted' ? '#e8f0fe' :
-                                                            '#f3f3f3',
+                                                                report.final_status === 'Delayed' ? '#fff4e5' :
+                                                                    report.final_status === 'Cancelled' ? '#fdecea' :
+                                                                        report.final_status === 'Diverted' ? '#e8f0fe' :
+                                                                            '#f3f3f3',
                                                         color:
                                                             report.final_status === 'Completed' ? '#2e7d32' :
-                                                            report.final_status === 'Delayed' ? '#ed6c02' :
-                                                            report.final_status === 'Cancelled' ? '#c62828' :
-                                                            report.final_status === 'Diverted' ? '#1565c0' :
-                                                            '#333'
+                                                                report.final_status === 'Delayed' ? '#ed6c02' :
+                                                                    report.final_status === 'Cancelled' ? '#c62828' :
+                                                                        report.final_status === 'Diverted' ? '#1565c0' :
+                                                                            '#333'
                                                     }}
                                                 >
                                                     {report.final_status || 'N/A'}
