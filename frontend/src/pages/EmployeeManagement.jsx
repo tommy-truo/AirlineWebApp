@@ -6,8 +6,11 @@ import '../styles/styles.css';
 function EmployeeManagement() {
 
   const [data, setData] = useState([])
-  const [editingId, setEditingId] = useState(null)
-  const [editedEmployee, setEditedEmployee] = useState({})
+const [editingId, setEditingId] = useState(null)
+const [editedEmployee, setEditedEmployee] = useState({})
+const [currentPage, setCurrentPage] = useState(1)
+
+const employeesPerPage = 8
 
   useEffect(() => {
     fetchEmployees()
@@ -54,6 +57,23 @@ function EmployeeManagement() {
     setEditedEmployee({})
   }
 
+  const indexOfLastEmployee = currentPage * employeesPerPage
+const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage
+const currentEmployees = data.slice(indexOfFirstEmployee, indexOfLastEmployee)
+const totalPages = Math.ceil(data.length / employeesPerPage)
+
+function handleNextPage() {
+  if (currentPage < totalPages) {
+    setCurrentPage(currentPage + 1)
+  }
+}
+
+function handlePrevPage() {
+  if (currentPage > 1) {
+    setCurrentPage(currentPage - 1)
+  }
+}
+
   return (
     <div className="container-fluid form-wrapper">
 
@@ -88,7 +108,7 @@ function EmployeeManagement() {
               </thead>
 
               <tbody>
-                {data.map((employee) => (
+                {currentEmployees.map((employee) => (
                   <tr key={employee.employee_id}>
 
                     <td>{employee.employee_id}</td>
@@ -235,6 +255,28 @@ function EmployeeManagement() {
 
             </table>
           </div>
+
+          <div className="d-flex justify-content-between align-items-center mt-3">
+  <button
+    className="btn btn-outline-danger"
+    onClick={handlePrevPage}
+    disabled={currentPage === 1}
+  >
+    Previous
+  </button>
+
+  <span className="fw-semibold">
+    Page {currentPage} of {totalPages || 1}
+  </span>
+
+  <button
+    className="btn btn-outline-danger"
+    onClick={handleNextPage}
+    disabled={currentPage === totalPages || totalPages === 0}
+  >
+    Next
+  </button>
+</div>
 
         </div>
       </div>
