@@ -71,7 +71,7 @@ export const createEmployee = async (req, res) => {
 
     const [accountResult] = await db.execute(accountSql, [
       email,
-      password,
+      '',
       1,
       role
     ]);
