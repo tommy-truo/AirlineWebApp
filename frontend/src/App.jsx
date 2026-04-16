@@ -1,4 +1,3 @@
-/* Abhishek Singh - ACME App */
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Login from './components/Login.jsx';  
@@ -12,7 +11,22 @@ import PilotDashboard from './components/PilotDashboard.jsx';
 const AppContent = () => {
   const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userID'));
   const [role, setRole] = useState(localStorage.getItem('userRole'));
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate(); 
+
+  useEffect(() => {
+    const initSession = () => {
+      const storedId = localStorage.getItem('userID');
+      const storedRole = localStorage.getItem('userRole');
+      
+      if (storedId && storedRole) {
+        setCurrentUserId(storedId);
+        setRole(storedRole);
+      }
+      setIsLoading(false);
+    };
+    initSession();
+  }, []);
 
   const handleLoginSuccess = (userData) => {
     const storedId = userData.user.account_id ?? userData.user.employee_id ?? userData.user.id;
@@ -38,42 +52,54 @@ const AppContent = () => {
     navigate('/');
   };
 
+  if (isLoading) {
+    return <div className="loading-screen">Loading...</div>;
+  }
+
   return (
     <div className="app-container">
       <Routes>
-        {/* LANDING PAGE(HOmepage) */}
         <Route path="/" element={
-          <>
-            <HomeNav 
-              isLoggedIn={!!currentUserId} 
-              onLogoutClick={handleLogout} 
-              onLoginClick={() => navigate('/login')} 
-            />
-            <HomeHero 
-              isLoggedIn={!!currentUserId} 
-              onSignUpClick={() => navigate('/signup')} 
-            />
-            <Ticker />
-          </>
+          currentUserId ? (
+            role === 'passenger' ? <Navigate to="/passenger-dashboard" /> : <Navigate to="/pilot-dashboard" />
+          ) : (
+            <>
+              <HomeNav 
+                isLoggedIn={false} 
+                onLogoutClick={handleLogout} 
+                onLoginClick={() => navigate('/login')} 
+              />
+              <HomeHero 
+                isLoggedIn={false} 
+                onSignUpClick={() => navigate('/signup')} 
+              />
+              <Ticker />
+            </>
+          )
         } />
 
-        {/* LOGIN PAGE */}
         <Route path="/login" element={
-          <Login 
-            onLoginSuccess={handleLoginSuccess} 
-            onSwitch={() => navigate('/signup')} 
-          />
+          currentUserId ? (
+            role === 'passenger' ? <Navigate to="/passenger-dashboard" /> : <Navigate to="/pilot-dashboard" />
+          ) : (
+            <Login 
+              onLoginSuccess={handleLoginSuccess} 
+              onSwitch={() => navigate('/signup')} 
+            />
+          )
         } />
 
-        {/* SIGNUP PAGE */}
         <Route path="/signup" element={
-          <SignUp 
-            onSwitch={() => navigate('/login')} 
-            onSignupSuccess={() => navigate('/login')}
-          />
+          currentUserId ? (
+            role === 'passenger' ? <Navigate to="/passenger-dashboard" /> : <Navigate to="/pilot-dashboard" />
+          ) : (
+            <SignUp 
+              onSwitch={() => navigate('/login')} 
+              onSignupSuccess={() => navigate('/login')}
+            />
+          )
         } />
 
-        {/* DASHBOARDS */}
         <Route 
           path="/passenger-dashboard" 
           element={currentUserId && role === 'passenger' ? <PassengerDashboard userID={currentUserId} onLogout={handleLogout} /> : <Navigate to="/login" />} 
@@ -84,7 +110,6 @@ const AppContent = () => {
           element={currentUserId && role === 'pilot' ? <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} /> : <Navigate to="/login" />} 
         />
 
-        {/* CATCH ALL */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

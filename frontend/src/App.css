@@ -1,28 +1,66 @@
-/* Layout Containers */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .dashboard-container {
   display: flex;
   height: 100vh;
+  width: 100%;
   font-family: sans-serif;
   background-color: #f4f4f9;
+  overflow: hidden;
 }
 
-/* Sidebar Layout update */
 .sidebar {
   width: 250px;
+  min-width: 250px;
   background-color: #1a202c;
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Ensure it takes full height */
+  height: 100vh;
   box-sizing: border-box;
 }
 
-/* Push everything below this to the bottom */
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; 
+  flex: 0 1 auto; 
+}
+
 .sidebar-footer {
-  margin-top: auto; 
+  margin-top: auto;
   padding-top: 20px;
   border-top: 1px solid #2d3748;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  padding: 12px 15px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 15px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background-color: #2d3748;
+  color: white;
+}
+
+.nav-button.active {
+  background-color: #3182ce !important;
+  color: white !important;
+  font-weight: 600;
 }
 
 .signout-button {
@@ -46,33 +84,9 @@
   flex: 1;
   padding: 40px;
   overflow-y: auto;
+  background-color: #f4f4f9;
 }
 
-/* Sidebar Buttons */
-.nav-button {
-  background: none;
-  border: none;
-  color: #a0aec0;
-  padding: 12px;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  transition: 0.2s;
-}
-
-.nav-button:hover {
-  background-color: #2d3748;
-}
-
-.nav-button.active {
-  background-color: #3182ce;
-  color: white;
-}
-
-/* UI Components */
 .card {
   background: white;
   padding: 20px;
@@ -112,4 +126,15 @@ input {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  background-color: #f4f4f9;
+  font-size: 1.2rem;
+  color: #1a202c;
 }
