@@ -45,8 +45,7 @@ export const createEmployee = async (req, res) => {
     salary,
     start_date,
     supervisor_id,
-    email,
-    password
+    email
   } = req.body;
 
   try {
@@ -160,7 +159,7 @@ export const deleteEmployee = async (req, res) => {
       [accountId]
     );
 
-    return res.status(200).json({ message: 'Employee deleted successfully.' });
+    return res.status(200).json({ message: 'Employee deactivated successfully.' });
   } catch (err) {
     console.error('DELETE EMPLOYEE ERROR:', err.message || err);
     return res.status(500).json({ message: 'Error deleting employee.' });
