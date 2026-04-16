@@ -18,6 +18,7 @@ function FlightReports({ employeeId = 1 }) {
     const [loadingFilteredReports, setLoadingFilteredReports] = useState(false);
     const [flightSearch, setFlightSearch] = useState('');
     const [irregularOnly, setIrregularOnly] = useState(false);
+    const [reasonSearch, setReasonSearch] = useState('');
 
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -239,6 +240,10 @@ function FlightReports({ employeeId = 1 }) {
     const irregularCnt = reports.filter(
         (report) => report.final_status && report.final_status !== 'Completed'
     ).length;
+
+    const displayedReports = filteredReports.filter(report =>
+    report.irregular_reason?.toLowerCase().includes(reasonSearch.toLowerCase())
+);
 
     return (
         <div className="page">
@@ -480,7 +485,7 @@ function FlightReports({ employeeId = 1 }) {
                     <div
                         style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(4, minmax(180px, 1fr))',
+                            gridTemplateColumns: 'repeat(5, minmax(180px, 1fr))',
                             gap: '16px',
                             marginBottom: '18px'
                         }}
@@ -593,6 +598,25 @@ function FlightReports({ employeeId = 1 }) {
                                     boxSizing: 'border-box'
                                 }}
                             />
+                        </div>
+                        <div>
+                            <label
+                            style={{
+                                    display: 'block',
+                                    marginBottom: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    color: '#555'
+                                }}
+                            >
+                                Reason Search
+                                </label>
+                                <input
+                                type="text"
+                                placeholder="e.g thunder"
+                                value={reasonSearch}
+                                onChange={(e) => setReasonSearch(e.target.value)}
+                                />
                         </div>
                     </div>
 
@@ -819,7 +843,7 @@ function FlightReports({ employeeId = 1 }) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredReports.map((report, index) => (
+                                    {displayedReports.map((report, index) => (
                                         <tr key={report.report_id || index}>
                                             <td>
                                                 <span
