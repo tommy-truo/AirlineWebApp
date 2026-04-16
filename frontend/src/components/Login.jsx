@@ -15,7 +15,6 @@ const Login = ({onLoginSuccess, onSwitch}) => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        // Change this line to use the actual string
         const response = await fetch('https://airlinewebapp.onrender.com/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

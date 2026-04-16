@@ -41,7 +41,7 @@ const AppContent = () => {
   return (
     <div className="app-container">
       <Routes>
-        {/* LANDING PAGE */}
+        {/* LANDING PAGE(HOmepage) */}
         <Route path="/" element={
           <>
             <HomeNav 
