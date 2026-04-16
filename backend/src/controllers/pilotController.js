@@ -42,11 +42,6 @@ export const getShiftCalendar = async (req, res, next) => {
     ORDER BY fi.scheduled_departure_datetime
   `;
 
-  //db.query(sql, [employeeId], (err, results) => {
-  // if (err) return next(err);
-  // res.json(results);
-  //});
-
   try {
     const [results] = await db.query(sql, [employeeId]);
     res.json(results);

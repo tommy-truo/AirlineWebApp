@@ -7,6 +7,7 @@ import bookingRouter from './src/routes/booking-router.js';
 import flightRouter from './src/routes/flight-instance-router.js';
 import authRouter from './src/routes/authRoutes.js';
 import pilotRouter from './src/routes/pilotRouter.js';
+import cabinCrewRouter from './src/routes/cabinCrewRouter.js';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -22,6 +23,7 @@ app.use('/api/bookings', bookingRouter);
 app.use('/api/flights', flightRouter)
 app.use('/api/auth', authRouter);
 app.use('/api/pilot', pilotRouter);
+app.use('/api/cabin_crew', cabinCrewRouter);
 
 app.use((err, req, res, next) => {
     console.error("SERVER ERROR:", err);
