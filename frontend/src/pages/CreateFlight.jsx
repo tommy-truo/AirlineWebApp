@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from "react-router-dom"
 import '../styles/styles.css';
 
 function CreateFlight() {
@@ -174,53 +173,6 @@ function CreateFlight() {
                                         {dropdowns.gates.map((gate) => (
                                             <option key={gate.gate_id} value={gate.gate_id}>
                                                 {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="form-section mb-4">
-                            <h5 className="section-title">Flight Status</h5>
-
-                            <div className="row">
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Status*</label>
-                                    <select
-                                        id="status_id"
-                                        className="form-control"
-                                        value={form.status_id}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Status</option>
-                                        {dropdowns.statuses.map((status) => (
-                                            <option
-                                                key={status.flight_status_id}
-                                                value={status.flight_status_id}
-                                            >
-                                                {status.status_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Status Reason</label>
-                                    <select
-                                        id="status_reason_id"
-                                        className="form-control"
-                                        value={form.status_reason_id}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">Select Reason</option>
-                                        {dropdowns.reasons.map((reason) => (
-                                            <option
-                                                key={reason.flight_irregularity_reason_id}
-                                                value={reason.flight_irregularity_reason_id}
-                                            >
-                                                {reason.reason_name}
                                             </option>
                                         ))}
                                     </select>
