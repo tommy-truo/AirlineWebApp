@@ -6,11 +6,13 @@ import '../styles/styles.css';
 function EmployeeManagement() {
 
   const [data, setData] = useState([])
-const [editingId, setEditingId] = useState(null)
-const [editedEmployee, setEditedEmployee] = useState({})
-const [currentPage, setCurrentPage] = useState(1)
-
-const employeesPerPage = 8
+  const [editingId, setEditingId] = useState(null)
+  const [editedEmployee, setEditedEmployee] = useState({})
+  const [currentPage, setCurrentPage] = useState(1)
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [confirmId, setConfirmId] = useState(null);
+  const employeesPerPage = 8
 
   useEffect(() => {
     fetchEmployees()
@@ -27,9 +29,16 @@ const employeesPerPage = 8
   function handleDelete(id) {
     axios.delete(`http://localhost:3000/api/employees/${id}`)
       .then(() => {
-        fetchEmployees()
+        setMessage("Employee deactivated successfully.");
+        setError('');
+        setConfirmId(null);
+        fetchEmployees();
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err);
+        setError("Error deactivating employee.");
+        setMessage('');
+      });
   }
 
   function handleEditClick(employee) {
@@ -47,9 +56,15 @@ const employeesPerPage = 8
       .then(() => {
         setEditingId(null)
         setEditedEmployee({})
-        fetchEmployees()
+        setMessage("Employee updated successfully.");
+        setError('');
+        fetchEmployees();
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err);
+        setError("Error updating employee.");
+        setMessage('');
+      })
   }
 
   function handleCancelEdit() {
@@ -58,21 +73,21 @@ const employeesPerPage = 8
   }
 
   const indexOfLastEmployee = currentPage * employeesPerPage
-const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage
-const currentEmployees = data.slice(indexOfFirstEmployee, indexOfLastEmployee)
-const totalPages = Math.ceil(data.length / employeesPerPage)
+  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage
+  const currentEmployees = data.slice(indexOfFirstEmployee, indexOfLastEmployee)
+  const totalPages = Math.ceil(data.length / employeesPerPage)
 
-function handleNextPage() {
-  if (currentPage < totalPages) {
-    setCurrentPage(currentPage + 1)
+  function handleNextPage() {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
   }
-}
 
-function handlePrevPage() {
-  if (currentPage > 1) {
-    setCurrentPage(currentPage - 1)
+  function handlePrevPage() {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
   }
-}
 
   return (
     <div className="container-fluid form-wrapper">
@@ -82,6 +97,18 @@ function handlePrevPage() {
         <div className="card-body">
 
           <h2 className="form-title mb-3">Employee Directory</h2>
+
+          {message && (
+            <div className="alert alert-success">
+              {message}
+            </div>
+          )}
+
+          {error && (
+            <div className="alert alert-danger">
+              {error}
+            </div>
+          )}
 
           <div className="d-flex justify-content-end mb-3">
             <Link className="btn btn-success" to="/employee-register">
@@ -241,10 +268,28 @@ function handlePrevPage() {
                           </button>
                           <button
                             className="btn btn-danger mx-1"
-                            onClick={() => handleDelete(employee.employee_id)}
+                            onClick={() => setConfirmId(employee.employee_id)}
                           >
-                            Delete
+                            Deactivate
                           </button>
+
+                          {confirmId === employee.employee_id && (
+                            <div className="mt-2">
+                              <span className="text-danger me-2">Confirm?</span>
+                              <button
+                                className="btn btn-sm btn-danger me-1"
+                                onClick={() => handleDelete(employee.employee_id)}
+                              >
+                                Yes
+                              </button>
+                              <button
+                                className="btn btn-sm btn-secondary"
+                                onClick={() => setConfirmId(null)}
+                              >
+                                No
+                              </button>
+                            </div>
+                          )}
                         </>
                       )}
                     </td>
@@ -257,26 +302,26 @@ function handlePrevPage() {
           </div>
 
           <div className="d-flex justify-content-between align-items-center mt-3">
-  <button
-    className="btn btn-outline-danger"
-    onClick={handlePrevPage}
-    disabled={currentPage === 1}
-  >
-    Previous
-  </button>
+            <button
+              className="btn btn-outline-danger"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
 
-  <span className="fw-semibold">
-    Page {currentPage} of {totalPages || 1}
-  </span>
+            <span className="fw-semibold">
+              Page {currentPage} of {totalPages || 1}
+            </span>
 
-  <button
-    className="btn btn-outline-danger"
-    onClick={handleNextPage}
-    disabled={currentPage === totalPages || totalPages === 0}
-  >
-    Next
-  </button>
-</div>
+            <button
+              className="btn btn-outline-danger"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              Next
+            </button>
+          </div>
 
         </div>
       </div>
