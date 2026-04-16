@@ -15,32 +15,25 @@ const Login = ({onLoginSuccess, onSwitch}) => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-          const response = await fetch(import.meta.env.VITE_API_URL + '/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(formData),
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-              //alert("Login Successful!");
-              onLoginSuccess(data); // Pass user data to parent component
-          } else {
-              alert("Login Failed: " + data.message);
-          }
-
-
-
-
-
-
-
+        // Change this line to use the actual string
+        const response = await fetch('https://airlinewebapp.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+    
+        const data = await response.json();
+    
+        if (response.ok) {
+          onLoginSuccess(data); 
+        } else {
+          alert("Login Failed: " + data.message);
+        }
       } catch (err) {
-          console.error("Login Error:", err);
-          alert("Connection error. Is the backend running?");
+        console.error("Login Error:", err);
+        alert("Connection error. Is the backend running?");
       }
-  };
+    };
 
 
 
