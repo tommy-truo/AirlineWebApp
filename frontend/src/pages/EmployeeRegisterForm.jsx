@@ -19,9 +19,7 @@ function EmployeeRegisterForm() {
         salary: '',
         start_date: '',
         supervisor_id: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
+        email: ''
     });
 
     const [message, setMessage] = useState('');
@@ -44,14 +42,6 @@ function EmployeeRegisterForm() {
 
         e.preventDefault();
 
-        if (form.password !== form.confirmPassword) {
-            setError("Passwords don't match!");
-            setMessage('');
-            return;
-        }
-
-        // const { confirmPassword, ...dataToSend } = form;
-
         try {
 
             const res = await axios.post(
@@ -60,7 +50,7 @@ function EmployeeRegisterForm() {
             );
 
             console.log(res);
-            setMessage("Employee registered successfully!");
+            setMessage("Employee registered successfully! Please use the temporary password to log in and change it immediately.");
             setError('');
 
         } catch (err) {
@@ -83,6 +73,9 @@ function EmployeeRegisterForm() {
                 <div className="card-body">
 
                     <h2 className="form-title mb-3">Register New Employee</h2>
+                    <p className="text-muted">
+                        A temporary password will be assigned automatically when the employee account is created.
+                    </p>
 
                     {message && (
                         <div className="alert alert-success">
@@ -329,7 +322,7 @@ function EmployeeRegisterForm() {
 
                             <div className="row">
 
-                                <div className="col-md-4 mb-3 form-field">
+                                <div className="col-md-6 mb-3 form-field">
                                     <label>Email*</label>
                                     <input
                                         type="email"
@@ -338,32 +331,6 @@ function EmployeeRegisterForm() {
                                         value={form.email}
                                         onChange={handleChange}
                                         placeholder='Email'
-                                        required
-                                    />
-                                </div>
-
-                                <div className="col-md-4 mb-3 form-field">
-                                    <label>Password*</label>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        className="form-control"
-                                        value={form.password}
-                                        onChange={handleChange}
-                                        placeholder='Min 8 characters'
-                                        required
-                                    />
-                                </div>
-
-                                <div className="col-md-4 mb-3 form-field">
-                                    <label>Confirm Password*</label>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        className="form-control"
-                                        value={form.confirmPassword}
-                                        onChange={handleChange}
-                                        placeholder='Confirm Password'
                                         required
                                     />
                                 </div>
