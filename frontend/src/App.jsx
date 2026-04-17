@@ -40,7 +40,7 @@ const App = () => {
       setView('shiftCalendar');
     }
     else if(userData.user.role === 'flightcrew'){
-      storedId = userData.user.account_id ?? userData.user.id;
+      storedId = userData.user.employee_id ?? userData.user.id;
       localStorage.setItem('activeView', 'cabinCrewDashboard');
       setView('cabinCrewDashboard');
     }
