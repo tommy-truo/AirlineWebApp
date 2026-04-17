@@ -23,8 +23,8 @@ export const findFlights = async (req, res) => {
     }
 };
 
-
 // below added by aya
+
 export const getDropdownData = async (req, res) => {
     try {
         const routesSql = `
@@ -67,7 +67,7 @@ export const getDropdownData = async (req, res) => {
                 flight_status_id,
                 status_name
             FROM flight_statuses
-            ORDER BY status_name ASC
+            ORDER BY flight_status_id ASC
         `;
 
         const reasonsSql = `
@@ -78,11 +78,19 @@ export const getDropdownData = async (req, res) => {
             ORDER BY reason_name ASC
         `;
 
-        const [routes] = await db.execute(routesSql);
-        const [aircrafts] = await db.execute(aircraftsSql);
-        const [gates] = await db.execute(gatesSql);
-        const [statuses] = await db.execute(statusesSql);
-        const [reasons] = await db.execute(reasonsSql);
+        const [
+            [routes],
+            [aircrafts],
+            [gates],
+            [statuses],
+            [reasons]
+        ] = await Promise.all([
+            db.execute(routesSql),
+            db.execute(aircraftsSql),
+            db.execute(gatesSql),
+            db.execute(statusesSql),
+            db.execute(reasonsSql)
+        ]);
 
         return res.status(200).json({
             routes,
@@ -92,8 +100,10 @@ export const getDropdownData = async (req, res) => {
             reasons
         });
     } catch (err) {
-        console.error('GET FLIGHT DROPDOWNS ERROR:', err.message || err);
-        return res.status(500).json({ message: 'Error fetching flight dropdown data.' });
+        console.error("GET FLIGHT DROPDOWNS ERROR:", err.message || err);
+        return res.status(500).json({
+            message: "Error fetching flight dropdown data."
+        });
     }
 };
 
@@ -109,20 +119,19 @@ export const createFlight = async (req, res) => {
 
     try {
         const sql = `
-            INSERT INTO flight_instances
-(
-    flight_route_id,
-    aircraft_id,
-    departure_gate_id,
-    arrival_gate_id,
-    status_id,
-    status_reason_id,
-    scheduled_departure_datetime,
-    scheduled_arrival_datetime,
-    actual_departure_datetime,
-    actual_arrival_datetime
-)
-VALUES (?, ?, ?, ?, 1, 6, ?, ?, ?, ?)
+            INSERT INTO flight_instances (
+                flight_route_id,
+                aircraft_id,
+                departure_gate_id,
+                arrival_gate_id,
+                status_id,
+                status_reason_id,
+                scheduled_departure_datetime,
+                scheduled_arrival_datetime,
+                actual_departure_datetime,
+                actual_arrival_datetime
+            )
+            VALUES (?, ?, ?, ?, 1, 6, ?, ?, ?, ?)
         `;
 
         const [result] = await db.execute(sql, [
@@ -137,12 +146,14 @@ VALUES (?, ?, ?, ?, 1, 6, ?, ?, ?, ?)
         ]);
 
         return res.status(201).json({
-            message: 'Flight created successfully.',
+            message: "Flight created successfully.",
             flight_instance_id: result.insertId
         });
     } catch (err) {
-        console.error('CREATE FLIGHT ERROR:', err.message || err);
-        return res.status(500).json({ message: 'Error creating flight.' });
+        console.error("CREATE FLIGHT ERROR:", err.message || err);
+        return res.status(500).json({
+            message: "Error creating flight."
+        });
     }
 };
 
@@ -151,6 +162,11 @@ export const getAllFlights = async (req, res) => {
         const sql = `
             SELECT
                 fi.flight_instance_id,
+                fi.aircraft_id,
+                fi.departure_gate_id,
+                fi.arrival_gate_id,
+                fi.status_id,
+                fi.status_reason_id,
                 fr.flight_number,
                 dep.city AS departure_city,
                 arr.city AS arrival_city,
@@ -182,12 +198,117 @@ export const getAllFlights = async (req, res) => {
             LEFT JOIN flight_irregularity_reasons fir
                 ON fi.status_reason_id = fir.flight_irregularity_reason_id
             ORDER BY fi.scheduled_departure_datetime DESC
+            LIMIT 100
         `;
 
         const [rows] = await db.execute(sql);
+
         return res.status(200).json(rows);
     } catch (err) {
-        console.error('GET ALL FLIGHTS ERROR:', err.message || err);
-        return res.status(500).json({ message: 'Error fetching flights.' });
+        console.error("GET ALL FLIGHTS ERROR:", err.message || err);
+        return res.status(500).json({
+            message: "Error fetching flights."
+        });
+    }
+};
+
+export const updateFlight = async (req, res) => {
+    const { id } = req.params;
+    const {
+        aircraft_id,
+        departure_gate_id,
+        arrival_gate_id,
+        status_id,
+        status_reason_id,
+        scheduled_departure_datetime,
+        scheduled_arrival_datetime
+    } = req.body;
+
+    try {
+        const numericStatusId = Number(status_id);
+
+        // Current statuses from your table:
+        // 1 = On Schedule
+        // 2 = Boarding
+        // 3 = Delayed
+        // 4 = Cancelled
+        // 5 = Departed
+        // 6 = En Route
+        // 7 = Arrived   <-- after you add it, verify this ID
+
+        let finalReasonId = status_reason_id || 6;
+        let actualDepartureSql = `actual_departure_datetime`;
+        let actualArrivalSql = `actual_arrival_datetime`;
+
+        if (numericStatusId === 3 || numericStatusId === 4) {
+            // delayed or cancelled should require a chosen reason
+            finalReasonId = status_reason_id;
+        }
+
+        if (numericStatusId === 5 || numericStatusId === 6) {
+            // departed or en route: stamp actual departure once
+            actualDepartureSql = `CASE
+                WHEN actual_departure_datetime = scheduled_departure_datetime
+                THEN NOW()
+                ELSE actual_departure_datetime
+            END`;
+        }
+
+        if (numericStatusId === 7) {
+            // arrived: stamp actual arrival now
+            actualArrivalSql = `NOW()`;
+
+            // if somehow not stamped yet, also stamp departure
+            actualDepartureSql = `CASE
+                WHEN actual_departure_datetime = scheduled_departure_datetime
+                THEN NOW()
+                ELSE actual_departure_datetime
+            END`;
+        }
+
+        const sql = `
+            UPDATE flight_instances
+            SET
+                aircraft_id = ?,
+                departure_gate_id = ?,
+                arrival_gate_id = ?,
+                status_id = ?,
+                status_reason_id = ?,
+                scheduled_departure_datetime = CASE
+                    WHEN ? IS NOT NULL AND ? != '' THEN ?
+                    ELSE scheduled_departure_datetime
+                END,
+                scheduled_arrival_datetime = CASE
+                    WHEN ? IS NOT NULL AND ? != '' THEN ?
+                    ELSE scheduled_arrival_datetime
+                END,
+                actual_departure_datetime = ${actualDepartureSql},
+                actual_arrival_datetime = ${actualArrivalSql}
+            WHERE flight_instance_id = ?
+        `;
+
+        await db.execute(sql, [
+            aircraft_id,
+            departure_gate_id,
+            arrival_gate_id,
+            status_id,
+            finalReasonId,
+            scheduled_departure_datetime,
+            scheduled_departure_datetime,
+            scheduled_departure_datetime,
+            scheduled_arrival_datetime,
+            scheduled_arrival_datetime,
+            scheduled_arrival_datetime,
+            id
+        ]);
+
+        return res.status(200).json({
+            message: "Flight updated successfully."
+        });
+    } catch (err) {
+        console.error("UPDATE FLIGHT ERROR:", err.message || err);
+        return res.status(500).json({
+            message: "Error updating flight."
+        });
     }
 };
