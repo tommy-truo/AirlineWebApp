@@ -4,15 +4,13 @@ import ManagerLayout from "../components/ManagerLayout";
 
 import EmployeeManagement from "./EmployeeManagement.jsx";
 import EmployeeRegisterForm from "./EmployeeRegisterForm.jsx";
-// import ManagerChangeAircraft from "./ManagerChangeAircraft.jsx";
-// import ManagerChangeGate from "./ManagerChangeGate.jsx";
 // import ManagerEmployeeRequests from "./ManagerEmployeeRequests.jsx";
-// import ManagerFlightManagement from "./ManagerFlightManagement.jsx";
+import FlightManagement from "./FlightManagement.jsx";
+import CreateFlight from "./CreateFlight.jsx";
 // import ManagerPayroll from "./ManagerPayroll.jsx";
-// import ManagerReports from "./ManagerReports.jsx";
-// import ManagerShiftCalendar from "./ManagerShiftCalendar.jsx";
 // import ManagerTransactions from "./ManagerTransactions.jsx";
-// import ManagerUpdateSalary from "./ManagerUpdateSalary.jsx";
+// import ManagerTransactionReports from "./ManagerTransactionReports.jsx";
+// import FlightReports from "./FlightReports.jsx";
 
 function ManagerDashboard({ employeeId, onLogout }) {
   return (
@@ -21,14 +19,10 @@ function ManagerDashboard({ employeeId, onLogout }) {
         <Route path="/" element={<EmployeeManagement employeeId={employeeId} />} />
         <Route path="/employee-directory" element={<EmployeeManagement employeeId={employeeId} />} />
         <Route path="/employee-register" element={<EmployeeRegisterForm employeeId={employeeId} />} />
+        <Route path="/flights" element={<FlightManagement employeeId={employeeId} />} />
+        <Route path="/create-flight" element={<CreateFlight employeeId={employeeId} />} />
         {/* <Route path="/employee-requests" element={<ManagerEmployeeRequests employeeId={employeeId} />} />
         <Route path="/payroll" element={<ManagerPayroll employeeId={employeeId} />} />
-        <Route path="/update-salary" element={<ManagerUpdateSalary employeeId={employeeId} />} />
-        <Route path="/flights" element={<ManagerFlightManagement employeeId={employeeId} />} />
-        <Route path="/change-gate" element={<ManagerChangeGate employeeId={employeeId} />} />
-        <Route path="/change-aircraft" element={<ManagerChangeAircraft employeeId={employeeId} />} />
-        <Route path="/reports" element={<ManagerReports employeeId={employeeId} />} />
-        <Route path="/shift-calendar" element={<ManagerShiftCalendar employeeId={employeeId} />} />
         <Route path="/transactions" element={<ManagerTransactions employeeId={employeeId} />} /> */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
