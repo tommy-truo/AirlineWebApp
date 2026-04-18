@@ -83,7 +83,9 @@ export const getPayrollReports = async (req, res) => {
                 d.department_name,
                 jt.title_name AS job_title,
                 e.salary,
+                ROUND(e.salary / 12, 2) AS monthly_salary,
                 e.start_date,
+                TIMESTAMPDIFF(YEAR, e.start_date, CURDATE()) AS years_of_service,
                 a.is_active
             FROM employees e
             JOIN departments d
@@ -104,7 +106,9 @@ export const getPayrollReports = async (req, res) => {
                 jt.title_name AS job_title,
                 COUNT(*) AS employee_count,
                 SUM(e.salary) AS total_salary,
-                AVG(e.salary) AS average_salary
+                AVG(e.salary) AS average_salary,
+                MIN(e.salary) AS min_salary,
+                MAX(e.salary) AS max_salary
             FROM employees e
             JOIN departments d
                 ON e.department_id = d.department_id
@@ -119,8 +123,21 @@ export const getPayrollReports = async (req, res) => {
 
         const [formattedReport] = await db.execute(formattedSql, params);
 
+        const summarySql = `
+            SELECT
+                COUNT(*) AS total_employees,
+                SUM(CASE WHEN a.is_active = 1 THEN 1 ELSE 0 END) AS active_count,
+                SUM(CASE WHEN a.is_active = 0 THEN 1 ELSE 0 END) AS inactive_count
+            FROM employees e
+            JOIN accounts a
+                ON e.account_id = a.account_id
+            ${whereSql}
+        `;
+
+        const [[summary]] = await db.execute(summarySql, params);
+
         const reportMeta = {
-            reportName: "Payroll Salary Report",
+            reportName: "Employee Payroll Report",
             departmentId: departmentId || null,
             jobTitleId: jobTitleId || null,
             activeOnly: activeOnly || '',
@@ -130,6 +147,11 @@ export const getPayrollReports = async (req, res) => {
 
         return res.status(200).json({
             reportMeta,
+            summary: {
+                totalEmployees: summary?.total_employees || 0,
+                activeCount: summary?.active_count || 0,
+                inactiveCount: summary?.inactive_count || 0
+            },
             formattedReport,
             rawData
         });
