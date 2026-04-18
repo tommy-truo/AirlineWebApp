@@ -1,35 +1,41 @@
-import axios from "axios"
 import { useState, useEffect } from 'react';
 import '../components/styles.css';
 
 function TransactionHistory() {
 
-  const [data, setData] = useState([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-  const [statusFilter, setStatusFilter] = useState('ALL')
-  const [searchTerm, setSearchTerm] = useState('')
-  const transactionsPerPage = 8
+  const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const transactionsPerPage = 8;
 
   useEffect(() => {
-    fetchTransactions()
-  }, [])
+    fetchTransactions();
+  }, []);
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [statusFilter, searchTerm])
+    setCurrentPage(1);
+  }, [statusFilter, searchTerm]);
 
-  function fetchTransactions() {
-    axios.get("http://localhost:3000/api/transactions")
-      .then((res) => {
-        setData(res.data)
-      })
-      .catch((err) => {
-        console.log(err)
-        setError("Error fetching transactions.")
-        setMessage('')
-      })
+  async function fetchTransactions() {
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+      const res = await fetch(`${API_BASE_URL}/api/transactions`);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch transactions.");
+      }
+
+      const result = await res.json();
+      setData(result);
+    } catch (err) {
+      console.log(err);
+      setError("Error fetching transactions.");
+      setMessage('');
+    }
   }
 
   const filteredTransactions = data.filter((transaction) => {
@@ -37,29 +43,29 @@ function TransactionHistory() {
       String(transaction.transaction_id).includes(searchTerm) ||
       String(transaction.booking_id).includes(searchTerm) ||
       (transaction.payment_method || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (transaction.transaction_type || '').toLowerCase().includes(searchTerm.toLowerCase())
+      (transaction.transaction_type || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter =
       statusFilter === 'ALL' ||
-      (transaction.transaction_type || '').toLowerCase() === statusFilter.toLowerCase()
+      (transaction.transaction_type || '').toLowerCase() === statusFilter.toLowerCase();
 
-    return matchesSearch && matchesFilter
-  })
+    return matchesSearch && matchesFilter;
+  });
 
-  const indexOfLastTransaction = currentPage * transactionsPerPage
-  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage
-  const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction)
-  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage)
+  const indexOfLastTransaction = currentPage * transactionsPerPage;
+  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+  const currentTransactions = filteredTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
 
   function handleNextPage() {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
+      setCurrentPage(currentPage + 1);
     }
   }
 
   function handlePrevPage() {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
+      setCurrentPage(currentPage - 1);
     }
   }
 
@@ -176,7 +182,7 @@ function TransactionHistory() {
       </div>
 
     </div>
-  )
+  );
 }
 
-export default TransactionHistory
+export default TransactionHistory;
