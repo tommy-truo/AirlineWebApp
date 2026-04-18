@@ -1,7 +1,7 @@
 import axios from "axios"
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom"
-import '../styles/styles.css';
+import '../components/styles.css';
 
 function EmployeeManagement() {
 
