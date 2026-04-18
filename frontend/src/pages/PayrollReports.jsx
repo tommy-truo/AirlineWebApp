@@ -1,9 +1,7 @@
-import axios from "axios"
 import { useState, useEffect } from 'react';
-import "../components/styles.css";
+import '../components/styles.css';
 
 function PayrollReports() {
-
     const [filters, setFilters] = useState({
         departmentId: '',
         jobTitleId: '',
@@ -36,19 +34,27 @@ function PayrollReports() {
         fetchDropdowns()
     }, [])
 
-    function fetchDropdowns() {
-        axios.get("http://localhost:3000/api/payroll/dropdowns")
-            .then((res) => {
-                setDropdowns({
-                    departments: res.data.departments || [],
-                    jobTitles: res.data.jobTitles || []
-                })
+    async function fetchDropdowns() {
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+            const res = await fetch(`${API_BASE_URL}/api/payroll/dropdowns`)
+
+            if (!res.ok) {
+                throw new Error()
+            }
+
+            const data = await res.json()
+
+            setDropdowns({
+                departments: data.departments || [],
+                jobTitles: data.jobTitles || []
             })
-            .catch((err) => {
-                console.log(err)
-                setError("Error loading payroll report filter options.")
-                setMessage('')
-            })
+        } catch (err) {
+            console.log(err)
+            setError("Error loading payroll report filter options.")
+            setMessage('')
+        }
     }
 
     function handleChange(e) {
@@ -60,39 +66,45 @@ function PayrollReports() {
         }))
     }
 
-    function handleGenerateReport(e) {
+    async function handleGenerateReport(e) {
         e.preventDefault()
 
-        axios.get("http://localhost:3000/api/payroll/reports", {
-            params: {
+        try {
+            const params = new URLSearchParams({
                 departmentId: filters.departmentId,
                 jobTitleId: filters.jobTitleId,
                 activeOnly: filters.activeOnly,
                 startDateFrom: filters.startDateFrom,
                 startDateTo: filters.startDateTo
+            })
+
+            const res = await fetch(`${API_BASE_URL}/api/payroll/reports?${params.toString()}`)
+
+            if (!res.ok) {
+                throw new Error()
             }
-        })
-            .then((res) => {
-                setReportData({
-                    reportMeta: res.data.reportMeta || null,
-                    summary: res.data.summary || {
-                        totalEmployees: 0,
-                        activeCount: 0,
-                        inactiveCount: 0
-                    },
-                    formattedReport: res.data.formattedReport || [],
-                    rawData: res.data.rawData || []
-                })
-                setHasGenerated(true)
-                setMessage("Report generated successfully.")
-                setError('')
+
+            const data = await res.json()
+
+            setReportData({
+                reportMeta: data.reportMeta || null,
+                summary: data.summary || {
+                    totalEmployees: 0,
+                    activeCount: 0,
+                    inactiveCount: 0
+                },
+                formattedReport: data.formattedReport || [],
+                rawData: data.rawData || []
             })
-            .catch((err) => {
-                console.log(err)
-                setError("Error generating payroll report.")
-                setMessage('')
-                setHasGenerated(false)
-            })
+            setHasGenerated(true)
+            setMessage("Report generated successfully.")
+            setError('')
+        } catch (err) {
+            console.log(err)
+            setError("Error generating payroll report.")
+            setMessage('')
+            setHasGenerated(false)
+        }
     }
 
     return (
@@ -238,20 +250,28 @@ function PayrollReports() {
                                     </div>
                                 )}
 
-                                <div className="mb-3">
-                                    <p className="mb-1">
-                                        <strong>Total Employees in Report:</strong> {reportData.summary.totalEmployees}
-                                    </p>
-                                    <p className="mb-1">
-                                        <strong>Active Employees:</strong> {reportData.summary.activeCount}
-                                    </p>
-                                    <p className="mb-1">
-                                        <strong>Inactive Employees:</strong> {reportData.summary.inactiveCount}
-                                    </p>
+                                <div style={{ overflowX: "auto" }}>
+                                    <table className="table table-bordered">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>Total Employees</th>
+                                                <th>Active Employees</th>
+                                                <th>Inactive Employees</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr>
+                                                <td>{reportData.summary.totalEmployees}</td>
+                                                <td>{reportData.summary.activeCount}</td>
+                                                <td>{reportData.summary.inactiveCount}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
                                 <div style={{ overflowX: "auto" }}>
-                                    <table className="table table-bordered">
+                                    <table className="table table-bordered mt-3">
                                         <thead className="table-light">
                                             <tr>
                                                 <th>Department</th>
@@ -345,4 +365,4 @@ function PayrollReports() {
     )
 }
 
-export default PayrollReports
+export default PayrollReports;
