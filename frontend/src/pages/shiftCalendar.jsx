@@ -32,7 +32,7 @@ function ShiftCalendar({ employeeId = 1 }) {
                 console.error(err);
                 setError('Could not load shift data.');
             });
-    }, []);
+    }, [employeeId]);
 
     const fetchShiftRequests = () => {
         fetch(`${API_URL}/api/pilot/shift_requests?employee_id=${employeeId}`)
@@ -53,7 +53,7 @@ function ShiftCalendar({ employeeId = 1 }) {
 
     useEffect(() => {
         fetchShiftRequests();
-    }, []);
+    }, [employeeId]);
 
     const nextFlight = shifts.length > 0 ? shifts[0] : null;
 
@@ -105,7 +105,7 @@ function ShiftCalendar({ employeeId = 1 }) {
         <>
             <div className="page">
                 <h2 style={{ textAlign: 'center', marginBottom: '6px', color: '#777' }}>
-                    Pilot Dashboard
+                    Shift Calendar
                 </h2>
 
                 <h1 className="title" style={{ marginBottom: '4px' }}>

@@ -4,6 +4,7 @@ import Signup from './components/SignUp.jsx';
 import PassengerDashboard from './components/Layout.jsx';
 // IMPORT YALLS SPECIFIC COMPONENTS HERE
 import PilotDashboard from './components/PilotDashboard.jsx'; //dex
+import MaintenanceDashboard from './components/MaintenanceDashboard.jsx'; //abel
 
 const App = () => {
   // Initialize view from localStorage so the user stays logged in on refresh
@@ -37,6 +38,11 @@ const App = () => {
       storedId = userData.user.employee_id ?? userData.user.id;
       localStorage.setItem('activeView', 'shiftCalendar');
       setView('shiftCalendar');
+    }
+    else if (userData.user.role === 'maintenance') {
+      storedId = userData.user.employee_id ?? userData.user.id;
+      localStorage.setItem('activeView', 'maintenanceDashboard');
+      setView('maintenanceDashboard');
     }
 
     localStorage.setItem('userID', storedId);
@@ -82,6 +88,9 @@ const App = () => {
 
       {view === 'shiftCalendar' && (
         <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
+
+      {view === 'maintenanceDashboard' && (
+        <MaintenanceDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
 
     </div>
   );
