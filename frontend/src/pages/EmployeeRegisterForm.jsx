@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import '../components/styles.css';
 
 function EmployeeRegisterForm() {
@@ -25,6 +24,29 @@ function EmployeeRegisterForm() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
+    const [dropdowns, setDropdowns] = useState({
+        departments: [],
+        jobTitles: [],
+        supervisors: []
+    });
+
+    useEffect(() => {
+        async function fetchDropdowns() {
+            try {
+                const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+                const res = await fetch(`${API_BASE_URL}/api/employees/dropdowns`);
+                const data = await res.json();
+                setDropdowns(data);
+            } catch (err) {
+                console.error(err);
+                setError('Error loading dropdown options.');
+            }
+        }
+
+        fetchDropdowns();
+    }, []);
+
     const handleChange = (e) => {
 
         const { id, value } = e.target;
@@ -44,12 +66,20 @@ function EmployeeRegisterForm() {
 
         try {
 
-            const res = await axios.post(
-                'http://localhost:3000/api/employees',
-                form
-            );
+            const res = await fetch(`${API_BASE_URL}/api/employees`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(form)
+            });
 
-            console.log(res);
+            if (!res.ok) {
+                throw new Error('Failed to register employee');
+            }
+
+            await res.json();
+
             setMessage("Employee registered successfully! Please use the temporary password to log in and change it immediately.");
             setError('');
 
@@ -67,7 +97,6 @@ function EmployeeRegisterForm() {
 
         <div className="container-fluid form-wrapper">
 
-            {/* Form Card */}
             <div className="card signup-container shadow-sm border-danger">
 
                 <div className="card-body">
@@ -91,7 +120,6 @@ function EmployeeRegisterForm() {
 
                     <form onSubmit={handleSubmit}>
 
-                        {/* PERSONAL INFO */}
                         <div className="form-section mb-4">
 
                             <h5 className="section-title">
@@ -189,8 +217,6 @@ function EmployeeRegisterForm() {
 
                         </div>
 
-
-                        {/* EMPLOYEE INFO */}
                         <div className="form-section mb-4">
 
                             <h5 className="section-title">
@@ -200,27 +226,45 @@ function EmployeeRegisterForm() {
                             <div className="row">
 
                                 <div className="col-md-3 mb-3 form-field">
-                                    <label>Department ID*</label>
-                                    <input
-                                        type="number"
+                                    <label>Department*</label>
+                                    <select
                                         id="department_id"
                                         className="form-control"
                                         value={form.department_id}
                                         onChange={handleChange}
                                         required
-                                    />
+                                    >
+                                        <option value="">Select Department</option>
+                                        {dropdowns.departments.map((department) => (
+                                            <option
+                                                key={department.department_id}
+                                                value={department.department_id}
+                                            >
+                                                {department.department_name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className="col-md-3 mb-3 form-field">
-                                    <label>Job Title ID*</label>
-                                    <input
-                                        type="number"
+                                    <label>Job Title*</label>
+                                    <select
                                         id="job_title_id"
                                         className="form-control"
                                         value={form.job_title_id}
                                         onChange={handleChange}
                                         required
-                                    />
+                                    >
+                                        <option value="">Select Job Title</option>
+                                        {dropdowns.jobTitles.map((job) => (
+                                            <option
+                                                key={job.job_title_id}
+                                                value={job.job_title_id}
+                                            >
+                                                {job.title_name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className="col-md-3 mb-3 form-field">
@@ -236,15 +280,23 @@ function EmployeeRegisterForm() {
                                 </div>
 
                                 <div className="col-md-3 mb-3 form-field">
-                                    <label>Supervisor ID</label>
-                                    <input
-                                        type="number"
+                                    <label>Supervisor</label>
+                                    <select
                                         id="supervisor_id"
                                         className="form-control"
                                         value={form.supervisor_id}
                                         onChange={handleChange}
-                                        required
-                                    />
+                                    >
+                                        <option value="">Select Supervisor</option>
+                                        {dropdowns.supervisors.map((supervisor) => (
+                                            <option
+                                                key={supervisor.employee_id}
+                                                value={supervisor.employee_id}
+                                            >
+                                                {supervisor.first_name} {supervisor.last_name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                             </div>
@@ -267,7 +319,6 @@ function EmployeeRegisterForm() {
 
                         </div>
 
-                        {/* {EMERGENCY CONTACT INFORMATION} */}
                         <div className="form-section mb-4">
 
                             <h5 className="section-title">
@@ -313,7 +364,6 @@ function EmployeeRegisterForm() {
                             </div>
                         </div>
 
-                        {/* ACCOUNT INFO */}
                         <div className="form-section mb-4">
 
                             <h5 className="section-title">
@@ -339,8 +389,6 @@ function EmployeeRegisterForm() {
 
                         </div>
 
-
-                        {/* SUBMIT */}
                         <button
                             type="submit"
                             className="login-button"
