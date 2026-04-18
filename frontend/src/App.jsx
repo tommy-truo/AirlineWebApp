@@ -4,6 +4,8 @@ import Signup from './components/SignUp.jsx';
 import PassengerDashboard from './components/Layout.jsx';
 // IMPORT YALLS SPECIFIC COMPONENTS HERE
 import PilotDashboard from './components/PilotDashboard.jsx'; //dex
+import EmployeeDashboard from './components/employeeDashboard.jsx';
+
 
 const App = () => {
   // Initialize view from localStorage so the user stays logged in on refresh
@@ -37,6 +39,11 @@ const App = () => {
       storedId = userData.user.employee_id ?? userData.user.id;
       localStorage.setItem('activeView', 'shiftCalendar');
       setView('shiftCalendar');
+    }
+    else if (userData.user.role ==='checkIn'){
+      storedId = userData.user.employee_id ?? useData.user.id;
+      localStorage.setItem('activeView', 'employeeDashboard');
+      setView('employeeDashboard');
     }
 
     localStorage.setItem('userID', storedId);
@@ -80,8 +87,14 @@ const App = () => {
         <PassengerDashboard userID={currentUserId} onLogout={handleLogout} />
       )}
 
+      {/* 4. Pilot View */}
       {view === 'shiftCalendar' && (
         <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
+
+      {/* 5. Check-in employee view */}
+      {view === 'employeeDashboard' && (
+        <EmployeeDashboard employeeId={currentUserId} onLogout={handleLogout} />
+      )}
 
     </div>
   );
