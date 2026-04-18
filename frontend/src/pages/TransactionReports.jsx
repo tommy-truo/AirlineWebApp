@@ -1,4 +1,3 @@
-import axios from "axios"
 import { useState, useEffect } from 'react';
 import '../components/styles.css';
 
@@ -9,77 +8,90 @@ function TransactionReports() {
     endDate: '',
     transactionTypeId: '',
     paymentMethodId: ''
-  })
+  });
 
   const [dropdowns, setDropdowns] = useState({
     transactionTypes: [],
     paymentMethods: []
-  })
+  });
 
   const [reportData, setReportData] = useState({
     reportMeta: null,
     formattedReport: [],
     rawData: []
-  })
+  });
 
-  const [hasGenerated, setHasGenerated] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
+  const [hasGenerated, setHasGenerated] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchDropdowns()
-  }, [])
+    fetchDropdowns();
+  }, []);
 
-  function fetchDropdowns() {
-    axios.get("http://localhost:3000/api/transactions/dropdowns")
-      .then((res) => {
-        setDropdowns({
-          transactionTypes: res.data.transactionTypes || [],
-          paymentMethods: res.data.paymentMethods || []
-        })
-      })
-      .catch((err) => {
-        console.log(err)
-        setError("Error loading report filter options.")
-        setMessage('')
-      })
+  async function fetchDropdowns() {
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+      const res = await fetch(`${API_BASE_URL}/api/transactions/dropdowns`);
+
+      if (!res.ok) {
+        throw new Error("Failed to load report filter options.");
+      }
+
+      const data = await res.json();
+
+      setDropdowns({
+        transactionTypes: data.transactionTypes || [],
+        paymentMethods: data.paymentMethods || []
+      });
+    } catch (err) {
+      console.log(err);
+      setError("Error loading report filter options.");
+      setMessage('');
+    }
   }
 
   function handleChange(e) {
-    const { name, value } = e.target
-    setFilters((prev) => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleGenerateReport(e) {
-    e.preventDefault()
+  async function handleGenerateReport(e) {
+    e.preventDefault();
 
-    axios.get("http://localhost:3000/api/transactions/reports", {
-      params: {
+    try {
+      const params = new URLSearchParams({
         startDate: filters.startDate,
         endDate: filters.endDate,
         transactionTypeId: filters.transactionTypeId,
         paymentMethodId: filters.paymentMethodId
+      });
+
+      const res = await fetch(`${API_BASE_URL}/api/transactions/reports?${params.toString()}`);
+
+      if (!res.ok) {
+        throw new Error("Failed to generate transaction report.");
       }
-    })
-      .then((res) => {
-        setReportData({
-          reportMeta: res.data.reportMeta || null,
-          formattedReport: res.data.formattedReport || [],
-          rawData: res.data.rawData || []
-        })
-        setHasGenerated(true)
-        setMessage("Report generated successfully.")
-        setError('')
-      })
-      .catch((err) => {
-        console.log(err)
-        setError("Error generating transaction report.")
-        setMessage('')
-        setHasGenerated(false)
-      })
+
+      const data = await res.json();
+
+      setReportData({
+        reportMeta: data.reportMeta || null,
+        formattedReport: data.formattedReport || [],
+        rawData: data.rawData || []
+      });
+      setHasGenerated(true);
+      setMessage("Report generated successfully.");
+      setError('');
+    } catch (err) {
+      console.log(err);
+      setError("Error generating transaction report.");
+      setMessage('');
+      setHasGenerated(false);
+    }
   }
 
-  // 🔥 NEW: revenue calculations
   const totalRevenue = reportData.rawData.reduce(
     (sum, row) => sum + Number(row.amount || 0),
     0
@@ -203,24 +215,28 @@ function TransactionReports() {
                   </div>
                 )}
 
-                {/* 🔥 NEW Revenue Section */}
-                <div className="row text-center mb-3">
-                  <div className="col-md-4">
-                    <p className="fw-bold mb-1">Total Revenue</p>
-                    <p>${totalRevenue.toFixed(2)}</p>
-                  </div>
-                  <div className="col-md-4">
-                    <p className="fw-bold mb-1">Total Sales</p>
-                    <p>${positiveRevenue.toFixed(2)}</p>
-                  </div>
-                  <div className="col-md-4">
-                    <p className="fw-bold mb-1">Total Refunded</p>
-                    <p>${refundedAmount.toFixed(2)}</p>
-                  </div>
+                <div style={{ overflowX: "auto" }}>
+                  <table className="table table-bordered">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Total Revenue</th>
+                        <th>Total Sales</th>
+                        <th>Total Refunded</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td>${totalRevenue.toFixed(2)}</td>
+                        <td>${positiveRevenue.toFixed(2)}</td>
+                        <td>${refundedAmount.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 <div style={{ overflowX: "auto" }}>
-                  <table className="table table-bordered">
+                  <table className="table table-bordered mt-3">
                     <thead className="table-light">
                       <tr>
                         <th>Transaction Type</th>
@@ -298,7 +314,7 @@ function TransactionReports() {
       </div>
 
     </div>
-  )
+  );
 }
 
-export default TransactionReports
+export default TransactionReports;
