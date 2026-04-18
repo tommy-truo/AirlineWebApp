@@ -1,37 +1,20 @@
-function Header({onLogout}) {
+function Header() {
   return (
+    <div className="manager-header d-flex align-items-center px-4 py-3 text-white">
+      <img
+        src="/acmelogo.png"
+        alt="logo"
+        style={{
+          width: "50px",
+          height: "50px",
+          objectFit: "contain",
+          marginRight: "10px"
+        }}
+      />
 
-    <div className="d-flex justify-content-between align-items-center px-4 py-3 bg-danger text-white">
-
-      <div className="d-flex align-items-center">
-
-        <img
-          src="/acmelogo.png"
-          alt="logo"
-          style={{
-            width: "50px",
-            height: "50px",
-            objectFit: "contain",
-            marginRight: "10px"
-          }}
-        />
-
-        <h5 className="m-0">
-          ACME Airlines
-        </h5>
-
-        <button
-          onClick={onLogout}
-          className="btn btn-light btn-sm"
-        >
-          Logout
-        </button>
-
-      </div>
-
+      <h5 className="m-0">ACME Airlines</h5>
     </div>
-
-  )
+  );
 }
 
-export default Header
+export default Header;
