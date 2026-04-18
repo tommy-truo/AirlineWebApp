@@ -92,7 +92,8 @@ export const getScheduledFlights = async (req, res, next) => {
     fi.scheduled_arrival_datetime,
     fr.estimated_distance_km,
     fr.estimated_duration_minutes,
-    fi.aircraft_id
+    fi.aircraft_id,
+    ac.aircraft_name
   FROM airline.flight_employee_assignments fea
   JOIN airline.employees e
     ON fea.employee_id = e.employee_id
@@ -100,6 +101,8 @@ export const getScheduledFlights = async (req, res, next) => {
     ON fea.flight_instance_id = fi.flight_instance_id
   JOIN airline.flight_routes fr
     ON fi.flight_route_id = fr.flight_route_id
+  JOIN airline.aircrafts ac
+    ON fi.aircraft_id = ac.aircraft_id
   JOIN airline.airports da
     ON fr.departure_airport_id = da.airport_id
   JOIN airline.airports aa

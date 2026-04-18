@@ -70,6 +70,10 @@ function CabinCrewScheduledFlights({ employeeId = 1 }) {
                 new Date(b.scheduled_departure_datetime)
         );
 
+    const totalFlights = upcomingFlights.length;
+
+    const totalDistance = upcomingFlights.reduce((sum, f) => sum + (f.distance || 0), 0);
+
     const pastFlights = flights.filter(
         (f) => new Date(f.scheduled_departure_datetime) < now
     );
@@ -172,8 +176,8 @@ function CabinCrewScheduledFlights({ employeeId = 1 }) {
 
             <div className="summary-cards">
                 <div className="summary-card">
-                    <h3>Total Flights</h3>
-                    <p>{flights.length}</p>
+                    <h3>Upcoming Flights</h3>
+                    <p>{upcomingFlights.length}</p>
                 </div>
 
                 <div className="summary-card">
@@ -191,9 +195,9 @@ function CabinCrewScheduledFlights({ employeeId = 1 }) {
                 </div>
 
                 <div className="summary-card">
-                    <h3>Total Distance</h3>
+                    <h3>Upcoming Distance</h3>
                     <p>
-                        {flights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
+                        {upcomingFlights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
                     </p>
                 </div>
             </div>

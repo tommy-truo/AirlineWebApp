@@ -139,7 +139,7 @@ function ScheduledFlights({ employeeId = 1 }) {
 
                             <td>{flight.estimated_distance_km ?? 'N/A'}</td>
                             <td>{flight.estimated_duration_minutes ?? 'N/A'}</td>
-                            <td>{flight.aircraft_id || 'N/A'}</td>
+                            <td>{flight.aircraft_name || `Aircraft ${flight.aircraft_id}`}</td>
 
                             <td>
                                 <button
@@ -172,8 +172,8 @@ function ScheduledFlights({ employeeId = 1 }) {
 
             <div className="summary-cards">
                 <div className="summary-card">
-                    <h3>Total Flights</h3>
-                    <p>{flights.length}</p>
+                    <h3>Upcoming Flights</h3>
+                    <p>{upcomingFlights.length}</p>
                 </div>
 
                 <div className="summary-card">
@@ -191,9 +191,9 @@ function ScheduledFlights({ employeeId = 1 }) {
                 </div>
 
                 <div className="summary-card">
-                    <h3>Total Distance</h3>
+                    <h3>Upcoming Distance</h3>
                     <p>
-                        {flights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
+                        {upcomingFlights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
                     </p>
                 </div>
             </div>
