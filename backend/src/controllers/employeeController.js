@@ -3,29 +3,76 @@ import { db } from '../config/db.js';
 export const getAllEmployees = async (req, res) => {
   try {
     const sql = `
-  SELECT 
+      SELECT 
   e.employee_id,
   e.first_name,
   e.last_name,
   e.department_id,
+  d.department_name,
   e.job_title_id,
+  j.title_name,
   e.salary,
   e.supervisor_id,
+  CONCAT(s.first_name, ' ', s.last_name) AS supervisor_name,
   e.emergency_contact_name,
   e.emergency_contact_phone,
   e.emergency_contact_relationship,
-  e.account_id
+  a.is_active
 FROM employees e
-JOIN accounts a ON e.account_id = a.account_id
-WHERE a.is_active = 1
+JOIN accounts a 
+  ON e.account_id = a.account_id
+LEFT JOIN departments d 
+  ON e.department_id = d.department_id
+LEFT JOIN job_titles j 
+  ON e.job_title_id = j.job_title_id
+LEFT JOIN employees s 
+  ON e.supervisor_id = s.employee_id
 ORDER BY e.employee_id ASC
-`;
+    `;
 
     const [rows] = await db.execute(sql);
+
+    console.log("EMPLOYEES RESULT:", rows);
+
     return res.status(200).json(rows);
   } catch (err) {
-    console.error('GET EMPLOYEES ERROR:', err.message || err);
+    console.error('GET EMPLOYEES ERROR:', err);
     return res.status(500).json({ message: 'Error fetching employees.' });
+  }
+};
+
+export const getEmployeeDropdowns = async (req, res) => {
+  try {
+    const departmentsSql = `
+      SELECT department_id, department_name
+      FROM departments
+      ORDER BY department_name ASC
+    `;
+
+    const jobTitlesSql = `
+      SELECT job_title_id, title_name
+      FROM job_titles
+      ORDER BY title_name ASC
+    `;
+
+    const supervisorsSql = `
+      SELECT employee_id, first_name, last_name
+      FROM employees
+      ORDER BY first_name ASC, last_name ASC
+    `;
+
+    const [departments] = await db.execute(departmentsSql);
+    const [jobTitles] = await db.execute(jobTitlesSql);
+    const [supervisors] = await db.execute(supervisorsSql);
+
+    return res.status(200).json({
+      departments,
+      jobTitles,
+      supervisors
+    });
+  } catch (err) {
+    console.error('GET EMPLOYEE DROPDOWNS ERROR:', err.message || err);
+    return res.status(500).json({ message: 'Error fetching employee dropdown data.' });
   }
 };
 
@@ -182,19 +229,19 @@ export const updateEmployee = async (req, res) => {
 
   try {
     const sql = `
-  UPDATE employees
-  SET 
-    first_name = ?,
-    last_name = ?,
-    department_id = ?,
-    job_title_id = ?,
-    salary = ?,
-    supervisor_id = ?,
-    emergency_contact_name = ?,
-    emergency_contact_phone = ?,
-    emergency_contact_relationship = ?
-  WHERE employee_id = ?
-`;
+      UPDATE employees
+      SET 
+        first_name = ?,
+        last_name = ?,
+        department_id = ?,
+        job_title_id = ?,
+        salary = ?,
+        supervisor_id = ?,
+        emergency_contact_name = ?,
+        emergency_contact_phone = ?,
+        emergency_contact_relationship = ?
+      WHERE employee_id = ?
+    `;
 
     await db.execute(sql, [
       first_name,
@@ -202,7 +249,7 @@ export const updateEmployee = async (req, res) => {
       department_id,
       job_title_id,
       salary,
-      supervisor_id,
+      supervisor_id || null,
       emergency_contact_name,
       emergency_contact_phone,
       emergency_contact_relationship,
@@ -210,7 +257,6 @@ export const updateEmployee = async (req, res) => {
     ]);
 
     return res.status(200).json({ message: "Employee updated successfully." });
-
   } catch (err) {
     console.error('UPDATE EMPLOYEE ERROR:', err.message || err);
     return res.status(500).json({ message: 'Error updating employee.' });
