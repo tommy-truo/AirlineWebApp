@@ -11,6 +11,8 @@ export const getShiftCalendar = async (req, res, next) => {
   const sql = `
     SELECT
       fea.assignment_id AS shift_id,
+      fi.scheduled_departure_datetime,
+      fi.scheduled_arrival_datetime,
       DATE(fi.scheduled_departure_datetime) AS shift_date,
       TIME(fi.scheduled_departure_datetime) AS start_time,
       TIME(fi.scheduled_arrival_datetime) AS end_time,

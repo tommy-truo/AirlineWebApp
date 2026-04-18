@@ -54,11 +54,13 @@ function ShiftCalendar({ employeeId = 1 }) {
 
     const now = new Date();
 
-    const upcomingShifts = shifts.filter((shift) => {
-        if (!shift.shift_date || !shift.start_time) return true;
-        const shiftDateTime = new Date(`${shift.shift_date}T${shift.start_time}`);
-        return shiftDateTime >= now;
-    });
+    const upcomingShifts = shifts
+        .filter((shift) => new Date(shift.scheduled_departure_datetime) >= now)
+        .sort(
+            (a, b) =>
+                new Date(a.scheduled_departure_datetime) -
+                new Date(b.scheduled_departure_datetime)
+        );
 
 
     const nextFlight = upcomingShifts.length > 0 ? upcomingShifts[0] : null;

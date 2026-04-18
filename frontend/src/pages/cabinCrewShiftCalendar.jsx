@@ -72,13 +72,7 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
                 new Date(b.scheduled_departure_datetime)
         );
 
-    const pastShifts = shifts
-        .filter((shift) => new Date(shift.scheduled_departure_datetime) < now)
-        .sort(
-            (a, b) =>
-                new Date(b.scheduled_departure_datetime) -
-                new Date(a.scheduled_departure_datetime)
-        );
+    
 
     const nextFlight = upcomingShifts.length > 0 ? upcomingShifts[0] : null;
 
@@ -286,12 +280,7 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
                 {renderShiftsTable(upcomingShifts, 'No upcoming shifts assigned yet.')}
             </div>
 
-            <div className="table-wrapper" style={{ marginTop: '30px' }}>
-                <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
-                    Past Shifts
-                </h2>
-                {renderShiftsTable(pastShifts, 'No past shifts.')}
-            </div>
+           
 
             <div className="table-wrapper" style={{ marginTop: '30px' }}>
                 <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
