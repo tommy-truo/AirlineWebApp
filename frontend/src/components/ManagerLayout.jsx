@@ -4,15 +4,15 @@ import Sidebar from "./Sidebar"
 
 function ManagerLayout({ children, onLogout }) {
   return (
-    <div className="d-flex">
+    <div className="d-flex manager-shell">
 
-      <Sidebar />
+      <Sidebar onLogout={onLogout} />
 
-      <div className="flex-grow-1">
+      <div className="flex-grow-1 d-flex flex-column manager-content-area">
 
-        <Header onLogout={onLogout} />
+        <Header />
 
-        <div className="flex-grow-1">
+        <div className="flex-grow-1 overflow-auto">
           {children}
         </div>
 
