@@ -12,14 +12,16 @@ function EmployeeRequest() {
     }, [])
 
     function fetchRequests() {
-        fetch('http://localhost:3000/api/requests')
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+        fetch(`${API_BASE_URL}/api/requests`)
             .then(res => res.json())
             .then(data => setRequests(data))
             .catch(() => setError('Error loading requests'))
     }
 
     function handleUpdate(id, status) {
-        fetch(`http://localhost:3000/api/requests/${id}`, {
+        fetch(`${API_BASE_URL}/api/requests/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -75,7 +77,16 @@ function EmployeeRequest() {
                                         <td>{r.flight_number || '—'}</td>
                                         <td>{r.request_type}</td>
                                         <td>{r.reason}</td>
-                                        <td>{r.status}</td>
+                                        <td>
+                                            <span className={`status-badge ${r.status === 'Approved'
+                                                ? 'status-approved'
+                                                : r.status === 'Denied'
+                                                    ? 'status-denied'
+                                                    : 'status-pending'
+                                                }`}>
+                                                {r.status}
+                                            </span>
+                                        </td>
                                         <td>{r.submitted_datetime}</td>
 
                                         <td>
