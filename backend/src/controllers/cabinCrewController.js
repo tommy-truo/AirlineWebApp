@@ -24,7 +24,7 @@ export const getCabinCrewShiftCalendar = async (req, res, next) => {
     feat.type_name AS assignment_role,
     e.first_name,
     e.last_name,
-    ac.aircraft_name,
+    ac.aircraft_name AS aircraft_name,
     fs.status_name AS flight_status
   FROM airline.flight_employee_assignments fea
   JOIN airline.employees e
@@ -133,14 +133,23 @@ export const getCabinCrewScheduledFlights = async (req, res, next) => {
         fi.scheduled_arrival_datetime,
         da.city AS departure_city,
         aa.city AS arrival_city,
-        fi.aircraft_id
+        fi.aircraft_id,
+        ac.aircraft_name,
+        fr.estimated_distance_km,
+        fr.estimated_duration_minutes
       FROM flight_employee_assignments fea
-      JOIN flight_instances fi ON fea.flight_instance_id = fi.flight_instance_id
-      JOIN flight_routes fr ON fi.flight_route_id = fr.flight_route_id
-      JOIN airports da ON fr.departure_airport_id = da.airport_id
-      JOIN airports aa ON fr.arrival_airport_id = aa.airport_id
+      JOIN flight_instances fi 
+        ON fea.flight_instance_id = fi.flight_instance_id
+      JOIN aircrafts ac
+        on fi.aircraft_id = ac.aircraft_id
+      JOIN flight_routes fr 
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airports da 
+        ON fr.departure_airport_id = da.airport_id
+      JOIN airports aa 
+        ON fr.arrival_airport_id = aa.airport_id
       JOIN flight_employee_assignment_types feat
-  ON fea.assignment_type_id = feat.assignment_type_id
+        ON fea.assignment_type_id = feat.assignment_type_id
       WHERE fea.employee_id = ?
         AND feat.type_name = 'Cabin Crew'
       ORDER BY fi.scheduled_departure_datetime
