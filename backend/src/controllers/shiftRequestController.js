@@ -56,15 +56,12 @@ export const updateRequestStatus = async (req, res) => {
   const { status } = req.body
 
   try {
-    const sql = `
+    await db.execute(`
       UPDATE shift_requests
       SET status = ?, reviewed_datetime = NOW()
       WHERE shift_request_id = ?
-    `
+    `, [status, id])
 
-    await db.execute(sql, [status, id])
-
-    // HANDLE DROP ONLY (simple logic)
     if (status === 'Approved') {
       const [reqData] = await db.execute(
         `SELECT * FROM shift_requests WHERE shift_request_id = ?`,
@@ -78,6 +75,14 @@ export const updateRequestStatus = async (req, res) => {
           `DELETE FROM flight_employee_assignments WHERE assignment_id = ?`,
           [request.assignment_id]
         )
+      }
+
+      if (request.request_type === 'swap' && request.assignment_id && request.requested_flight_instance_id) {
+        await db.execute(`
+          UPDATE flight_employee_assignments
+          SET flight_instance_id = ?
+          WHERE assignment_id = ?
+        `, [request.requested_flight_instance_id, request.assignment_id])
       }
     }
 
