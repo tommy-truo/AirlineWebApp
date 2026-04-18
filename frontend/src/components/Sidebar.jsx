@@ -1,115 +1,142 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import "../styles/styles.css";
+import { Link, useLocation } from "react-router-dom";
+import "../components/styles.css";
 
-function Sidebar() {
+function Sidebar({ onLogout }) {
+  const location = useLocation();
+
+  function isActive(path) {
+    return location.pathname === path ? "active" : "";
+  }
+
   return (
-    <div className="sidebar">
-      <div className="p-3">
-        <h5 className="mb-4">Menu</h5>
+    <div className="sidebar d-flex flex-column justify-content-between">
+      <div>
+        <div className="p-3">
+          <h5 className="mb-4 sidebar-title">Manager Panel</h5>
 
-        <ul className="nav flex-column">
-          {/* Home */}
-          <li className="nav-item">
-            <Link className="nav-link sidebar-link" to="/">
-              Home
-            </Link>
-          </li>
+          <ul className="nav flex-column">
+            <li className="nav-item">
+              <Link className={`nav-link sidebar-link ${isActive("/")}`} to="/">
+                Overview
+              </Link>
+            </li>
 
-          {/* Shift Assignment */}
-          <li className="nav-item">
-            <Link className="nav-link sidebar-link" to="/shift-calendar">
-              Shift Assignment
-            </Link>
-          </li>
+            <li className="nav-item mt-2">
+              <button
+                className="nav-link btn btn-toggle"
+                data-bs-toggle="collapse"
+                data-bs-target="#employees-menu"
+                type="button"
+              >
+                Employees
+              </button>
 
-          {/* Employees */}
-          <li className="nav-item">
-            <button
-              className="nav-link btn btn-toggle align-items-center"
-              data-bs-toggle="collapse"
-              data-bs-target="#employees-menu"
-              type="button"
-            >
-              Employees
-            </button>
+              <div className="collapse show" id="employees-menu">
+                <ul className="list-unstyled ms-3">
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/employee-directory")}`} to="/employee-directory">
+                      Directory
+                    </Link>
+                  </li>
 
-            <div className="collapse" id="employees-menu">
-              <ul className="btn-toggle-nav list-unstyled fw-normal ms-3">
-                <li>
-                  <Link className="nav-link" to="/employee-directory">
-                    Employee Directory
-                  </Link>
-                </li>
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/employee-register")}`} to="/employee-register">
+                      Register Employee
+                    </Link>
+                  </li>
 
-                <li>
-                  <Link className="nav-link" to="/employee-register">
-                    Register New Employee
-                  </Link>
-                </li>
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/shift-requests")}`} to="/shift-requests">
+                      Requests
+                    </Link>
+                  </li>
 
-                <li>
-                  <Link className="nav-link" to="/shift-requests">
-                    Employee Shift Requests
-                  </Link>
-                </li>
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/assignments")}`} to="/assignments">
+                      Assignments
+                    </Link>
+                  </li>
 
-                <li>
-                  <Link className="nav-link" to="/payroll-reports">
-                    Payroll Reports
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </li>
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/payroll-reports")}`} to="/payroll-reports">
+                      Payroll Reports
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </li>
 
-          {/* Flights */}
-          <li className="nav-item mt-2">
-            <button
-              className="nav-link btn btn-toggle"
-              data-bs-toggle="collapse"
-              data-bs-target="#flights-menu"
-              type="button"
-            >
-              Flights
-            </button>
+            <li className="nav-item mt-2">
+              <button
+                className="nav-link btn btn-toggle"
+                data-bs-toggle="collapse"
+                data-bs-target="#flights-menu"
+                type="button"
+              >
+                Flights
+              </button>
 
-            <div className="collapse" id="flights-menu">
-              <ul className="list-unstyled ms-3">
-                <li>
-                  <Link className="nav-link" to="/flights">
-                    Flight Management
-                  </Link>
-                </li>
+              <div className="collapse show" id="flights-menu">
+                <ul className="list-unstyled ms-3">
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/flights")}`} to="/flights">
+                      Directory
+                    </Link>
+                  </li>
 
-                <li>
-                  <Link className="nav-link" to="/create-flight">
-                    Create Flight
-                  </Link>
-                </li>
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/create-flight")}`} to="/create-flight">
+                      Create Flight
+                    </Link>
+                  </li>
 
-                <li>
-                  <Link className="nav-link" to="/reports">
-                    Flight Reports
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </li>
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/flight-reports")}`} to="/flight-reports">
+                      Reports
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </li>
 
-          {/* Transactions */}
-          <li className="nav-item mt-2">
-            <Link className="nav-link" to="/transaction-history">
-              Transaction History
-            </Link>
-          </li>
+            <li className="nav-item mt-2">
+              <button
+                className="nav-link btn btn-toggle"
+                data-bs-toggle="collapse"
+                data-bs-target="#transactions-menu"
+                type="button"
+              >
+                Transactions
+              </button>
 
-          <li className="nav-item mt-2">
-            <Link className="nav-link" to="/transaction-reports">
-              Transaction Reports
-            </Link>
-          </li>
-        </ul>
+              <div className="collapse show" id="transactions-menu">
+                <ul className="list-unstyled ms-3">
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/transaction-history")}`} to="/transaction-history">
+                      History
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/transaction-reports")}`} to="/transaction-reports">
+                      Reports
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="p-3 border-top sidebar-footer">
+        <button
+          className="btn btn-danger w-100 logout-button"
+          onClick={onLogout}
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
