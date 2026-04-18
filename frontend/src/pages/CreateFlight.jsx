@@ -1,224 +1,320 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
 import '../components/styles.css';
 
-function CreateFlight() {
-    const [form, setForm] = useState({
-        flight_route_id: '',
-        aircraft_id: '',
-        departure_gate_id: '',
-        arrival_gate_id: '',
-        status_id: '',
-        status_reason_id: '',
-        scheduled_departure_datetime: '',
-        scheduled_arrival_datetime: ''
-    });
+function TransactionReports() {
 
-    const [dropdowns, setDropdowns] = useState({
-        routes: [],
-        aircrafts: [],
-        gates: [],
-        statuses: [],
-        reasons: []
-    });
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    transactionTypeId: '',
+    paymentMethodId: ''
+  });
 
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+  const [dropdowns, setDropdowns] = useState({
+    transactionTypes: [],
+    paymentMethods: []
+  });
 
-    useEffect(() => {
-        axios.get('http://localhost:3000/api/flights/dropdowns')
-            .then((res) => {
-                setDropdowns(res.data);
-            })
-            .catch((err) => {
-                console.error(err);
-                setError('Error loading dropdown options.');
-            });
-    }, []);
+  const [reportData, setReportData] = useState({
+    reportMeta: null,
+    formattedReport: [],
+    rawData: []
+  });
 
-    const handleChange = (e) => {
-        const { id, value } = e.target;
-        setForm({ ...form, [id]: value });
-    };
+  const [hasGenerated, setHasGenerated] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  useEffect(() => {
+    fetchDropdowns();
+  }, []);
 
-        try {
-            await axios.post('http://localhost:3000/api/flights/create', form);
-            setMessage('Flight created successfully.');
-            setError('');
+  async function fetchDropdowns() {
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-            setForm({
-                flight_route_id: '',
-                aircraft_id: '',
-                departure_gate_id: '',
-                arrival_gate_id: '',
-                status_id: '',
-                status_reason_id: '',
-                scheduled_departure_datetime: '',
-                scheduled_arrival_datetime: ''
-            });
-        } catch (err) {
-            console.error(err);
-            setError('Error creating flight.');
-            setMessage('');
-        }
-    };
+      const res = await fetch(`${API_BASE_URL}/api/transactions/dropdowns`);
 
-    return (
-        <div className="container-fluid form-wrapper">
-            <div className="card signup-container shadow-sm border-danger">
-                <div className="card-body">
+      if (!res.ok) {
+        throw new Error("Failed to load report filter options.");
+      }
 
-                    <h2 className="form-title mb-3">Create New Flight</h2>
-                    <p className="text-muted">
-                        Enter the scheduled flight details below.
-                    </p>
+      const data = await res.json();
 
-                    {message && (
-                        <div className="alert alert-success">
-                            {message}
-                        </div>
-                    )}
+      setDropdowns({
+        transactionTypes: data.transactionTypes || [],
+        paymentMethods: data.paymentMethods || []
+      });
+    } catch (err) {
+      console.log(err);
+      setError("Error loading report filter options.");
+      setMessage('');
+    }
+  }
 
-                    {error && (
-                        <div className="alert alert-danger">
-                            {error}
-                        </div>
-                    )}
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  }
 
-                    <form onSubmit={handleSubmit}>
+  async function handleGenerateReport(e) {
+    e.preventDefault();
 
-                        <div className="form-section mb-4">
-                            <h5 className="section-title">Flight Information</h5>
+    try {
+      const params = new URLSearchParams({
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        transactionTypeId: filters.transactionTypeId,
+        paymentMethodId: filters.paymentMethodId
+      });
 
-                            <div className="row">
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Flight Route*</label>
-                                    <select
-                                        id="flight_route_id"
-                                        className="form-control"
-                                        value={form.flight_route_id}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Route</option>
-                                        {dropdowns.routes.map((route) => (
-                                            <option
-                                                key={route.flight_route_id}
-                                                value={route.flight_route_id}
-                                            >
-                                                {route.flight_number} — {route.departure_city} → {route.arrival_city}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+      const res = await fetch(`${API_BASE_URL}/api/transactions/reports?${params.toString()}`);
 
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Aircraft*</label>
-                                    <select
-                                        id="aircraft_id"
-                                        className="form-control"
-                                        value={form.aircraft_id}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Aircraft</option>
-                                        {dropdowns.aircrafts.map((aircraft) => (
-                                            <option
-                                                key={aircraft.aircraft_id}
-                                                value={aircraft.aircraft_id}
-                                            >
-                                                Aircraft {aircraft.aircraft_id}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+      if (!res.ok) {
+        throw new Error("Failed to generate transaction report.");
+      }
 
-                        <div className="form-section mb-4">
-                            <h5 className="section-title">Gate Information</h5>
+      const data = await res.json();
 
-                            <div className="row">
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Departure Gate*</label>
-                                    <select
-                                        id="departure_gate_id"
-                                        className="form-control"
-                                        value={form.departure_gate_id}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Departure Gate</option>
-                                        {dropdowns.gates.map((gate) => (
-                                            <option key={gate.gate_id} value={gate.gate_id}>
-                                                {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+      setReportData({
+        reportMeta: data.reportMeta || null,
+        formattedReport: data.formattedReport || [],
+        rawData: data.rawData || []
+      });
+      setHasGenerated(true);
+      setMessage("Report generated successfully.");
+      setError('');
+    } catch (err) {
+      console.log(err);
+      setError("Error generating transaction report.");
+      setMessage('');
+      setHasGenerated(false);
+    }
+  }
 
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Arrival Gate*</label>
-                                    <select
-                                        id="arrival_gate_id"
-                                        className="form-control"
-                                        value={form.arrival_gate_id}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Arrival Gate</option>
-                                        {dropdowns.gates.map((gate) => (
-                                            <option key={gate.gate_id} value={gate.gate_id}>
-                                                {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+  const totalRevenue = reportData.rawData.reduce(
+    (sum, row) => sum + Number(row.amount || 0),
+    0
+  );
 
-                        <div className="form-section mb-4">
-                            <h5 className="section-title">Schedule</h5>
+  const positiveRevenue = reportData.rawData
+    .filter(row => Number(row.amount) > 0)
+    .reduce((sum, row) => sum + Number(row.amount), 0);
 
-                            <div className="row">
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Scheduled Departure*</label>
-                                    <input
-                                        type="datetime-local"
-                                        id="scheduled_departure_datetime"
-                                        className="form-control"
-                                        value={form.scheduled_departure_datetime}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+  const refundedAmount = reportData.rawData
+    .filter(row => Number(row.amount) < 0)
+    .reduce((sum, row) => sum + Number(row.amount), 0);
 
-                                <div className="col-md-6 mb-3 form-field">
-                                    <label>Scheduled Arrival*</label>
-                                    <input
-                                        type="datetime-local"
-                                        id="scheduled_arrival_datetime"
-                                        className="form-control"
-                                        value={form.scheduled_arrival_datetime}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </div>
+  return (
+    <div className="container-fluid form-wrapper">
 
-                        <button type="submit" className="login-button">
-                            Create Flight
-                        </button>
+      <div className="card signup-container directory-card shadow-sm border-danger">
+        <div className="card-body">
 
-                    </form>
-                </div>
+          <h2 className="form-title mb-3">Transaction Reports</h2>
+
+          {message && (
+            <div className="alert alert-success">
+              {message}
             </div>
+          )}
+
+          {error && (
+            <div className="alert alert-danger">
+              {error}
+            </div>
+          )}
+
+          <div className="form-section mb-4">
+            <h5 className="form-title text-center mb-3">Report Request</h5>
+
+            <form onSubmit={handleGenerateReport}>
+              <div className="row">
+                <div className="col-md-3 mb-3 form-field">
+                  <label>Start Date</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    className="form-control"
+                    value={filters.startDate}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="col-md-3 mb-3 form-field">
+                  <label>End Date</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    className="form-control"
+                    value={filters.endDate}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="col-md-3 mb-3 form-field">
+                  <label>Transaction Type</label>
+                  <select
+                    name="transactionTypeId"
+                    className="form-control"
+                    value={filters.transactionTypeId}
+                    onChange={handleChange}
+                  >
+                    <option value="">All Transaction Types</option>
+                    {dropdowns.transactionTypes.map((type) => (
+                      <option
+                        key={type.transaction_type_id}
+                        value={type.transaction_type_id}
+                      >
+                        {type.type_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-md-3 mb-3 form-field">
+                  <label>Payment Method</label>
+                  <select
+                    name="paymentMethodId"
+                    className="form-control"
+                    value={filters.paymentMethodId}
+                    onChange={handleChange}
+                  >
+                    <option value="">All Payment Methods</option>
+                    {dropdowns.paymentMethods.map((method) => (
+                      <option
+                        key={method.transaction_payment_method_id}
+                        value={method.transaction_payment_method_id}
+                      >
+                        {method.payment_method_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" className="login-button mt-2">
+                Generate Report
+              </button>
+            </form>
+          </div>
+
+          {hasGenerated && (
+            <>
+              <hr />
+
+              <div className="form-section my-4">
+                <h5 className="form-title text-center mb-3">Report Output</h5>
+
+                {reportData.reportMeta && (
+                  <div className="mb-3">
+                    <p><strong>Report:</strong> {reportData.reportMeta.reportName}</p>
+                    <p><strong>Date Range:</strong> {reportData.reportMeta.startDate || 'Any'} to {reportData.reportMeta.endDate || 'Any'}</p>
+                    <p><strong>Transaction Type:</strong> {reportData.reportMeta.transactionType || 'All'}</p>
+                    <p><strong>Payment Method:</strong> {reportData.reportMeta.paymentMethod || 'All'}</p>
+                  </div>
+                )}
+
+                <div style={{ overflowX: "auto" }}>
+                  <table className="table table-bordered">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Total Revenue</th>
+                        <th>Total Sales</th>
+                        <th>Total Refunded</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td>${totalRevenue.toFixed(2)}</td>
+                        <td>${positiveRevenue.toFixed(2)}</td>
+                        <td>${refundedAmount.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table className="table table-bordered mt-3">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Transaction Type</th>
+                        <th>Transaction Count</th>
+                        <th>Total Amount</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {reportData.formattedReport.length > 0 ? (
+                        reportData.formattedReport.map((row, index) => (
+                          <tr key={index}>
+                            <td>{row.transaction_type}</td>
+                            <td>{row.transaction_count}</td>
+                            <td>${Number(row.total_amount || 0).toFixed(2)}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="3" className="text-center">
+                            No report output found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <hr />
+
+              <div className="form-section mt-4">
+                <h5 className="form-title text-center mb-3">Raw Data Used</h5>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table className="table table-bordered">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Transaction ID</th>
+                        <th>Booking ID</th>
+                        <th>Amount</th>
+                        <th>Date / Time</th>
+                        <th>Transaction Type</th>
+                        <th>Payment Method</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {reportData.rawData.length > 0 ? (
+                        reportData.rawData.map((row) => (
+                          <tr key={row.transaction_id}>
+                            <td>{row.transaction_id}</td>
+                            <td>{row.booking_id}</td>
+                            <td>${Number(row.amount || 0).toFixed(2)}</td>
+                            <td>{row.transaction_datetime}</td>
+                            <td>{row.transaction_type}</td>
+                            <td>{row.payment_method}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="text-center">
+                            No raw data found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
         </div>
-    );
+      </div>
+
+    </div>
+  );
 }
 
-export default CreateFlight;
+export default TransactionReports;
