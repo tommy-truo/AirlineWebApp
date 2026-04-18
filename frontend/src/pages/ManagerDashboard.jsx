@@ -7,9 +7,9 @@ import EmployeeRegisterForm from "./EmployeeRegisterForm.jsx";
 // import ManagerEmployeeRequests from "./ManagerEmployeeRequests.jsx";
 import FlightManagement from "./FlightManagement.jsx";
 import CreateFlight from "./CreateFlight.jsx";
-// import ManagerPayroll from "./ManagerPayroll.jsx";
-// import ManagerTransactions from "./ManagerTransactions.jsx";
-// import ManagerTransactionReports from "./ManagerTransactionReports.jsx";
+import PayrollReports from "./PayrollReports.jsx";
+import TransactionHistory from "./TransactionHistory.jsx";
+import TransactionReports from "./TransactionReports.jsx";
 // import FlightReports from "./FlightReports.jsx";
 
 function ManagerDashboard({ employeeId, onLogout }) {
@@ -21,9 +21,9 @@ function ManagerDashboard({ employeeId, onLogout }) {
         <Route path="/employee-register" element={<EmployeeRegisterForm employeeId={employeeId} />} />
         <Route path="/flights" element={<FlightManagement employeeId={employeeId} />} />
         <Route path="/create-flight" element={<CreateFlight employeeId={employeeId} />} />
-        {/* <Route path="/employee-requests" element={<ManagerEmployeeRequests employeeId={employeeId} />} />
-        <Route path="/payroll" element={<ManagerPayroll employeeId={employeeId} />} />
-        <Route path="/transactions" element={<ManagerTransactions employeeId={employeeId} />} /> */}
+        <Route path="/payroll-reports" element={<PayrollReports employeeId={employeeId} />} />
+        <Route path="/transaction-history" element={<TransactionHistory />} />
+        <Route path="/transaction-reports" element={<TransactionReports />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ManagerLayout>
