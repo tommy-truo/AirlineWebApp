@@ -1,0 +1,207 @@
+.login-page{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #fdf2f2;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.light-red-page{
+    background-color: transparent;
+    height: auto;
+  }
+
+.navbar-light-red{
+    background-color: #dd0e0e;
+}
+
+
+.form-wrapper{
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding: 40px 30px;
+}
+
+.directory-card{
+    max-width: 1500px;
+}
+
+.signup-container{
+    margin: auto;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 95%;
+    max-width: 1400px;
+    margin-top: 40px;
+}
+
+.signup-container h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.form-section {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.brand-text{                                                /*Acme airlines text formatting*/
+    color: white !important;
+    font-weight: bolder !important;
+    font-size:x-large;
+}
+
+.navbar-logo{
+
+    height: 50px;
+    width: auto;
+}
+
+.form-field{
+    margin-bottom: 20px;
+}
+
+.form-field label{
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.form-field input{
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.form-field input:focus{
+    outline: none;
+    border-color: #d32f2f;
+}
+
+.loyalty-field{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 8px, 12px;
+    background-color: #fff8f8;
+    border-radius: 6px;
+    border: 1px solid #f2e0e0;
+    cursor: pointer;
+}
+
+.loyalty-field input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #d32f2f;
+}
+
+.loyalty-field label{
+    margin-bottom: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    display: inline;
+}
+
+.loyalty-field:hover {
+    border-color: #d32f2f;
+    background-color: #fdf2f2;
+}
+
+.login-button{
+    width: 100%;
+    padding: 14px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-bottom: 20px;
+}
+
+.login-button:hover{
+    background-color: #b71c1c;
+}
+
+.Sign-Up .signup-link{
+    color: #d32f2f;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* SIDEBAR BASE */
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background-color: #fff8f8; /* matches your light red theme */
+    border-right: 1px solid #f2dede;
+    padding: 20px 10px;
+}
+
+/* Sidebar title */
+.sidebar h5 {
+    color: #b71c1c;
+    font-weight: 600;
+}
+
+/* Links */
+.sidebar-link {
+    color: #444 !important;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.sidebar-link:hover {
+    background-color: #fdf2f2;
+    color: #d32f2f !important;
+}
+
+/* Active / selected feel (you can enhance later) */
+.sidebar-link.active {
+    background-color: #d32f2f;
+    color: white !important;
+}
+
+/* Collapse items indent */
+.btn-toggle-nav .nav-link {
+    padding-left: 10px;
+}
+
+/* Remove ugly button look */
+.btn-toggle {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
