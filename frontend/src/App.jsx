@@ -83,7 +83,6 @@ const App = () => {
   };
 
   return (
-    // added by aya
     <BrowserRouter>
       <div className="app-container">
         {/* 1. Login View */}
