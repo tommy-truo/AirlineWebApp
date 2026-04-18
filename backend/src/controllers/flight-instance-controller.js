@@ -227,26 +227,15 @@ export const updateFlight = async (req, res) => {
     try {
         const numericStatusId = Number(status_id);
 
-        // Current statuses from your table:
-        // 1 = On Schedule
-        // 2 = Boarding
-        // 3 = Delayed
-        // 4 = Cancelled
-        // 5 = Departed
-        // 6 = En Route
-        // 7 = Arrived   <-- after you add it, verify this ID
-
         let finalReasonId = status_reason_id || 6;
         let actualDepartureSql = `actual_departure_datetime`;
         let actualArrivalSql = `actual_arrival_datetime`;
 
         if (numericStatusId === 3 || numericStatusId === 4) {
-            // delayed or cancelled should require a chosen reason
             finalReasonId = status_reason_id;
         }
 
         if (numericStatusId === 5 || numericStatusId === 6) {
-            // departed or en route: stamp actual departure once
             actualDepartureSql = `CASE
                 WHEN actual_departure_datetime = scheduled_departure_datetime
                 THEN NOW()
@@ -255,10 +244,8 @@ export const updateFlight = async (req, res) => {
         }
 
         if (numericStatusId === 7) {
-            // arrived: stamp actual arrival now
             actualArrivalSql = `NOW()`;
 
-            // if somehow not stamped yet, also stamp departure
             actualDepartureSql = `CASE
                 WHEN actual_departure_datetime = scheduled_departure_datetime
                 THEN NOW()
