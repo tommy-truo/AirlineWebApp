@@ -1,4 +1,3 @@
-
 import axios from "axios"
 import { useState, useEffect } from 'react';
 import '../styles/styles.css';
@@ -80,6 +79,20 @@ function TransactionReports() {
       })
   }
 
+  // 🔥 NEW: revenue calculations
+  const totalRevenue = reportData.rawData.reduce(
+    (sum, row) => sum + Number(row.amount || 0),
+    0
+  );
+
+  const positiveRevenue = reportData.rawData
+    .filter(row => Number(row.amount) > 0)
+    .reduce((sum, row) => sum + Number(row.amount), 0);
+
+  const refundedAmount = reportData.rawData
+    .filter(row => Number(row.amount) < 0)
+    .reduce((sum, row) => sum + Number(row.amount), 0);
+
   return (
     <div className="container-fluid form-wrapper">
 
@@ -101,7 +114,7 @@ function TransactionReports() {
           )}
 
           <div className="form-section mb-4">
-<h5 className="form-title text-center mb-3">Report Request</h5>
+            <h5 className="form-title text-center mb-3">Report Request</h5>
 
             <form onSubmit={handleGenerateReport}>
               <div className="row">
@@ -179,24 +192,32 @@ function TransactionReports() {
               <hr />
 
               <div className="form-section my-4">
-<h5 className="form-title text-center mb-3">Report Output</h5>
+                <h5 className="form-title text-center mb-3">Report Output</h5>
 
                 {reportData.reportMeta && (
                   <div className="mb-3">
-                    <p className="mb-1">
-                      <strong>Report:</strong> {reportData.reportMeta.reportName}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Date Range:</strong> {reportData.reportMeta.startDate || 'Any'} to {reportData.reportMeta.endDate || 'Any'}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Transaction Type:</strong> {reportData.reportMeta.transactionType || 'All'}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Payment Method:</strong> {reportData.reportMeta.paymentMethod || 'All'}
-                    </p>
+                    <p><strong>Report:</strong> {reportData.reportMeta.reportName}</p>
+                    <p><strong>Date Range:</strong> {reportData.reportMeta.startDate || 'Any'} to {reportData.reportMeta.endDate || 'Any'}</p>
+                    <p><strong>Transaction Type:</strong> {reportData.reportMeta.transactionType || 'All'}</p>
+                    <p><strong>Payment Method:</strong> {reportData.reportMeta.paymentMethod || 'All'}</p>
                   </div>
                 )}
+
+                {/* 🔥 NEW Revenue Section */}
+                <div className="row text-center mb-3">
+                  <div className="col-md-4">
+                    <p className="fw-bold mb-1">Total Revenue</p>
+                    <p>${totalRevenue.toFixed(2)}</p>
+                  </div>
+                  <div className="col-md-4">
+                    <p className="fw-bold mb-1">Total Sales</p>
+                    <p>${positiveRevenue.toFixed(2)}</p>
+                  </div>
+                  <div className="col-md-4">
+                    <p className="fw-bold mb-1">Total Refunded</p>
+                    <p>${refundedAmount.toFixed(2)}</p>
+                  </div>
+                </div>
 
                 <div style={{ overflowX: "auto" }}>
                   <table className="table table-bordered">
@@ -220,7 +241,7 @@ function TransactionReports() {
                       ) : (
                         <tr>
                           <td colSpan="3" className="text-center">
-                            No report output found for the selected filters.
+                            No report output found.
                           </td>
                         </tr>
                       )}
@@ -232,7 +253,8 @@ function TransactionReports() {
               <hr />
 
               <div className="form-section mt-4">
-<h5 className="form-title text-center mb-3">Raw Data Used</h5>
+                <h5 className="form-title text-center mb-3">Raw Data Used</h5>
+
                 <div style={{ overflowX: "auto" }}>
                   <table className="table table-bordered">
                     <thead className="table-light">
@@ -261,7 +283,7 @@ function TransactionReports() {
                       ) : (
                         <tr>
                           <td colSpan="6" className="text-center">
-                            No raw data found for the selected filters.
+                            No raw data found.
                           </td>
                         </tr>
                       )}
