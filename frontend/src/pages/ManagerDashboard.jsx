@@ -4,7 +4,7 @@ import ManagerLayout from "../components/ManagerLayout";
 
 import EmployeeManagement from "./EmployeeManagement.jsx";
 import EmployeeRegisterForm from "./EmployeeRegisterForm.jsx";
-// import ManagerEmployeeRequests from "./ManagerEmployeeRequests.jsx";
+import EmployeeShiftRequests from "./EmployeeShiftRequests.jsx";
 import FlightManagement from "./FlightManagement.jsx";
 import CreateFlight from "./CreateFlight.jsx";
 import PayrollReports from "./PayrollReports.jsx";
@@ -19,6 +19,7 @@ function ManagerDashboard({ employeeId, onLogout }) {
         <Route path="/" element={<EmployeeManagement employeeId={employeeId} />} />
         <Route path="/employee-directory" element={<EmployeeManagement employeeId={employeeId} />} />
         <Route path="/employee-register" element={<EmployeeRegisterForm employeeId={employeeId} />} />
+        <Route path="/shift-requests" element={<EmployeeShiftRequests employeeId={employeeId} />} />
         <Route path="/flights" element={<FlightManagement employeeId={employeeId} />} />
         <Route path="/create-flight" element={<CreateFlight employeeId={employeeId} />} />
         <Route path="/payroll-reports" element={<PayrollReports employeeId={employeeId} />} />
