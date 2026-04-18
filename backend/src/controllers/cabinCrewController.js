@@ -164,7 +164,48 @@ export const getCabinCrewScheduledFlights = async (req, res, next) => {
 };
 
 export const getCabinCrewProfile = async (req, res) => {
-  res.json({ message: 'Cabin crew profile not implemented yet' });
+  const employeeId = req.query.employee_id;
+
+  if (!employeeId) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    SELECT
+      e.employee_id,
+      e.first_name,
+      e.middle_initial,
+      e.last_name,
+      e.date_of_birth,
+      e.salary,
+      e.start_date,
+      e.emergency_contact_name,
+      e.emergency_contact_phone,
+      e.emergency_contact_relationship,
+      a.email,
+      d.department_name,
+      jt.title_name
+    FROM airline.employees e
+    JOIN airline.accounts a
+      ON e.account_id = a.account_id
+    JOIN airline.departments d
+      ON e.department_id = d.department_id
+    JOIN airline.job_titles jt
+      ON e.job_title_id = jt.job_title_id
+    WHERE e.employee_id = ?
+  `;
+
+
+  try {
+    const [results] = await db.query(sql, [employeeId]);
+    if (results.length === 0) {
+      return res.status(404).json({ errror: 'Employee not found' });
+    }
+    res.json(results[0]);
+  }
+  catch (err) {
+    return next(err);
+  }
 };
 
 export const updateCabinCrewEmergencyContact = async (req, res) => {
