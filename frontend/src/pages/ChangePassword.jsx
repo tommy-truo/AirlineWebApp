@@ -17,7 +17,9 @@ function ChangePassword({ accountId, onSuccess }) {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/api/auth/change-password', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
