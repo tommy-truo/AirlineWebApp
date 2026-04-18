@@ -172,5 +172,52 @@ export const updateCabinCrewEmergencyContact = async (req, res) => {
 };
 
 export const getCabinCrewManifest = async (req, res) => {
-  res.json({ message: 'Manifest not implemented yet' });
+  const { employee_id, flight_id } = req.query;
+
+  if (!employee_id || !flight_id) {
+    return res.status(400).json({
+      error: 'employee_id and flight_id are required'
+    });
+  }
+
+  const verifySql = `
+    SELECT 1
+    FROM airline.flight_employee_assignments
+    WHERE employee_id = ?
+      AND flight_instance_id = ?
+    LIMIT 1
+  `;
+
+  const crewSql = `
+    SELECT
+      e.employee_id,
+      e.first_name,
+      e.last_name,
+      feat.type_name AS assignment_role,
+      d.department_name
+    FROM airline.flight_employee_assignments fea
+    JOIN airline.employees e
+      ON fea.employee_id = e.employee_id
+    JOIN airline.flight_employee_assignment_types feat
+      ON fea.assignment_type_id = feat.assignment_type_id
+    LEFT JOIN airline.departments d
+      ON e.department_id = d.department_id
+    WHERE fea.flight_instance_id = ?
+    ORDER BY feat.type_name, e.last_name, e.first_name
+  `;
+
+  try {
+    const [allowed] = await db.query(verifySql, [employee_id, flight_id]);
+
+    if (allowed.length === 0) {
+      return res.status(403).json({
+        error: 'You are not assigned to this flight'
+      });
+    }
+
+    const [results] = await db.query(crewSql, [flight_id]);
+    res.json(results);
+  } catch (err) {
+    return next(err);
+  }
 };
