@@ -82,7 +82,7 @@ function PersonalInfo({ employeeId = 1 }) {
             </h2>
 
             <h1 className="title" style={{ marginBottom: '4px' }}>
-                Personal Info / HR
+                Personal Info 
             </h1>
 
             <p
