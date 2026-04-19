@@ -381,25 +381,25 @@ export const getCabinCrewFlightReports = async (req, res, next) => {
     }
 
     let sql = `
-      SELECT
-        rep.report_id,
-        rep.flight_instance_id,
-        rep.employee_id,
-        rep.aircraft_id,
-        ac.aircraft_name,
-        rep.hours_flown,
-        rep.distance_flown_km,
-        rep.final_status,
-        rep.incident_type,
-        rep.cabin_class_affected,
-        rep.passengers_involved,
-        rep.follow_up_required,
-        rep.irregular_reason,
-        rep.notes,
-        rep.submitted_at,
-        fr.flight_number,
-        fi.scheduled_departure_datetime,
-        fi.scheduled_arrival_datetime
+     SELECT
+  rep.report_id,
+  rep.flight_instance_id,
+  rep.employee_id,
+  rep.aircraft_id,
+  ac.aircraft_name,
+  rep.hours_flown,
+  rep.distance_flown_km,
+  rep.final_status,
+  rep.incident_type,
+  rep.cabin_class_affected,
+  rep.passengers_involved,
+  rep.follow_up_required,
+  rep.irregular_reason,
+  rep.notes,
+  rep.submitted_at,
+  fr.flight_number,
+  fi.scheduled_departure_datetime,
+  fi.scheduled_arrival_datetime
       FROM airline.flight_reports rep
       JOIN airline.flight_instances fi
         ON rep.flight_instance_id = fi.flight_instance_id
@@ -456,33 +456,33 @@ export const getCabinCrewPendingFlightReports = async (req, res, next) => {
     const [rows] = await db.query(
       `
       
-  SELECT
-  rep.report_id,
-  rep.flight_instance_id,
-  rep.employee_id,
-  rep.aircraft_id,
-  rep.hours_flown,
-  rep.distance_flown_km,
-  rep.final_status,
-  rep.incident_type,
-  rep.cabin_class_affected,
-  rep.passengers_involved,
-  rep.follow_up_required,
-  rep.irregular_reason,
-  rep.notes,
-  rep.submitted_at,
-  fr.flight_number,
-  fi.scheduled_departure_datetime,
-  fi.scheduled_arrival_datetime,
-  ac.aircraft_name
-FROM airline.flight_reports rep
-JOIN airline.flight_instances fi
-  ON rep.flight_instance_id = fi.flight_instance_id
-JOIN airline.flight_routes fr
-  ON fi.flight_route_id = fr.flight_route_id
-JOIN airline.aircrafts ac
-  ON rep.aircraft_id = ac.aircraft_id
-WHERE rep.employee_id = ?
+ SELECT
+        fi.flight_instance_id,
+        fr.flight_number,
+        da.city AS departure_city,
+        aa.city AS arrival_city,
+        fi.scheduled_departure_datetime,
+        fi.scheduled_arrival_datetime,
+        fi.aircraft_id,
+        ac.aircraft_name
+      FROM airline.flight_employee_assignments fea
+      JOIN airline.flight_instances fi
+        ON fea.flight_instance_id = fi.flight_instance_id
+      JOIN airline.flight_routes fr
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airline.airports da
+        ON fr.departure_airport_id = da.airport_id
+      JOIN airline.airports aa
+        ON fr.arrival_airport_id = aa.airport_id
+      JOIN airline.aircrafts ac
+        ON fi.aircraft_id = ac.aircraft_id
+      LEFT JOIN airline.flight_reports rep
+        ON rep.flight_instance_id = fi.flight_instance_id
+       AND rep.employee_id = fea.employee_id
+      WHERE fea.employee_id = ?
+        AND fi.scheduled_arrival_datetime < NOW()
+        AND rep.report_id IS NULL
+      ORDER BY fi.scheduled_departure_datetime DESC
       `,
       [employee_id]
     );
