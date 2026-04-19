@@ -2,6 +2,7 @@ import { useState } from 'react';
 import CabinCrewShiftCalendar from '../pages/cabinCrewShiftCalendar.jsx';
 import CabinCrewScheduledFlights from '../pages/cabinCrewScheduledFlights.jsx';
 import CabinCrewPersonalInfo from '../pages/cabinCrewPersonalInfo.jsx';
+import CabinCrewFlightReports from '../pages/cabinCrewFlightReports.jsx';
 import './PilotDashboard.css';
 
 function CabinCrewDashboard({ employeeId, onLogout }) {
@@ -35,6 +36,13 @@ function CabinCrewDashboard({ employeeId, onLogout }) {
             >
               Personal Info
             </button>
+
+            <button
+              className={page === 'reports' ? 'sidebar-button active' : 'sidebar-button'}
+              onClick={() => setPage('reports')}
+            >
+              Flight Reports / Logs
+            </button>
           </div>
         </div>
 
@@ -47,6 +55,7 @@ function CabinCrewDashboard({ employeeId, onLogout }) {
         {page === 'shift' && <CabinCrewShiftCalendar employeeId={employeeId} />}
         {page === 'flights' && <CabinCrewScheduledFlights employeeId={employeeId} />}
         {page === 'personal' && <CabinCrewPersonalInfo employeeId={employeeId} />}
+        {page === 'reports' && <CabinCrewFlightReports employeeId={employeeId} />}
       </main>
     </div>
   );
