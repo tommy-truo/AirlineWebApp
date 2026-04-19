@@ -28,16 +28,16 @@ app.use(express.json());
 
 app.use('/api/passengers', passengerRouter);
 app.use('/api/bookings', bookingRouter);
-app.use('/api/flights', flightRouter)
+app.use('/api/flights', flightRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/pilot', pilotRouter);
 app.use('/api/cabin_crew', cabinCrewRouter);
 app.use('/api/employees', employeeRouter);
 app.use('/api/transactions', transactionRouter);
 app.use('/api/payroll', payrollRouter);
-app.use('/api/requests', shiftRequestRouter)
-app.use('/api/assignments', assignmentRouter)
-app.use('/api/flight-reports', flightReportRouter)
+app.use('/api/requests', shiftRequestRouter);
+app.use('/api/assignments', assignmentRouter);
+app.use('/api/flight-reports', flightReportRouter);
 app.use('/api/flash-sales', flashSaleRouter);
 app.use('/api/airports', airportRouter);
 
