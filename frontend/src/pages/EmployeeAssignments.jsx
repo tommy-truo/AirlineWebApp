@@ -19,6 +19,8 @@ function EmployeeAssignments() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
   useEffect(() => {
     fetchAssignments()
     fetchDropdowns()
@@ -29,65 +31,143 @@ function EmployeeAssignments() {
     return new Date(dateString).toLocaleString()
   }
 
+  // function fetchAssignments() {
+
+  //   fetch(`${API_BASE_URL}/api/assignments`)
+  //     .then(res => res.json())
+  //     .then(data => setAssignments(data))
+  // }
+
+  // function fetchDropdowns() {
+  //   fetch(`${API_BASE_URL}/api/employees`)
+  //     .then(res => res.json())
+  //     .then(data => setEmployees(data))
+
+  //   fetch(`${API_BASE_URL}/api/flights/all`)
+  //     .then(res => res.json())
+  //     .then(data => setFlights(data))
+
+  //   fetch(`${API_BASE_URL}/api/assignments/types`)
+  //     .then(res => res.json())
+  //     .then(data => setRoles(data))
+  // }
+
   function fetchAssignments() {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  fetch(`${API_BASE_URL}/api/assignments`)
+    .then(res => res.json())
+    .then(data => setAssignments(data))
+    .catch(err => {
+      console.log(err);
+      setError('Error loading assignments.');
+    });
+}
 
-    fetch(`${API_BASE_URL}/api/assignments`)
-      .then(res => res.json())
-      .then(data => setAssignments(data))
-  }
+function fetchDropdowns() {
+  fetch(`${API_BASE_URL}/api/employees`)
+    .then(res => res.json())
+    .then(data => setEmployees(data))
+    .catch(err => {
+      console.log(err);
+      setError('Error loading employees.');
+    });
 
-  function fetchDropdowns() {
-    fetch(`${API_BASE_URL}/api/employees`)
-      .then(res => res.json())
-      .then(data => setEmployees(data))
+  fetch(`${API_BASE_URL}/api/flights/all`)
+    .then(res => res.json())
+    .then(data => setFlights(data))
+    .catch(err => {
+      console.log(err);
+      setError('Error loading flights.');
+    });
 
-    fetch(`${API_BASE_URL}/api/flights/all`)
-      .then(res => res.json())
-      .then(data => setFlights(data))
-
-    fetch(`${API_BASE_URL}/api/assignments/types`)
-      .then(res => res.json())
-      .then(data => setRoles(data))
-  }
+  fetch(`${API_BASE_URL}/api/assignments/types`)
+    .then(res => res.json())
+    .then(data => setRoles(data))
+    .catch(err => {
+      console.log(err);
+      setError('Error loading assignment types.');
+    });
+}
 
   function handleChange(e) {
     const { id, value } = e.target
     setForm(prev => ({ ...prev, [id]: value }))
   }
 
+  // function handleSubmit(e) {
+  //   e.preventDefault()
+
+  //   fetch(`${API_BASE_URL}/api/assignments`, {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify(form)
+  //   })
+  //     .then(res => res.json())
+  //     .then((data) => {
+  //       if (data.message === 'Employee is already assigned to this flight.') {
+  //         setError(data.message)
+  //         setMessage('')
+  //         return
+  //       }
+
+  //       setMessage('Assignment created successfully.')
+  //       setError('')
+  //       setForm({
+  //         employee_id: '',
+  //         flight_instance_id: '',
+  //         assignment_type_id: ''
+  //       })
+  //       fetchAssignments()
+  //     })
+  // }
+
+  // function handleDelete(id) {
+  //   fetch(`${API_BASE_URL}/api/assignments/${id}`, {
+  //     method: 'DELETE'
+  //   }).then(() => fetchAssignments())
+  // }
+
   function handleSubmit(e) {
-    e.preventDefault()
+  e.preventDefault();
 
-    fetch(`${API_BASE_URL}/api/assignments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+  fetch(`${API_BASE_URL}/api/assignments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(form)
+  })
+    .then(res => res.json())
+    .then((data) => {
+      if (data.message === 'Employee is already assigned to this flight.') {
+        setError(data.message);
+        setMessage('');
+        return;
+      }
+
+      setMessage('Assignment created successfully.');
+      setError('');
+      setForm({
+        employee_id: '',
+        flight_instance_id: '',
+        assignment_type_id: ''
+      });
+      fetchAssignments();
     })
-      .then(res => res.json())
-      .then((data) => {
-        if (data.message === 'Employee is already assigned to this flight.') {
-          setError(data.message)
-          setMessage('')
-          return
-        }
+    .catch(err => {
+      console.log(err);
+      setError('Error creating assignment.');
+      setMessage('');
+    });
+}
 
-        setMessage('Assignment created successfully.')
-        setError('')
-        setForm({
-          employee_id: '',
-          flight_instance_id: '',
-          assignment_type_id: ''
-        })
-        fetchAssignments()
-      })
-  }
-
-  function handleDelete(id) {
-    fetch(`${API_BASE_URL}/api/assignments/${id}`, {
-      method: 'DELETE'
-    }).then(() => fetchAssignments())
-  }
+function handleDelete(id) {
+  fetch(`${API_BASE_URL}/api/assignments/${id}`, {
+    method: 'DELETE'
+  })
+    .then(() => fetchAssignments())
+    .catch(err => {
+      console.log(err);
+      setError('Error removing assignment.');
+    });
+}
 
   const filteredAssignments = assignments.filter(a => {
     const matchesSearch =
