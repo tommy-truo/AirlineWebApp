@@ -7,16 +7,13 @@ import LoyaltyPortal from '../features/loyaltyProgram/LoyaltyPortal';
 const PassengerDashboard = ({ userID, onLogout }) => {
   const [activeTab, setActiveTab] = useState('search');
 
-  // Static styles that don't change
-  const sidebarStyle = {
-    width: '250px',
-    backgroundColor: '#c63b3b', // Airlines Blue
-    color: 'white',
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    boxSizing: 'border-box',
+  // Professional Red Color Palette
+  const colors = {
+    primaryRed: '#c63b3b',    // Main sidebar
+    hoverRed: '#a32f2f',      // Button hover
+    lightRed: '#fceaea',      // Active tab background
+    textLight: '#fceaea',     // Subdued text
+    white: '#ffffff'
   };
 
   const containerStyle = {
@@ -28,115 +25,108 @@ const PassengerDashboard = ({ userID, onLogout }) => {
     fontFamily: 'sans-serif',
   };
 
-  const handleSignOut = () => {
-    onLogout();
+  const sidebarStyle = {
+    width: '260px',
+    backgroundColor: colors.primaryRed,
+    color: colors.white,
+    padding: '25px 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100vh',
+    boxSizing: 'border-box',
+    boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
   };
 
-  const handleNavigate = (tab) => {
-    setActiveTab(tab);
+  // Helper for shared button styles
+  const getNavButtonStyle = (isActive) => ({
+    background: isActive ? colors.white : 'none',
+    border: 'none',
+    color: isActive ? colors.primaryRed : colors.textLight,
+    padding: '14px 18px',
+    textAlign: 'left',
+    width: '100%',
+    cursor: 'pointer',
+    fontSize: '15px',
+    borderRadius: '8px',
+    marginBottom: '10px',
+    fontWeight: isActive ? 'bold' : '500',
+    transition: 'all 0.2s ease',
+  });
+
+  const signoutButtonStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Glass effect
+    color: colors.white,
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    padding: '12px',
+    textAlign: 'center',
+    width: '100%',
+    cursor: 'pointer',
+    fontSize: '15px',
+    fontWeight: 'bold',
+    borderRadius: '8px',
+    transition: '0.3s',
   };
 
   return (
     <div style={containerStyle}>
       <nav style={sidebarStyle}>
-        <h2 style={{ marginBottom: '30px', textAlign: 'center', color: 'white' }}>
-          ACME Airlines
+        <h2 style={{ 
+          marginBottom: '40px', 
+          textAlign: 'center', 
+          letterSpacing: '1px',
+          fontSize: '22px'
+        }}>
+          ACME AIRLINES
         </h2>
         
-        <div className="nav-links" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Search Flights */}
+        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <button 
-            style={{
-              background: activeTab === 'search' ? 'white' : 'none',
-              border: 'none',
-              color: activeTab === 'search' ? '#3182ce' : '#ebf8ff',
-              padding: '12px',
-              textAlign: 'left',
-              width: '100%',
-              cursor: 'pointer',
-              fontSize: '16px',
-              borderRadius: '6px',
-              marginBottom: '8px',
-              fontWeight: activeTab === 'search' ? 'bold' : 'normal',
-            }}
+            style={getNavButtonStyle(activeTab === 'search')}
             onClick={() => setActiveTab('search')}
           >
             Search Flights
           </button>
           
-          {/* My Trips */}
           <button 
-            style={{
-              background: activeTab === 'bookings' ? 'white' : 'none',
-              border: 'none',
-              color: activeTab === 'bookings' ? '#3182ce' : '#ebf8ff',
-              padding: '12px',
-              textAlign: 'left',
-              width: '100%',
-              cursor: 'pointer',
-              fontSize: '16px',
-              borderRadius: '6px',
-              marginBottom: '8px',
-              fontWeight: activeTab === 'bookings' ? 'bold' : 'normal',
-            }}
+            style={getNavButtonStyle(activeTab === 'bookings')}
             onClick={() => setActiveTab('bookings')}
           >
             My Trips
           </button>
           
-          {/* Profile */}
           <button 
-            style={{
-              background: activeTab === 'profile' ? 'white' : 'none',
-              border: 'none',
-              color: activeTab === 'profile' ? '#3182ce' : '#ebf8ff',
-              padding: '12px',
-              textAlign: 'left',
-              width: '100%',
-              cursor: 'pointer',
-              fontSize: '16px',
-              borderRadius: '6px',
-              marginBottom: '8px',
-              fontWeight: activeTab === 'profile' ? 'bold' : 'normal',
-            }}
+            style={getNavButtonStyle(activeTab === 'profile')}
             onClick={() => setActiveTab('profile')}
           >
             Profile & Guests
           </button>
 
-          {/* Loyalty */}
           <button 
-            style={{
-              background: activeTab === 'loyalty' ? 'white' : 'none',
-              border: 'none',
-              color: activeTab === 'loyalty' ? '#3182ce' : '#ebf8ff',
-              padding: '12px',
-              textAlign: 'left',
-              width: '100%',
-              cursor: 'pointer',
-              fontSize: '16px',
-              borderRadius: '6px',
-              marginBottom: '8px',
-              fontWeight: activeTab === 'loyalty' ? 'bold' : 'normal',
-            }}
+            style={getNavButtonStyle(activeTab === 'loyalty')}
             onClick={() => setActiveTab('loyalty')}
           >
             Loyalty Program
           </button>
         </div>
 
-        <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #63b3ed' }}>
-          <button className="signout-button" onClick={handleSignOut}>
+        {/* Footer with Styled Logout */}
+        <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+          <button 
+            style={signoutButtonStyle}
+            onClick={onLogout}
+            onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.25)'}
+            onMouseOut={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
+          >
             Log Out
           </button>
         </div>
       </nav>
 
-      <main className="main-content" style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+      <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
         {activeTab === 'search' && <FlightSearch userID={userID} />}
-        {activeTab === 'bookings' && (<MyBookings userID={userID} onNavigate={handleNavigate} />)}
+        {activeTab === 'bookings' && <MyBookings userID={userID} onNavigate={setActiveTab} />}
         {activeTab === 'profile' && <Profile userID={userID} />}
-        {activeTab === 'loyalty' && <LoyaltyPortal userID={userID} onNavigate={handleNavigate} />}
+        {activeTab === 'loyalty' && <LoyaltyPortal userID={userID} onNavigate={setActiveTab} />}
       </main>
     </div>
   );
