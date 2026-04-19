@@ -254,6 +254,23 @@
 
 .confirm-checkin-btn-large:hover { background: #2f855a; }
 
+
+/* Wrong Station */
+.wrong-station-message {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.wrong-station-message p {
+    margin: 0;
+    color: #856404;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
 /* Baggage and payment */
 .baggage-action-area {
     padding: 15px 25px;

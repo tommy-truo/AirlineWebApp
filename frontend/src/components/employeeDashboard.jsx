@@ -368,13 +368,19 @@ const Dashboard = ({ onLogout }) => {
                                         {!isActuallyCheckedIn && (
                                             <>
                                                 <div className="primary-action-area">
-                                                    <button
-                                                        className="confirm-checkin-btn-large"
-                                                        disabled={isProcessing}
-                                                        onClick={() => handleConfirmCheckIn(p.ticket_id)}
-                                                    >
-                                                        Confirm Check-In
-                                                    </button>
+                                                    {p.origin_iata === selectedAirport ? (
+                                                        <button
+                                                            className="confirm-checkin-btn-large"
+                                                            disabled={isProcessing}
+                                                            onClick={() => handleConfirmCheckIn(p.ticket_id)}
+                                                        >
+                                                            Confirm Check-In
+                                                        </button>
+                                                    ) : (
+                                                        <div className="wrong-station-message">
+                                                            <p> This passenger must check in at {p.origin_iata} station</p>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="baggage-action-area">
