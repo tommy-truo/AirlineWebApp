@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import '../components/styles.css';
+import "../components/ManagerStyles.css";
 
 function EmployeeManagement() {
   const [data, setData] = useState([]);
