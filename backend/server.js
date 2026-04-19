@@ -14,6 +14,8 @@ import payrollRouter from './src/routes/payrollRouter.js';
 import shiftRequestRouter from './src/routes/shiftRequestRouter.js'
 import assignmentRouter from './src/routes/assignmentRouter.js'
 import flightReportRouter from './src/routes/flightReportRouter.js'
+import flashSaleRouter from './src/routes/flashSaleRouter.js';
+import airportRouter from './src/routes/airportRouter.js';
 
 const app = express();
 const PORT = process.env.PORT;
@@ -36,6 +38,8 @@ app.use('/api/payroll', payrollRouter);
 app.use('/api/requests', shiftRequestRouter)
 app.use('/api/assignments', assignmentRouter)
 app.use('/api/flight-reports', flightReportRouter)
+app.use('/api/flash-sales', flashSaleRouter);
+app.use('/api/airports', airportRouter);
 
 app.use((err, req, res, next) => {
     console.error("SERVER ERROR:", err);
