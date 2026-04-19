@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './Passenger.css';
 import FlightSearch from '../features/search/FlightSearch';
 import Profile from '../features/profile/Profile';
 import MyBookings from '../features/bookings/MyBookings';
@@ -11,7 +10,7 @@ const PassengerDashboard = ({ userID, onLogout }) => {
   // Static styles that don't change
   const sidebarStyle = {
     width: '250px',
-    backgroundColor: '#3182ce', // Airlines Blue
+    backgroundColor: '#c63b3b', // Airlines Blue
     color: 'white',
     padding: '20px',
     display: 'flex',
