@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js'; 
 import { db } from './config/db.js'; // Import the database instance
-
+import employeeRoutes from './routes/empDashRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -13,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/employee', employeeRoutes);
 
 async function startServer() {
   try {

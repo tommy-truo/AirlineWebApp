@@ -8,6 +8,7 @@ import PilotDashboard from './components/PilotDashboard.jsx'; //dex
 import CabinCrewDashboard from './components/cabinCrewDashboard.jsx';
 import ManagerDashboard from './pages/ManagerDashboard.jsx';
 import ManagerChangePassword from './pages/ManagerChangePassword.jsx';
+import EmployeeDashboard from './components/employeeDashboard.jsx';
 
 const App = () => {
   // Initialize view from localStorage so the user stays logged in on refresh
@@ -70,6 +71,11 @@ const App = () => {
       localStorage.setItem('activeView', 'cabinCrewDashboard');
       setView('cabinCrewDashboard');
     }
+    else if (userData.user.role ==='checkIn'){
+      storedId = userData.user.employee_id ?? userData.user.id;
+      localStorage.setItem('activeView', 'employeeDashboard');
+      setView('employeeDashboard');
+    }
 
     localStorage.setItem('userID', storedId);
     setCurrentUserId(storedId);
@@ -80,9 +86,8 @@ const App = () => {
     setCurrentUserId(null);
     localStorage.removeItem('activeView');
     localStorage.removeItem('userID');
-
-    // added by aya
     localStorage.removeItem('userRole');
+    sessionStorage.clear();
   };
 
   return (
@@ -149,6 +154,11 @@ const App = () => {
             }}
           />
         )}
+
+        {/* 5. Check-in employee view */}
+      {view === 'employeeDashboard' && (
+        <EmployeeDashboard employeeId={currentUserId} onLogout={handleLogout} />
+      )}
       </div>
     </BrowserRouter>
   );

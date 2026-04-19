@@ -17,6 +17,8 @@ import flightReportRouter from './src/routes/flightReportRouter.js'
 import flashSaleRouter from './src/routes/flashSaleRouter.js';
 import airportRouter from './src/routes/airportRouter.js';
 import startExpireJob from './src/jobs/bookingExpireCronJob.js';
+import employeeRoutes from './src/routes/empDashRoutes.js';
+
 const app = express();
 const PORT = process.env.PORT;
 
@@ -40,6 +42,7 @@ app.use('/api/assignments', assignmentRouter);
 app.use('/api/flight-reports', flightReportRouter);
 app.use('/api/flash-sales', flashSaleRouter);
 app.use('/api/airports', airportRouter);
+app.use('/api/employee', employeeRoutes);
 
 app.use((err, req, res, next) => {
     console.error("SERVER ERROR:", err);
