@@ -41,7 +41,7 @@ const App = () => {
       setView('shiftCalendar');
     }
     else if (userData.user.role ==='checkIn'){
-      storedId = userData.user.employee_id ?? useData.user.id;
+      storedId = userData.user.employee_id ?? userData.user.id;
       localStorage.setItem('activeView', 'employeeDashboard');
       setView('employeeDashboard');
     }
@@ -55,6 +55,7 @@ const App = () => {
     setCurrentUserId(null);
     localStorage.removeItem('activeView');
     localStorage.removeItem('userID');
+    sessionStorage.clear();
   };
 
   // SPECIFY YOUR COMPONENTS AND THEIR VIEW NAME BELOW, FOLLOWING THE EXAMPLE OF LOGIN, SIGNUP, PASSENGER DASHBOARD
