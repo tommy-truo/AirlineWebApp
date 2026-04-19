@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 function PersonalInfo({ employeeId = 1 }) {
     const [info, setInfo] = useState(null);
     const [formData, setFormData] = useState({
+        first_name: '',
+        middle_initial: '',
+        last_name: '',
+        email: '',
         emergency_contact_name: '',
         emergency_contact_phone: '',
         emergency_contact_relationship: ''
@@ -11,9 +15,11 @@ function PersonalInfo({ employeeId = 1 }) {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    //const API_URL = 'https://airline-web-app.onrender.com';
+    //const API_URL = 'http://localhost:5001';
     const API_URL = import.meta.env.VITE_API_URL;
-
     useEffect(() => {
+
         fetch(`${API_URL}/api/pilot/profile?employee_id=${employeeId}`)
             .then((res) => {
                 if (!res.ok) {
@@ -24,6 +30,10 @@ function PersonalInfo({ employeeId = 1 }) {
             .then((data) => {
                 setInfo(data);
                 setFormData({
+                    first_name: data.first_name || '',
+                    middle_initial: data.middle_initial || '',
+                    last_name: data.last_name || '',
+                    email: data.email || '',
                     emergency_contact_name: data.emergency_contact_name || '',
                     emergency_contact_phone: data.emergency_contact_phone || '',
                     emergency_contact_relationship: data.emergency_contact_relationship || ''
@@ -33,7 +43,7 @@ function PersonalInfo({ employeeId = 1 }) {
                 console.error(err);
                 setError('Could not load personal info.');
             });
-    }, [API_URL, employeeId]);
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -45,7 +55,7 @@ function PersonalInfo({ employeeId = 1 }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        fetch(`${API_URL}/api/pilot/profile/emergency-contact`, {
+        fetch(`${API_URL}/api/pilot/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -57,7 +67,7 @@ function PersonalInfo({ employeeId = 1 }) {
         })
             .then((res) => {
                 if (!res.ok) {
-                    throw new Error('Failed to update emergency contact');
+                    throw new Error('Failed to update profile');
                 }
                 return res.json();
             })
@@ -71,7 +81,7 @@ function PersonalInfo({ employeeId = 1 }) {
             })
             .catch((err) => {
                 console.error(err);
-                setError('Could not update emergency contact.');
+                setError('Could not update personal info.');
             });
     };
 
@@ -94,7 +104,7 @@ function PersonalInfo({ employeeId = 1 }) {
                     marginBottom: '24px'
                 }}
             >
-                Employee Information and Emergency Contact
+                Contact Information and Pay Overview
             </p>
 
             {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
@@ -104,6 +114,7 @@ function PersonalInfo({ employeeId = 1 }) {
 
             {info && (
                 <>
+                    {/* Summary Cards */}
                     <div className="summary-cards">
                         <div className="summary-card">
                             <h3>Position</h3>
@@ -134,50 +145,53 @@ function PersonalInfo({ employeeId = 1 }) {
                         </div>
                     </div>
 
+                    {/* Form */}
                     <div
                         className="table-wrapper"
                         style={{ padding: '30px', marginTop: '20px' }}
                     >
                         <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
-                            Employee Information
-                        </h2>
-
-                        <div style={{ display: 'grid', gap: '15px', marginBottom: '30px' }}>
-                            <input
-                                type="text"
-                                value={info.first_name || ''}
-                                disabled
-                                placeholder="First Name"
-                            />
-
-                            <input
-                                type="text"
-                                value={info.middle_initial || ''}
-                                disabled
-                                placeholder="Middle Initial"
-                            />
-
-                            <input
-                                type="text"
-                                value={info.last_name || ''}
-                                disabled
-                                placeholder="Last Name"
-                            />
-
-                            <input
-                                type="email"
-                                value={info.email || ''}
-                                disabled
-                                placeholder="Email"
-                            />
-                        </div>
-
-                        <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
-                            Update Emergency Contact
+                            Update Contact Info
                         </h2>
 
                         <form onSubmit={handleSubmit}>
                             <div style={{ display: 'grid', gap: '15px' }}>
+
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                    placeholder="First Name"
+                                />
+
+                                <input
+                                    type="text"
+                                    name="middle_initial"
+                                    value={formData.middle_initial}
+                                    onChange={handleChange}
+                                    placeholder="Middle Initial"
+                                />
+
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                    placeholder="Last Name"
+                                />
+
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    placeholder="Email"
+                                />
+
+                                {/* Emergency Contact */}
+                                <h3 style={{ marginTop: '20px' }}>Emergency Contact</h3>
+
                                 <input
                                     name="emergency_contact_name"
                                     value={formData.emergency_contact_name}
@@ -208,8 +222,9 @@ function PersonalInfo({ employeeId = 1 }) {
                                         border: 'none'
                                     }}
                                 >
-                                    Save Emergency Contact
+                                    Save Changes
                                 </button>
+
                             </div>
                         </form>
                     </div>

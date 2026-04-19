@@ -8,9 +8,10 @@ import flightRouter from './src/routes/flight-instance-router.js';
 import authRouter from './src/routes/authRoutes.js';
 import pilotRouter from './src/routes/pilotRouter.js';
 import cabinCrewRouter from './src/routes/cabinCrewRouter.js';
+import startExpireJob from './src/jobs/bookingExpireCronJob.js';
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT;
 
 app.use(cors()); 
 
@@ -36,6 +37,9 @@ app.use((err, req, res, next) => {
 //      START SERVER 
 app.listen(PORT,'0.0.0.0', () => {
     console.log(`Server running at https://airlinewebapp.onrender.com`);
+
+    // Start Cron Jobs
+    startExpireJob();  // Updates bookings past expiration time to 'Expired' every minute
 });
 
 export default app;

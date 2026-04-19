@@ -10,8 +10,8 @@ function ScheduledFlights({ employeeId = 1 }) {
     const [loadingFlights, setLoadingFlights] = useState(true);
 
     const API_URL = import.meta.env.VITE_API_URL;
-
     useEffect(() => {
+
         fetch(`${API_URL}/api/pilot/scheduled_flights?employee_id=${employeeId}`)
             .then((res) => {
                 if (!res.ok) throw new Error('Failed to fetch scheduled flights');
@@ -185,10 +185,11 @@ function ScheduledFlights({ employeeId = 1 }) {
                     <h3>Next Route</h3>
                     <p>
                         {nextFlight
-                            ? `${nextFlight.departure_city || 'N/A'} → ${nextFlight.arrival_city || 'N/A'}`
+                            ? `${nextFlight.departure_city} → ${nextFlight.arrival_city}`
                             : 'N/A'}
                     </p>
                 </div>
+            </div>
 
                 <div className="summary-card">
                     <h3>Upcoming Distance</h3>
