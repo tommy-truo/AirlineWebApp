@@ -9,8 +9,7 @@ function CreateFlight() {
         aircraft_id: '',
         departure_gate_id: '',
         arrival_gate_id: '',
-        scheduled_departure_datetime: '',
-        scheduled_arrival_datetime: ''
+        scheduled_departure_datetime: ''
     });
 
     const [dropdowns, setDropdowns] = useState({
@@ -137,20 +136,31 @@ function CreateFlight() {
             return;
         }
 
-        if (!form.scheduled_departure_datetime || !form.scheduled_arrival_datetime) {
-            setError('Please enter both scheduled departure and arrival times.');
+        if (!form.scheduled_departure_datetime) {
+            setError('Please enter departure time.');
             setMessage('');
             return;
         }
 
-        if (new Date(form.scheduled_arrival_datetime) <= new Date(form.scheduled_departure_datetime)) {
-            setError('Scheduled arrival must be after scheduled departure.');
+        if (form.departure_gate_id === form.arrival_gate_id) {
+            setError('Departure and arrival gates cannot be the same.');
+            setMessage('');
+            return;
+        }
+
+        if (new Date(form.scheduled_departure_datetime) <= new Date()) {
+            setError('Departure time must be in the future.');
             setMessage('');
             return;
         }
 
         try {
             const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+            const departure = new Date(form.scheduled_departure_datetime);
+            const arrival = new Date(
+                departure.getTime() + selectedRoute.estimated_duration_minutes * 60000
+            );
 
             const res = await fetch(`${API_BASE_URL}/api/flights/create`, {
                 method: 'POST',
@@ -162,8 +172,8 @@ function CreateFlight() {
                     aircraft_id: form.aircraft_id,
                     departure_gate_id: form.departure_gate_id,
                     arrival_gate_id: form.arrival_gate_id,
-                    scheduled_departure_datetime: form.scheduled_departure_datetime,
-                    scheduled_arrival_datetime: form.scheduled_arrival_datetime
+                    scheduled_departure_datetime: departure,
+                    scheduled_arrival_datetime: arrival
                 })
             });
 
@@ -183,8 +193,7 @@ function CreateFlight() {
                 aircraft_id: '',
                 departure_gate_id: '',
                 arrival_gate_id: '',
-                scheduled_departure_datetime: '',
-                scheduled_arrival_datetime: ''
+                scheduled_departure_datetime: ''
             });
 
         } catch (err) {
@@ -201,7 +210,7 @@ function CreateFlight() {
 
                     <h2 className="form-title mb-3">Create New Flight</h2>
                     <p className="text-muted">
-                        Enter the scheduled flight details below.
+                        Select the route, aircraft, gates, and departure time. The scheduled arrival time will be calculated automatically.
                     </p>
 
                     {message && (
@@ -219,7 +228,9 @@ function CreateFlight() {
                     <form onSubmit={handleSubmit}>
 
                         <div className="form-section mb-4">
-                            <h5 className="section-title">Flight Information</h5>
+                            <h5 className="section-title">
+                                Route Information
+                            </h5>
 
                             <div className="row">
                                 <div className="col-md-6 mb-3 form-field">
@@ -247,8 +258,8 @@ function CreateFlight() {
                                         className="form-control"
                                         value={form.arrival_city}
                                         onChange={handleChange}
-                                        required
                                         disabled={!form.departure_city}
+                                        required
                                     >
                                         <option value="">Select Arrival City</option>
                                         {arrivalCities.map((city) => (
@@ -261,7 +272,7 @@ function CreateFlight() {
                             </div>
 
                             <div className="row">
-                                <div className="col-md-6 mb-3 form-field">
+                                <div className="col-md-12 mb-3 form-field">
                                     <label>Flight Route*</label>
                                     <select
                                         id="flight_route_id"
@@ -269,21 +280,25 @@ function CreateFlight() {
                                         value={form.flight_route_id}
                                         onChange={handleChange}
                                         required
-                                        disabled={!form.departure_city || !form.arrival_city}
                                     >
                                         <option value="">Select Route</option>
                                         {filteredRoutes.map((route) => (
-                                            <option
-                                                key={route.flight_route_id}
-                                                value={route.flight_route_id}
-                                            >
-                                                {route.flight_number} — {route.departure_iata} ({route.departure_city}) → {route.arrival_iata} ({route.arrival_city})
+                                            <option key={route.flight_route_id} value={route.flight_route_id}>
+                                                {route.flight_number} — {route.departure_iata} → {route.arrival_iata}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
+                            </div>
+                        </div>
 
-                                <div className="col-md-6 mb-3 form-field">
+                        <div className="form-section mb-4">
+                            <h5 className="section-title">
+                                Assignment Information
+                            </h5>
+
+                            <div className="row">
+                                <div className="col-md-4 mb-3 form-field">
                                     <label>Aircraft*</label>
                                     <select
                                         id="aircraft_id"
@@ -293,24 +308,17 @@ function CreateFlight() {
                                         required
                                     >
                                         <option value="">Select Aircraft</option>
-                                        {dropdowns.aircrafts.map((aircraft) => (
-                                            <option
-                                                key={aircraft.aircraft_id}
-                                                value={aircraft.aircraft_id}
-                                            >
-                                                {aircraft.aircraft_name} ({aircraft.status_name})
-                                            </option>
-                                        ))}
+                                        {dropdowns.aircrafts
+                                            .filter((aircraft) => aircraft.status_name === 'Active')
+                                            .map((aircraft) => (
+                                                <option key={aircraft.aircraft_id} value={aircraft.aircraft_id}>
+                                                    {aircraft.aircraft_name}
+                                                </option>
+                                            ))}
                                     </select>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="form-section mb-4">
-                            <h5 className="section-title">Gate Information</h5>
-
-                            <div className="row">
-                                <div className="col-md-6 mb-3 form-field">
+                                <div className="col-md-4 mb-3 form-field">
                                     <label>Departure Gate*</label>
                                     <select
                                         id="departure_gate_id"
@@ -318,7 +326,6 @@ function CreateFlight() {
                                         value={form.departure_gate_id}
                                         onChange={handleChange}
                                         required
-                                        disabled={!form.flight_route_id}
                                     >
                                         <option value="">Select Departure Gate</option>
                                         {filteredDepartureGates.map((gate) => (
@@ -329,7 +336,7 @@ function CreateFlight() {
                                     </select>
                                 </div>
 
-                                <div className="col-md-6 mb-3 form-field">
+                                <div className="col-md-4 mb-3 form-field">
                                     <label>Arrival Gate*</label>
                                     <select
                                         id="arrival_gate_id"
@@ -337,7 +344,6 @@ function CreateFlight() {
                                         value={form.arrival_gate_id}
                                         onChange={handleChange}
                                         required
-                                        disabled={!form.flight_route_id}
                                     >
                                         <option value="">Select Arrival Gate</option>
                                         {filteredArrivalGates.map((gate) => (
@@ -351,7 +357,9 @@ function CreateFlight() {
                         </div>
 
                         <div className="form-section mb-4">
-                            <h5 className="section-title">Schedule</h5>
+                            <h5 className="section-title">
+                                Schedule Information
+                            </h5>
 
                             <div className="row">
                                 <div className="col-md-6 mb-3 form-field">
@@ -367,20 +375,20 @@ function CreateFlight() {
                                 </div>
 
                                 <div className="col-md-6 mb-3 form-field">
-                                    <label>Scheduled Arrival*</label>
-                                    <input
-                                        type="datetime-local"
-                                        id="scheduled_arrival_datetime"
-                                        className="form-control"
-                                        value={form.scheduled_arrival_datetime}
-                                        onChange={handleChange}
-                                        required
-                                    />
+                                    <label>Scheduled Arrival</label>
+                                    <div className="form-control bg-light">
+                                        {form.scheduled_departure_datetime && selectedRoute
+                                            ? new Date(
+                                                new Date(form.scheduled_departure_datetime).getTime() +
+                                                selectedRoute.estimated_duration_minutes * 60000
+                                            ).toLocaleString()
+                                            : 'Arrival auto-calculated'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <button type="submit" className="login-button">
+                        <button className="login-button">
                             Create Flight
                         </button>
 
