@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import '../styles/styles.css'
+import '../components/styles.css'
 
 function FlightReports() {
   const [filters, setFilters] = useState({
