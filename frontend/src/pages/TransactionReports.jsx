@@ -99,18 +99,15 @@ function TransactionReports() {
     }
   }
 
-  const totalRevenue = reportData.rawData.reduce(
-    (sum, row) => sum + Number(row.amount || 0),
-    0
-  );
-
-  const positiveRevenue = reportData.rawData
-    .filter(row => Number(row.amount) > 0)
-    .reduce((sum, row) => sum + Number(row.amount), 0);
+  const totalSales = reportData.rawData
+    .filter(row => (row.transaction_type || '').toLowerCase() !== 'refund')
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
 
   const refundedAmount = reportData.rawData
-    .filter(row => Number(row.amount) < 0)
-    .reduce((sum, row) => sum + Number(row.amount), 0);
+    .filter(row => (row.transaction_type || '').toLowerCase() === 'refund')
+    .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+
+  const totalRevenue = totalSales - refundedAmount;
 
   return (
     <div className="container-fluid form-wrapper">
@@ -235,7 +232,7 @@ function TransactionReports() {
                     <tbody>
                       <tr>
                         <td>${totalRevenue.toFixed(2)}</td>
-                        <td>${positiveRevenue.toFixed(2)}</td>
+                        <td>${totalSales.toFixed(2)}</td>
                         <td>${refundedAmount.toFixed(2)}</td>
                       </tr>
                     </tbody>
