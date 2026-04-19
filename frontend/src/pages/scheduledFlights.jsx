@@ -197,7 +197,6 @@ function ScheduledFlights({ employeeId = 1 }) {
                         {upcomingFlights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
                     </p>
                 </div>
-            </div>
 
             {loadingFlights ? (
                 <div className="table-wrapper" style={{ marginTop: '30px', textAlign: 'center' }}>
