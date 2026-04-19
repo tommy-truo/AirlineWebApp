@@ -140,6 +140,7 @@ function FlashSaleManagement() {
                                             <button
                                                 className="btn btn-primary btn-sm mx-1"
                                                 onClick={() => toggleStatus(s.flash_sale_id, s.is_active)}
+                                                disabled={new Date(s.end_datetime) <= new Date()}
                                             >
                                                 Toggle
                                             </button>
