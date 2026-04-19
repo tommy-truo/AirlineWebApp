@@ -1,4 +1,4 @@
-import { searchFlights } from '../models/flight-instance-model.js';
+import { searchFlights, fetchFlightSeats } from '../models/flight-instance-model.js';
 import { db } from '../config/db.js';
 
 // GET /api/flights/search?departureCity=(city)&arrivalCity=(city)&departureDate=(date)
