@@ -32,8 +32,6 @@ ORDER BY e.employee_id ASC
 
     const [rows] = await db.execute(sql);
 
-    console.log("EMPLOYEES RESULT:", rows);
-
     return res.status(200).json(rows);
   } catch (err) {
     console.error('GET EMPLOYEES ERROR:', err);
@@ -58,6 +56,7 @@ export const getEmployeeDropdowns = async (req, res) => {
     const supervisorsSql = `
       SELECT employee_id, first_name, last_name
       FROM employees
+      WHERE job_title_id = 8 
       ORDER BY first_name ASC, last_name ASC
     `;
 
