@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import '../styles/styles.css';
+import '../components/styles.css';
 
 function FlashSaleManagement() {
 
