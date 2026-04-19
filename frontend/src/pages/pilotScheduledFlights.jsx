@@ -62,6 +62,17 @@ function PilotScheduledFlights({ employeeId = 1 }) {
 
     const now = new Date();
 
+    const formatDateTime = (dateString) => {
+        return new Date(dateString).toLocaleString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
     const upcomingFlights = flights
         .filter((f) => new Date(f.scheduled_departure_datetime) >= now)
         .sort(
@@ -77,7 +88,7 @@ function PilotScheduledFlights({ employeeId = 1 }) {
     const nextFlight = upcomingFlights.length > 0 ? upcomingFlights[0] : null;
 
     const renderFlightsTable = (flightList, emptyMessage) => (
-        <table className="shift-table">
+        <table className="flights-table">
             <thead>
                 <tr>
                     <th>Flight</th>
@@ -127,13 +138,13 @@ function PilotScheduledFlights({ employeeId = 1 }) {
 
                             <td>
                                 {flight.scheduled_departure_datetime
-                                    ? new Date(flight.scheduled_departure_datetime).toLocaleString()
+                                    ? formatDateTime(flight.scheduled_departure_datetime)
                                     : 'N/A'}
                             </td>
 
                             <td>
                                 {flight.scheduled_arrival_datetime
-                                    ? new Date(flight.scheduled_arrival_datetime).toLocaleString()
+                                    ? formatDateTime(flight.scheduled_arrival_datetime)
                                     : 'N/A'}
                             </td>
 
@@ -189,14 +200,14 @@ function PilotScheduledFlights({ employeeId = 1 }) {
                             : 'N/A'}
                     </p>
                 </div>
-            </div>
-
                 <div className="summary-card">
                     <h3>Upcoming Distance</h3>
                     <p>
                         {upcomingFlights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
                     </p>
                 </div>
+            </div>
+
 
             {loadingFlights ? (
                 <div className="table-wrapper" style={{ marginTop: '30px', textAlign: 'center' }}>
