@@ -22,6 +22,7 @@ export const getDashboardFlights = async (req, res) => {
         const query = `
             SELECT 
                 fi.flight_instance_id,
+                fr.flight_number AS flight_number,
                 fi.departure_gate_id,           
                 fi.arrival_gate_id,
                 fi.scheduled_departure_datetime,
@@ -50,7 +51,7 @@ export const getDashboardFlights = async (req, res) => {
                 OR 
                 (arr.iata = ? AND fi.scheduled_arrival_datetime >= NOW())
             ORDER BY fi.scheduled_departure_datetime ASC;
-        `;
+        `; 
 
         const [rows] = await db.query(query, [airport, airport]);
         res.json(rows);                                             //send flight to frntnd
@@ -61,7 +62,6 @@ export const getDashboardFlights = async (req, res) => {
 };
 
 //Searching for passenger info using ticket id. show passenger name, flight info, baggage count, baggage weight, and update check in status if not already checked in.
-
 export const getPassengerDetailsByTicket = async (req, res) => { 
     try {
         const { ticket } = req.query; // Recieve ticket id from frntnd.
@@ -77,6 +77,7 @@ export const getPassengerDetailsByTicket = async (req, res) => {
                     p.last_name,
                     p.passport_number,
                     bg.group_name AS boarding_group,
+                    fr.flight_number AS flight_number,
                     dep.iata AS origin_iata,
                     arr.iata AS destination_iata,
                     (SELECT COUNT(*) FROM baggage WHERE ticket_id = t.ticket_id) AS baggage_count,
@@ -112,7 +113,6 @@ export const getPassengerDetailsByTicket = async (req, res) => {
 };
 
 // Adds baggage. update number of baggage, update weight of each added baggage, update the total fees in baggage and transaction tables.
-
 export const createBaggageTransaction = async (req, res) => {
     const { booking_id, ticket_id, amount, baggage_weights } = req.body;        // Recieve from frntend.
 
@@ -179,7 +179,6 @@ export const createBaggageTransaction = async (req, res) => {
 };
 
 // Updates checked in status value for tickets, updates seat status to occupied. 
-
 export const confirmCheckIn = async (req, res) => {
     try {
         const { ticket_id, seat_id, flight_instance_id } = req.body;
@@ -189,19 +188,9 @@ export const confirmCheckIn = async (req, res) => {
             [ticket_id]
         );
 
-        if (seat_id && flight_instance_id) { //update seat status to 3. 
-            await db.query(
-                `UPDATE flight_seats 
-                 SET status_id = 3 
-                 WHERE seat_id = ? 
-                 AND flight_instance_id = ?`,
-                [seat_id, flight_instance_id]
-            );
-        }
-
         res.json({ success: true });
 
     } catch (err) { 
-        res.status(500).json({ error: "Update failed" }); //throw error.
+        res.status(500).json({ error: "Update failed" });
     }
 };

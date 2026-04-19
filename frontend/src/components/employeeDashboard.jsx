@@ -237,8 +237,7 @@ const Dashboard = ({ onLogout }) => {
                             <div className="hero-card dep-border">
                                 <span className="card-label">NEXT DEPARTURE</span>
                                 <div className="hero-main">
-                                    <span className="hero-id">{nextDep ? `AC-${nextDep.flight_instance_id}` : "None Scheduled"}</span>
-                                    <div className="hero-time-stack">
+                                        <span className="hero-id">{nextDep ? nextDep.flight_number : "None Scheduled"}</span>                                    <div className="hero-time-stack">
                                         <span className="hero-date">{formatDate(nextDep?.scheduled_departure_datetime)}</span>
                                         <span className="hero-time">{formatTime(nextDep?.scheduled_departure_datetime)}</span>
                                     </div>
@@ -249,7 +248,7 @@ const Dashboard = ({ onLogout }) => {
                             <div className="hero-card arr-border">
                                 <span className="card-label">NEXT ARRIVAL</span>
                                 <div className="hero-main">
-                                    <span className="hero-id">{nextArr ? `AC-${nextArr.flight_instance_id}` : "None Scheduled"}</span>
+                                <span className="hero-id">{nextArr ? nextArr.flight_number : "None Scheduled"}</span>
                                     <div className="hero-time-stack">
                                         <span className="hero-date">{formatDate(nextArr?.scheduled_arrival_datetime)}</span>
                                         <span className="hero-time">{formatTime(nextArr?.scheduled_arrival_datetime)}</span>
@@ -268,7 +267,7 @@ const Dashboard = ({ onLogout }) => {
                                         {departingFlights.length > 0 ? (
                                             departingFlights.map((f, i) => (
                                                 <tr key={i}>
-                                                    <td><b>AC-{f.flight_instance_id}</b></td>
+                                                    <td><b>{f.flight_number}</b></td>
                                                     <td>{f.destination_iata}</td>
                                                     <td>{formatTime(f.scheduled_departure_datetime)}</td>
                                                     <td><span className="pill green">ON SCHEDULE</span></td>
@@ -289,7 +288,7 @@ const Dashboard = ({ onLogout }) => {
                                         {arrivingFlights.length > 0 ? (
                                             arrivingFlights.map((f, i) => (
                                                 <tr key={i}>
-                                                    <td><b>AC-{f.flight_instance_id}</b></td>
+                                                    <td><b>{f.flight_number}</b></td>
                                                     <td>{f.origin_iata}</td>
                                                     <td>{formatTime(f.scheduled_arrival_datetime)}</td>
                                                     <td><span className="pill blue">ON SCHEDULE</span></td>
@@ -346,7 +345,7 @@ const Dashboard = ({ onLogout }) => {
                                         <div className="checkin-card-body">
                                             <div className="passenger-details-grid">
                                                 <div className="p-field"><b>Name</b><p>{p.first_name} {p.last_name}</p></div>
-                                                <div className="p-field"><b>Flight</b><p>AC-{p.flight_instance_id}</p></div>
+                                                <div className="p-field"><b>Flight</b><p>{p.flight_number}</p></div>
                                                 <div className="p-field"><b>Route</b><p>{p.origin_iata || "—"} → {p.destination_iata || "—"}</p></div>
                                                 <div className="p-field"><b>Seat</b><p>{p.seat_id || "Unassigned"}</p></div>
                                                 <div className="p-field"><b>Bags</b><p>{p.baggage_count || 0}</p></div>
