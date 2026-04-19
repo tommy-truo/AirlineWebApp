@@ -7,7 +7,7 @@ import PassengerDashboard from './components/Layout.jsx';
 import PilotDashboard from './components/PilotDashboard.jsx'; //dex
 import CabinCrewDashboard from './components/cabinCrewDashboard.jsx';
 import ManagerDashboard from './pages/ManagerDashboard.jsx';
-import ChangePassword from './pages/ChangePassword.jsx';
+import ManagerChangePassword from './pages/ManagerChangePassword.jsx';
 
 const App = () => {
   // Initialize view from localStorage so the user stays logged in on refresh
@@ -131,7 +131,7 @@ const App = () => {
         {/* 6. Change Password View */}
         {/* added by aya */}
         {view === 'changePassword' && (
-          <ChangePassword
+          <ManagerChangePassword
             accountId={currentUserId}
             onSuccess={() => {
               const role = localStorage.getItem('userRole');
