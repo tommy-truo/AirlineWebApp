@@ -5,6 +5,7 @@ import '../components/styles.css';
 function FlightManagement() {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
   const [editedFlight, setEditedFlight] = useState({});
   const [dropdowns, setDropdowns] = useState({
     statuses: [],
@@ -49,6 +50,8 @@ function FlightManagement() {
 
   async function fetchDropdowns() {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
       const res = await fetch(`${API_BASE_URL}/api/flights/dropdowns`);
 
       if (!res.ok) {
@@ -71,7 +74,7 @@ function FlightManagement() {
   }
 
   function isClosedFlight(flight) {
-    return flight.status_id === 4 || flight.status_id === 7;
+    return Number(flight.status_id) === 4 || Number(flight.status_id) === 7;
   }
 
   function needsReason(statusId) {
@@ -104,6 +107,7 @@ function FlightManagement() {
 
   function handleEditClick(flight) {
     setEditingId(flight.flight_instance_id);
+    setExpandedId(flight.flight_instance_id);
     setEditedFlight({
       flight_instance_id: flight.flight_instance_id,
       aircraft_id: flight.aircraft_id || '',
@@ -132,6 +136,8 @@ function FlightManagement() {
 
   async function handleSaveEdit(id) {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
       const res = await fetch(`${API_BASE_URL}/api/flights/${id}`, {
         method: "PUT",
         headers: {
@@ -159,6 +165,10 @@ function FlightManagement() {
   function handleCancelEdit() {
     setEditingId(null);
     setEditedFlight({});
+  }
+
+  function toggleExpanded(flightId) {
+    setExpandedId((prev) => (prev === flightId ? null : flightId));
   }
 
   const filteredFlights = data.filter((flight) => {
@@ -212,6 +222,11 @@ function FlightManagement() {
       default:
         return 'status-default';
     }
+  }
+
+  function formatDateTime(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString();
   }
 
   return (
@@ -268,222 +283,58 @@ function FlightManagement() {
           </div>
 
           <div style={{ overflowX: "auto" }}>
-            <table className="table table-bordered">
+            <table className="table table-bordered align-middle">
               <thead className="table-light">
                 <tr>
                   <th>Flight #</th>
                   <th>Route</th>
                   <th>Aircraft</th>
-                  <th>Departure Gate</th>
-                  <th>Arrival Gate</th>
                   <th>Status</th>
-                  <th>Reason</th>
-                  <th>Scheduled Departure</th>
-                  <th>Scheduled Arrival</th>
-                  <th>Actual Departure</th>
-                  <th>Actual Arrival</th>
+                  <th>Departure</th>
+                  <th>Arrival</th>
+                  <th>Schedule</th>
                   <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {currentFlights.map((flight) => {
-                  const closedFlight = isClosedFlight(flight);
-                  const editingThisRow = editingId === flight.flight_instance_id;
-                  const selectedStatusId = editingThisRow ? editedFlight.status_id : flight.status_id;
+                {currentFlights.length > 0 ? (
+                  currentFlights.map((flight) => {
+                    const closedFlight = isClosedFlight(flight);
+                    const editingThisRow = editingId === flight.flight_instance_id;
+                    const showDetails = expandedId === flight.flight_instance_id || editingThisRow;
+                    const selectedStatusId = editingThisRow ? editedFlight.status_id : flight.status_id;
 
-                  return (
-                    <tr key={flight.flight_instance_id}>
-                      <td>{flight.flight_number}</td>
-
-                      <td className="text-nowrap">
-                        {flight.departure_city} → {flight.arrival_city}
-                      </td>
-
-                      <td>
-                        {editingThisRow ? (
-                          <select
-                            name="status_id"
-                            value={editedFlight.status_id}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                          >
-                            <option value="">Select Status</option>
-                            {getAllowedStatuses(flight.status_id).map((status) => (
-                              <option
-                                key={status.flight_status_id}
-                                value={status.flight_status_id}
-                              >
-                                {status.status_name}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className={`status-badge ${getFlightStatusClass(flight.status_name)}`}>
-                            {flight.status_name}
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="text-nowrap">
-                        {editingThisRow ? (
-                          <select
-                            name="departure_gate_id"
-                            value={editedFlight.departure_gate_id}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                          >
-                            <option value="">Select Departure Gate</option>
-                            {dropdowns.gates.map((gate) => (
-                              <option
-                                key={gate.gate_id}
-                                value={gate.gate_id}
-                              >
-                                {gate.iata} - {gate.terminal_name} - Gate {gate.gate_number}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          `${flight.departure_airport_iata} - ${flight.departure_terminal} - Gate ${flight.departure_gate_number}`
-                        )}
-                      </td>
-
-                      <td className="text-nowrap">
-                        {editingThisRow ? (
-                          <select
-                            name="arrival_gate_id"
-                            value={editedFlight.arrival_gate_id}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                          >
-                            <option value="">Select Arrival Gate</option>
-                            {dropdowns.gates.map((gate) => (
-                              <option
-                                key={gate.gate_id}
-                                value={gate.gate_id}
-                              >
-                                {gate.iata} - {gate.terminal_name} - Gate {gate.gate_number}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          `${flight.arrival_airport_iata} - ${flight.arrival_terminal} - Gate ${flight.arrival_gate_number}`
-                        )}
-                      </td>
-
-                      <td>
-                        {editingThisRow ? (
-                          <select
-                            name="status_id"
-                            value={editedFlight.status_id}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                          >
-                            <option value="">Select Status</option>
-                            {getAllowedStatuses(flight.status_id).map((status) => (
-                              <option
-                                key={status.flight_status_id}
-                                value={status.flight_status_id}
-                              >
-                                {status.status_name}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          flight.status_name
-                        )}
-                      </td>
-
-                      <td>
-                        {editingThisRow ? (
-                          needsReason(selectedStatusId) ? (
-                            <select
-                              name="status_reason_id"
-                              value={editedFlight.status_reason_id}
-                              onChange={handleFieldChange}
-                              className="form-control form-control-sm"
-                            >
-                              <option value="">Select Reason</option>
-                              {dropdowns.reasons
-                                .filter((reason) => Number(reason.flight_irregularity_reason_id) !== 6)
-                                .map((reason) => (
-                                  <option
-                                    key={reason.flight_irregularity_reason_id}
-                                    value={reason.flight_irregularity_reason_id}
-                                  >
-                                    {reason.reason_name}
-                                  </option>
-                                ))}
-                            </select>
-                          ) : (
-                            <span className="text-muted">Not needed</span>
-                          )
-                        ) : (
-                          flight.reason_name || '-'
-                        )}
-                      </td>
-
-                      <td>
-                        {editingThisRow && canEditSchedule(selectedStatusId) ? (
-                          <input
-                            type="datetime-local"
-                            name="scheduled_departure_datetime"
-                            value={editedFlight.scheduled_departure_datetime}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                          />
-                        ) : (
-                          flight.scheduled_departure_datetime
-                        )}
-                      </td>
-
-                      <td>
-                        {editingThisRow && canEditSchedule(selectedStatusId) ? (
-                          <input
-                            type="datetime-local"
-                            name="scheduled_arrival_datetime"
-                            value={editedFlight.scheduled_arrival_datetime}
-                            onChange={handleFieldChange}
-                            className="form-control form-control-sm"
-                          />
-                        ) : (
-                          flight.scheduled_arrival_datetime
-                        )}
-                      </td>
-
-                      <td>{flight.actual_departure_datetime}</td>
-                      <td>{flight.actual_arrival_datetime}</td>
-
-                      <td>
-                        {editingThisRow ? (
-                          <>
-                            <button
-                              className="btn btn-success mx-1"
-                              onClick={() => handleSaveEdit(flight.flight_instance_id)}
-                            >
-                              Save
-                            </button>
-                            <button
-                              className="btn btn-secondary mx-1"
-                              onClick={handleCancelEdit}
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        ) : closedFlight ? (
-                          <span className="text-muted fw-semibold">Closed</span>
-                        ) : (
-                          <button
-                            className="btn btn-primary mx-1"
-                            onClick={() => handleEditClick(flight)}
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                    return (
+                      <FragmentRow
+                        key={flight.flight_instance_id}
+                        flight={flight}
+                        closedFlight={closedFlight}
+                        editingThisRow={editingThisRow}
+                        showDetails={showDetails}
+                        selectedStatusId={selectedStatusId}
+                        editedFlight={editedFlight}
+                        dropdowns={dropdowns}
+                        handleFieldChange={handleFieldChange}
+                        getAllowedStatuses={getAllowedStatuses}
+                        needsReason={needsReason}
+                        canEditSchedule={canEditSchedule}
+                        formatDateTime={formatDateTime}
+                        getFlightStatusClass={getFlightStatusClass}
+                        toggleExpanded={toggleExpanded}
+                        handleEditClick={handleEditClick}
+                        handleSaveEdit={handleSaveEdit}
+                        handleCancelEdit={handleCancelEdit}
+                      />
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center">
+                      No flights found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -512,6 +363,268 @@ function FlightManagement() {
         </div>
       </div>
     </div>
+  );
+}
+
+function FragmentRow({
+  flight,
+  closedFlight,
+  editingThisRow,
+  showDetails,
+  selectedStatusId,
+  editedFlight,
+  dropdowns,
+  handleFieldChange,
+  getAllowedStatuses,
+  needsReason,
+  canEditSchedule,
+  formatDateTime,
+  getFlightStatusClass,
+  toggleExpanded,
+  handleEditClick,
+  handleSaveEdit,
+  handleCancelEdit
+}) {
+  return (
+    <>
+
+      <tr>
+        <td className="fw-semibold">{flight.flight_number}</td>
+
+        <td className="text-nowrap">
+          {flight.departure_city} → {flight.arrival_city}
+        </td>
+
+        <td>{`Aircraft ${flight.aircraft_id}`}</td>
+
+        <td>
+          <span className={`status-badge ${getFlightStatusClass(flight.status_name)}`}>
+            {flight.status_name}
+          </span>
+        </td>
+
+        <td className="text-nowrap">
+          <div>{flight.departure_terminal}</div>
+          <div>Gate {flight.departure_gate_number}</div>
+        </td>
+
+        <td className="text-nowrap">
+          <div>{flight.arrival_terminal}</div>
+          <div>Gate {flight.arrival_gate_number}</div>
+        </td>
+
+        <td className="text-nowrap">
+          <div><strong>Dep:</strong> {formatDateTime(flight.scheduled_departure_datetime)}</div>
+          <div><strong>Arr:</strong> {formatDateTime(flight.scheduled_arrival_datetime)}</div>
+        </td>
+
+        <td>
+          <div className="d-flex flex-wrap gap-2">
+            <button
+              className="btn btn-outline-secondary btn-sm"
+              onClick={() => toggleExpanded(flight.flight_instance_id)}
+            >
+              {showDetails ? 'Hide Details' : 'View Details'}
+            </button>
+
+            {editingThisRow ? (
+              <>
+                <button
+                  className="btn btn-success btn-sm"
+                  onClick={() => handleSaveEdit(flight.flight_instance_id)}
+                >
+                  Save
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : closedFlight ? (
+              <span className="text-muted fw-semibold align-self-center">Closed</span>
+            ) : (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => handleEditClick(flight)}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        </td>
+      </tr>
+
+      {showDetails && (
+        <tr>
+          <td colSpan="8" className="bg-light">
+            <div className="p-3">
+              <div className="row">
+                <div className="col-md-4 mb-3">
+                  <strong>Reason</strong>
+                  {editingThisRow ? (
+                    needsReason(selectedStatusId) ? (
+                      <select
+                        name="status_reason_id"
+                        value={editedFlight.status_reason_id}
+                        onChange={handleFieldChange}
+                        className="form-control form-control-sm mt-2"
+                      >
+                        <option value="">Select Reason</option>
+                        {dropdowns.reasons
+                          .filter((reason) => Number(reason.flight_irregularity_reason_id) !== 6)
+                          .map((reason) => (
+                            <option
+                              key={reason.flight_irregularity_reason_id}
+                              value={reason.flight_irregularity_reason_id}
+                            >
+                              {reason.reason_name}
+                            </option>
+                          ))}
+                      </select>
+                    ) : (
+                      <div className="mt-1 text-muted">Not needed</div>
+                    )
+                  ) : (
+                    <div className="mt-1">{flight.reason_name || '-'}</div>
+                  )}
+                </div>
+
+                <div className="col-md-4 mb-3">
+                  <strong>Actual Departure</strong>
+                  <div className="mt-1">
+                    {formatDateTime(flight.actual_departure_datetime) || '-'}
+                  </div>
+                </div>
+
+                <div className="col-md-4 mb-3">
+                  <strong>Actual Arrival</strong>
+                  <div className="mt-1">
+                    {formatDateTime(flight.actual_arrival_datetime) || '-'}
+                  </div>
+                </div>
+              </div>
+
+              {editingThisRow && (
+                <div className="row mt-2">
+                  <div className="col-md-4 mb-3">
+                    <strong>Aircraft</strong>
+                    <select
+                      name="aircraft_id"
+                      value={editedFlight.aircraft_id}
+                      onChange={handleFieldChange}
+                      className="form-control form-control-sm mt-2"
+                    >
+                      <option value="">Select Aircraft</option>
+                      {dropdowns.aircrafts.map((aircraft) => (
+                        <option
+                          key={aircraft.aircraft_id}
+                          value={aircraft.aircraft_id}
+                        >
+                          Aircraft {aircraft.aircraft_id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-4 mb-3">
+                    <strong>Status</strong>
+                    <select
+                      name="status_id"
+                      value={editedFlight.status_id}
+                      onChange={handleFieldChange}
+                      className="form-control form-control-sm mt-2"
+                    >
+                      <option value="">Select Status</option>
+                      {getAllowedStatuses(flight.status_id).map((status) => (
+                        <option
+                          key={status.flight_status_id}
+                          value={status.flight_status_id}
+                        >
+                          {status.status_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-4 mb-3">
+                    <strong>Departure Gate</strong>
+                    <select
+                      name="departure_gate_id"
+                      value={editedFlight.departure_gate_id}
+                      onChange={handleFieldChange}
+                      className="form-control form-control-sm mt-2"
+                    >
+                      <option value="">Select Departure Gate</option>
+                      {dropdowns.gates.map((gate) => (
+                        <option
+                          key={gate.gate_id}
+                          value={gate.gate_id}
+                        >
+                          {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-6 mb-3">
+                    <strong>Arrival Gate</strong>
+                    <select
+                      name="arrival_gate_id"
+                      value={editedFlight.arrival_gate_id}
+                      onChange={handleFieldChange}
+                      className="form-control form-control-sm mt-2"
+                    >
+                      <option value="">Select Arrival Gate</option>
+                      {dropdowns.gates.map((gate) => (
+                        <option
+                          key={gate.gate_id}
+                          value={gate.gate_id}
+                        >
+                          {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-3 mb-3">
+                    <strong>Scheduled Departure</strong>
+                    {canEditSchedule(selectedStatusId) ? (
+                      <input
+                        type="datetime-local"
+                        name="scheduled_departure_datetime"
+                        value={editedFlight.scheduled_departure_datetime}
+                        onChange={handleFieldChange}
+                        className="form-control form-control-sm mt-2"
+                      />
+                    ) : (
+                      <div className="mt-2">{formatDateTime(flight.scheduled_departure_datetime)}</div>
+                    )}
+                  </div>
+
+                  <div className="col-md-3 mb-3">
+                    <strong>Scheduled Arrival</strong>
+                    {canEditSchedule(selectedStatusId) ? (
+                      <input
+                        type="datetime-local"
+                        name="scheduled_arrival_datetime"
+                        value={editedFlight.scheduled_arrival_datetime}
+                        onChange={handleFieldChange}
+                        className="form-control form-control-sm mt-2"
+                      />
+                    ) : (
+                      <div className="mt-2">{formatDateTime(flight.scheduled_arrival_datetime)}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+
+    </>
   );
 }
 
