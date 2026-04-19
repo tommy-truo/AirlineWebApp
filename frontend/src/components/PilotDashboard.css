@@ -4,7 +4,10 @@
   --background-light: #f4f6f8;
   --card-white: #ffffff;
   --text-dark: #333;
+  --text-muted: #777;
   --border-light: #dddddd;
+  --sidebar-top: #7f1d1d;
+  --sidebar-bottom: #00072d;
 }
 
 /* Base */
@@ -12,6 +15,98 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: var(--background-light);
+}
+
+/* Layout */
+.dashboard-layout {
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: linear-gradient(to bottom, var(--sidebar-top), var(--sidebar-bottom));
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.sidebar-logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 6px;
+  color: white;
+}
+
+.sidebar-subtitle {
+  margin: 0 0 24px 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-button {
+  background: none;
+  border: none;
+  color: white;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-button:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-button.active {
+  background-color: #d32f2f;
+  font-weight: 600;
+}
+
+.logout-button {
+  margin-top: auto;
+  background-color: #ef5350;
+  border: none;
+  color: white;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #e53935;
+}
+
+/* Main content */
+.dashboard-content {
+  margin-left: 220px;
+  min-height: 100vh;
+  padding: 32px;
+  box-sizing: border-box;
 }
 
 /* Page */
@@ -59,17 +154,17 @@ body {
   color: var(--text-dark);
 }
 
-/* Table container */
-/* Table container */
+/* Cards / wrappers */
 .table-wrapper {
   background: var(--card-white);
   border-radius: 16px;
   padding: 28px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   overflow-x: auto;
+  margin-top: 30px; 
 }
 
-/* Table */
+/* Shift table */
 .shift-table {
   width: 100%;
   border-collapse: separate;
@@ -77,7 +172,6 @@ body {
   min-width: 1100px;
 }
 
-/* Header */
 .shift-table th {
   background-color: var(--primary-red);
   color: white;
@@ -96,7 +190,6 @@ body {
   border-top-right-radius: 12px;
 }
 
-/* Cells */
 .shift-table td {
   padding: 18px 14px;
   border-bottom: 1px solid var(--border-light);
@@ -106,30 +199,27 @@ body {
   line-height: 1.5;
 }
 
-/* Hover */
 .shift-table tbody tr:hover {
   background-color: #fafafa;
 }
 
-/* Keep important columns from wrapping awkwardly */
 .shift-table th:nth-child(1),
-.shift-table td:nth-child(1),   /* Date */
+.shift-table td:nth-child(1),
 .shift-table th:nth-child(2),
-.shift-table td:nth-child(2),   /* Day */
+.shift-table td:nth-child(2),
 .shift-table th:nth-child(3),
-.shift-table td:nth-child(3),   /* Start */
+.shift-table td:nth-child(3),
 .shift-table th:nth-child(4),
-.shift-table td:nth-child(4),   /* End */
+.shift-table td:nth-child(4),
 .shift-table th:nth-child(7),
-.shift-table td:nth-child(7),   /* Flight */
+.shift-table td:nth-child(7),
 .shift-table th:nth-child(8),
-.shift-table td:nth-child(8),   /* Aircraft */
+.shift-table td:nth-child(8),
 .shift-table th:nth-child(10),
-.shift-table td:nth-child(10) { /* Status */
+.shift-table td:nth-child(10) {
   white-space: nowrap;
 }
 
-/* Give route columns more room */
 .shift-table th:nth-child(5),
 .shift-table td:nth-child(5),
 .shift-table th:nth-child(6),
@@ -137,19 +227,16 @@ body {
   min-width: 105px;
 }
 
-/* Role column */
 .shift-table th:nth-child(9),
 .shift-table td:nth-child(9) {
   min-width: 100px;
 }
 
-/* Action column */
 .shift-table th:last-child,
 .shift-table td:last-child {
   min-width: 140px;
 }
 
-/* Better spacing for stacked action buttons */
 .shift-table td:last-child > div {
   display: flex;
   flex-direction: column;
@@ -157,7 +244,58 @@ body {
   align-items: flex-start;
 }
 
-/* Optional: slightly nicer status pill */
+/* Flights table */
+.flights-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1000px;
+}
+
+.flights-table th {
+  background-color: var(--primary-red);
+  color: white;
+  padding: 16px 14px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.flights-table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.flights-table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.flights-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.flights-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+.flights-table th:nth-child(4),
+.flights-table td:nth-child(4),
+.flights-table th:nth-child(5),
+.flights-table td:nth-child(5) {
+  min-width: 170px;
+}
+
+.flights-table th:last-child,
+.flights-table td:last-child {
+  min-width: 140px;
+}
+
+/* Generic pills / links / buttons */
 .status-pill {
   display: inline-block;
   padding: 7px 12px;
@@ -167,7 +305,6 @@ body {
   white-space: nowrap;
 }
 
-/* General buttons */
 .action-button {
   background-color: var(--primary-red);
   color: white;
@@ -182,68 +319,15 @@ body {
   background-color: var(--primary-red-dark);
 }
 
-/* Layout */
-.dashboard-layout {
-  min-height: 100vh;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 220px;
-  height: 100vh;
-  background: linear-gradient(to bottom, #7f1d1d, #00072d);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  gap: 10px;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
-  position: fixed;
-  top: 0;
-  left: 0;
-  box-sizing: border-box;
-}
-
-/* Logo */
-.logo {
-  margin-bottom: 24px;
-  line-height: 1.2;
-}
-
-/* Sidebar buttons */
-.sidebar button {
-  background: none;
-  border: none;
-  color: white;
-  padding: 12px;
-  text-align: left;
-  border-radius: 8px;
+.clickable-flight {
+  text-decoration: underline;
   cursor: pointer;
-  font-size: 1rem;
-}
-
-.sidebar button:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-}
-
-.sidebar .active {
-  background-color: #d32f2f;
   font-weight: 600;
+  color: #b91c1c;
 }
 
-/* Logout button */
-.logout-btn {
-  margin-top: auto;
-  background-color: #ef5350 !important;
-  font-weight: 600;
-}
-
-/* Main content */
-.dashboard-content {
-  margin-left: 220px;
-  min-height: 100vh;
-  padding: 32px;
-  box-sizing: border-box;
+.clickable-flight:hover {
+  color: #7f1d1d;
 }
 
 /* Responsive */
@@ -270,60 +354,4 @@ body {
   .summary-card {
     min-width: 100%;
   }
-}
-
-.clickable-flight {
-  text-decoration: underline;
-  cursor: pointer;
-  font-weight: 600;
-  color: #b91c1c;
-}
-
-.clickable-flight:hover {
-  color: #7f1d1d;
-}
-
-.flights-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 1000px;
-}
-
-/* Header */
-.flights-table th {
-  background-color: var(--primary-red);
-  color: white;
-  padding: 16px 14px;
-  text-align: left;
-  font-size: 0.95rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Cells */
-.flights-table td {
-  padding: 16px 14px;
-  border-bottom: 1px solid var(--border-light);
-  color: var(--text-dark);
-  font-size: 0.95rem;
-  white-space: nowrap; /*date issue*/
-}
-
-/* Row hover */
-.flights-table tbody tr:hover {
-  background-color: #fafafa;
-}
-
-/* Column sizing */
-.flights-table th:nth-child(4),
-.flights-table td:nth-child(4),
-.flights-table th:nth-child(5),
-.flights-table td:nth-child(5) {
-  min-width: 170px; /* Departure & Arrival */
-}
-
-.flights-table th:last-child,
-.flights-table td:last-child {
-  min-width: 140px; /* Action button */
 }
