@@ -1,115 +1,87 @@
-/* Layout Containers */
+/* Container holds the sidebar and main content side-by-side */
 .dashboard-container {
   display: flex;
   height: 100vh;
-  font-family: sans-serif;
-  background-color: #f4f4f9;
+  width: 100vw;
+  overflow: hidden; /* Prevents the whole page from scrolling */
+  background-color: #f4f7f6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Sidebar Layout update */
+/* Sidebar Styling */
 .sidebar {
-  width: 250px;
-  background-color: #1a202c;
+  width: 260px;
+  background-color: #1a202c; /* Dark Navy/Slate */
   color: white;
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Ensure it takes full height */
-  box-sizing: border-box;
+  padding: 30px 20px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
-/* Push everything below this to the bottom */
+.sidebar h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #63b3ed; /* Light Blue accent */
+  text-align: center;
+}
+
+/* Nav Buttons */
+.nav-links {
+  flex-grow: 1; /* Pushes the footer/logout button to the bottom */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  text-align: left;
+  padding: 12px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background-color: #2d3748;
+  color: white;
+}
+
+.nav-button.active {
+  background-color: #3182ce; /* Bright Blue */
+  color: white;
+  font-weight: 600;
+}
+
+/* Footer / Logout */
 .sidebar-footer {
-  margin-top: auto; 
-  padding-top: 20px;
   border-top: 1px solid #2d3748;
+  padding-top: 20px;
 }
 
 .signout-button {
-  background-color: #e53e3e;
+  width: 100%;
+  background-color: #e53e3e; /* Red */
   color: white;
   border: none;
-  padding: 12px;
-  text-align: center;
-  width: 100%;
-  cursor: pointer;
-  font-size: 16px;
+  padding: 10px;
   border-radius: 6px;
-  transition: 0.2s;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .signout-button:hover {
   background-color: #c53030;
 }
 
+/* Main Content Area */
 .main-content {
-  flex: 1;
+  flex-grow: 1;
   padding: 40px;
-  overflow-y: auto;
-}
-
-/* Sidebar Buttons */
-.nav-button {
-  background: none;
-  border: none;
-  color: #a0aec0;
-  padding: 12px;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  transition: 0.2s;
-}
-
-.nav-button:hover {
-  background-color: #2d3748;
-}
-
-.nav-button.active {
-  background-color: #3182ce;
-  color: white;
-}
-
-/* UI Components */
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-}
-
-.search-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-input {
-  padding: 10px;
-  border: 1px solid #cbd5e0;
-  border-radius: 4px;
-}
-
-.primary-btn {
-  background-color: #3182ce;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th, .table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  overflow-y: auto; /* Only the content scrolls, not the sidebar */
+  background-color: #ffffff;
 }
