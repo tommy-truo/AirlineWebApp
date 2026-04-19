@@ -70,6 +70,8 @@ function PayrollReports() {
         e.preventDefault()
 
         try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
             const params = new URLSearchParams({
                 departmentId: filters.departmentId,
                 jobTitleId: filters.jobTitleId,
