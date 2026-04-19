@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import MaintenancePage from '../pages/MaintenancePage.jsx';
-import ShiftCalendar from '../pages/shiftCalendar.jsx';
-import PersonalInfo from '../pages/personalInfo.jsx';
+//import ShiftCalendar from '../pages/shiftCalendar.jsx';
+//import PersonalInfo from '../pages/personalInfo.jsx';
 import './PilotDashboard.css';
 
 function MaintenanceDashboard({ employeeId, onLogout }) {
@@ -51,8 +51,8 @@ function MaintenanceDashboard({ employeeId, onLogout }) {
 
       <div className="page-container">
         {page === 'maintenance' && <MaintenancePage employeeId={employeeId} />}
-        {page === 'shift' && <ShiftCalendar employeeId={employeeId} />}
-        {page === 'personal' && <PersonalInfo employeeId={employeeId} />}
+        {/*{page === 'shift' && <ShiftCalendar employeeId={employeeId} />} */}
+        {/*{page === 'personal' && <PersonalInfo employeeId={employeeId} />} */}
       </div>
     </div>
   );
