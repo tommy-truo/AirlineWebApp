@@ -28,16 +28,21 @@ export const findFlights = async (req, res) => {
 export const getDropdownData = async (req, res) => {
     try {
         const routesSql = `
-            SELECT 
-                fr.flight_route_id,
-                fr.flight_number,
-                dep.city AS departure_city,
-                arr.city AS arrival_city
-            FROM flight_routes fr
-            JOIN airports dep ON fr.departure_airport_id = dep.airport_id
-            JOIN airports arr ON fr.arrival_airport_id = arr.airport_id
-            ORDER BY fr.flight_number ASC
-        `;
+    SELECT 
+        fr.flight_route_id,
+        fr.flight_number,
+        fr.departure_airport_id,
+        fr.arrival_airport_id,
+        fr.estimated_duration_minutes,
+        dep.city AS departure_city,
+        dep.iata AS departure_iata,
+        arr.city AS arrival_city,
+        arr.iata AS arrival_iata
+    FROM flight_routes fr
+    JOIN airports dep ON fr.departure_airport_id = dep.airport_id
+    JOIN airports arr ON fr.arrival_airport_id = arr.airport_id
+    ORDER BY fr.flight_number ASC
+`;
 
         const aircraftsSql = `
             SELECT 
@@ -51,16 +56,17 @@ export const getDropdownData = async (req, res) => {
         `;
 
         const gatesSql = `
-            SELECT
-                g.gate_id,
-                ap.iata,
-                t.name AS terminal_name,
-                g.number AS gate_number
-            FROM gates g
-            JOIN terminals t ON g.terminal_id = t.terminal_id
-            JOIN airports ap ON t.airport_id = ap.airport_id
-            ORDER BY ap.iata ASC, t.name ASC, g.number ASC
-        `;
+    SELECT
+        g.gate_id,
+        t.airport_id,
+        ap.iata AS iata_code,
+        t.name AS terminal_name,
+        g.number AS gate_number
+    FROM gates g
+    JOIN terminals t ON g.terminal_id = t.terminal_id
+    JOIN airports ap ON t.airport_id = ap.airport_id
+    ORDER BY ap.iata ASC, t.name ASC, g.number ASC
+`;
 
         const statusesSql = `
             SELECT
