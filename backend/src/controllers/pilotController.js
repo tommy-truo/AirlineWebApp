@@ -10,38 +10,41 @@ export const getShiftCalendar = async (req, res, next) => {
 
   const sql = `
     SELECT
-      fea.assignment_id AS shift_id,
-      fi.scheduled_departure_datetime,
-      fi.scheduled_arrival_datetime,
-      DATE(fi.scheduled_departure_datetime) AS shift_date,
-      TIME(fi.scheduled_departure_datetime) AS start_time,
-      TIME(fi.scheduled_arrival_datetime) AS end_time,
-      DAYNAME(fi.scheduled_departure_datetime) AS day_name,
-      fr.flight_number,
-      da.city AS departure_city,
-      aa.city AS arrival_city,
-      fi.aircraft_id,
-      feat.type_name AS assignment_role,
-      e.first_name,
-      e.last_name,
-      fs.status_name AS flight_status
-    FROM airline.flight_employee_assignments fea
-    JOIN airline.employees e
-      ON fea.employee_id = e.employee_id
-    JOIN airline.flight_employee_assignment_types feat
-      ON fea.assignment_type_id = feat.assignment_type_id
-    JOIN airline.flight_instances fi
-      ON fea.flight_instance_id = fi.flight_instance_id
-    JOIN airline.flight_routes fr
-      ON fi.flight_route_id = fr.flight_route_id
-    JOIN airline.airports da
-      ON fr.departure_airport_id = da.airport_id
-    JOIN airline.airports aa
-      ON fr.arrival_airport_id = aa.airport_id
-    JOIN airline.flight_statuses fs
-      ON fi.status_id = fs.flight_status_id
-    WHERE e.employee_id = ?
-    ORDER BY fi.scheduled_departure_datetime
+    fea.assignment_id AS shift_id,
+    fi.scheduled_departure_datetime,
+    fi.scheduled_arrival_datetime,
+    DATE(fi.scheduled_departure_datetime) AS shift_date,
+    TIME(fi.scheduled_departure_datetime) AS start_time,
+    TIME(fi.scheduled_arrival_datetime) AS end_time,
+    DAYNAME(fi.scheduled_departure_datetime) AS day_name,
+    fr.flight_number,
+    da.city AS departure_city,
+    aa.city AS arrival_city,
+    fi.aircraft_id,
+    ac.aircraft_name,
+    feat.type_name AS assignment_role,
+    e.first_name,
+    e.last_name,
+    fs.status_name AS flight_status
+  FROM airline.flight_employee_assignments fea
+  JOIN airline.employees e
+    ON fea.employee_id = e.employee_id
+  JOIN airline.flight_employee_assignment_types feat
+    ON fea.assignment_type_id = feat.assignment_type_id
+  JOIN airline.flight_instances fi
+    ON fea.flight_instance_id = fi.flight_instance_id
+  JOIN airline.flight_routes fr
+    ON fi.flight_route_id = fr.flight_route_id
+  JOIN airline.airports da
+    ON fr.departure_airport_id = da.airport_id
+  JOIN airline.airports aa
+    ON fr.arrival_airport_id = aa.airport_id
+  JOIN airline.flight_statuses fs
+    ON fi.status_id = fs.flight_status_id
+  JOIN airline.aircrafts ac
+    ON fi.aircraft_id = ac.aircraft_id
+  WHERE e.employee_id = ?
+  ORDER BY fi.scheduled_departure_datetime
   `;
 
   try {
@@ -384,27 +387,30 @@ export const getFlightReports = async (req, res, next) => {
     }
 
     let sql = `
-      SELECT
-        rep.report_id,
-        rep.flight_instance_id,
-        rep.employee_id,
-        rep.aircraft_id,
-        rep.hours_flown,
-        rep.distance_flown_km,
-        rep.final_status,
-        rep.irregular_reason,
-        rep.notes,
-        rep.submitted_at,
-        fr.flight_number,
-        fi.scheduled_departure_datetime,
-        fi.scheduled_arrival_datetime
-      FROM airline.flight_reports rep
-      JOIN airline.flight_instances fi
-        ON rep.flight_instance_id = fi.flight_instance_id
-      JOIN airline.flight_routes fr
-        ON fi.flight_route_id = fr.flight_route_id
-      WHERE rep.employee_id = ?
-    `;
+  SELECT
+    rep.report_id,
+    rep.flight_instance_id,
+    rep.employee_id,
+    rep.aircraft_id,
+    ac.aircraft_name,
+    rep.hours_flown,
+    rep.distance_flown_km,
+    rep.final_status,
+    rep.irregular_reason,
+    rep.notes,
+    rep.submitted_at,
+    fr.flight_number,
+    fi.scheduled_departure_datetime,
+    fi.scheduled_arrival_datetime
+  FROM airline.flight_reports rep
+  JOIN airline.flight_instances fi
+    ON rep.flight_instance_id = fi.flight_instance_id
+  JOIN airline.flight_routes fr
+    ON fi.flight_route_id = fr.flight_route_id
+  JOIN airline.aircrafts ac
+    ON rep.aircraft_id = ac.aircraft_id
+  WHERE rep.employee_id = ?
+`;
 
     const params = [employee_id];
 
@@ -452,29 +458,32 @@ export const getPendingFlightReports = async (req, res, next) => {
     const [rows] = await db.query(
       `
       SELECT
-        fi.flight_instance_id,
-        fr.flight_number,
-        da.city AS departure_city,
-        aa.city AS arrival_city,
-        fi.scheduled_departure_datetime,
-        fi.scheduled_arrival_datetime,
-        fi.aircraft_id
-      FROM airline.flight_employee_assignments fea
-      JOIN airline.flight_instances fi
-        ON fea.flight_instance_id = fi.flight_instance_id
-      JOIN airline.flight_routes fr
-        ON fi.flight_route_id = fr.flight_route_id
-      JOIN airline.airports da
-        ON fr.departure_airport_id = da.airport_id
-      JOIN airline.airports aa
-        ON fr.arrival_airport_id = aa.airport_id
-      LEFT JOIN airline.flight_reports rep
-        ON rep.flight_instance_id = fi.flight_instance_id
-       AND rep.employee_id = fea.employee_id
-      WHERE fea.employee_id = ?
-        AND fi.scheduled_arrival_datetime < NOW()
-        AND rep.report_id IS NULL
-      ORDER BY fi.scheduled_departure_datetime DESC
+    fi.flight_instance_id,
+    fr.flight_number,
+    da.city AS departure_city,
+    aa.city AS arrival_city,
+    fi.scheduled_departure_datetime,
+    fi.scheduled_arrival_datetime,
+    fi.aircraft_id,
+    ac.aircraft_name
+  FROM airline.flight_employee_assignments fea
+  JOIN airline.flight_instances fi
+    ON fea.flight_instance_id = fi.flight_instance_id
+  JOIN airline.flight_routes fr
+    ON fi.flight_route_id = fr.flight_route_id
+  JOIN airline.airports da
+    ON fr.departure_airport_id = da.airport_id
+  JOIN airline.airports aa
+    ON fr.arrival_airport_id = aa.airport_id
+  JOIN airline.aircrafts ac
+    ON fi.aircraft_id = ac.aircraft_id
+  LEFT JOIN airline.flight_reports rep
+    ON rep.flight_instance_id = fi.flight_instance_id
+   AND rep.employee_id = fea.employee_id
+  WHERE fea.employee_id = ?
+    AND fi.scheduled_arrival_datetime < NOW()
+    AND rep.report_id IS NULL
+  ORDER BY fi.scheduled_departure_datetime DESC
       `,
       [employee_id]
     );
@@ -553,38 +562,41 @@ export const getFlightReportDetails = async (req, res, next) => {
     const [rows] = await db.query(
       `
       SELECT
-        fr.report_id,
-        fr.hours_flown,
-        fr.distance_flown_km,
-        fr.final_status,
-        fr.irregular_reason,
-        fr.notes,
-        fr.submitted_at,
-        fi.flight_instance_id,
-        fi.scheduled_departure_datetime,
-        fi.scheduled_arrival_datetime,
-        fi.actual_departure_datetime,
-        fi.actual_arrival_datetime,
-        fi.aircraft_id,
-        TIMESTAMPDIFF(
-          MINUTE,
-          fi.actual_departure_datetime,
-          fi.actual_arrival_datetime
-        ) AS actual_duration,
-        r.flight_number,
-        CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
-        CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
-      FROM flight_reports fr
-      JOIN flight_instances fi
-        ON fr.flight_instance_id = fi.flight_instance_id
-      JOIN flight_routes r
-        ON fi.flight_route_id = r.flight_route_id
-      JOIN airports dep
-        ON r.departure_airport_id = dep.airport_id
-      JOIN airports arr
-        ON r.arrival_airport_id = arr.airport_id
-      WHERE fr.report_id = ?
-        AND fr.employee_id = ?
+    fr.report_id,
+    fr.hours_flown,
+    fr.distance_flown_km,
+    fr.final_status,
+    fr.irregular_reason,
+    fr.notes,
+    fr.submitted_at,
+    fi.flight_instance_id,
+    fi.scheduled_departure_datetime,
+    fi.scheduled_arrival_datetime,
+    fi.actual_departure_datetime,
+    fi.actual_arrival_datetime,
+    fi.aircraft_id,
+    ac.aircraft_name,
+    TIMESTAMPDIFF(
+      MINUTE,
+      fi.actual_departure_datetime,
+      fi.actual_arrival_datetime
+    ) AS actual_duration,
+    r.flight_number,
+    CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
+    CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
+  FROM flight_reports fr
+  JOIN flight_instances fi
+    ON fr.flight_instance_id = fi.flight_instance_id
+  JOIN flight_routes r
+    ON fi.flight_route_id = r.flight_route_id
+  JOIN airports dep
+    ON r.departure_airport_id = dep.airport_id
+  JOIN airports arr
+    ON r.arrival_airport_id = arr.airport_id
+  JOIN airline.aircrafts ac
+    ON fi.aircraft_id = ac.aircraft_id
+  WHERE fr.report_id = ?
+    AND fr.employee_id = ?
       `,
       [reportId, employee_id]
     );
