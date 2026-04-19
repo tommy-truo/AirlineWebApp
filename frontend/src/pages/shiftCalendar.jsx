@@ -229,7 +229,7 @@ function ShiftCalendar({ employeeId = 1 }) {
                                         <td>{shift.departure_city || shift.start_location || 'N/A'}</td>
                                         <td>{shift.arrival_city || 'N/A'}</td>
                                         <td>{shift.flight_number || 'N/A'}</td>
-                                        <td>{shift.aircraft_id || 'N/A'}</td>
+                                        <td>{shift.aircraft_name || `Aircraft ${shift.aircraft_id}`}</td>
                                         <td>{shift.assignment_role || 'N/A'}</td>
                                         <td>
                                             <span

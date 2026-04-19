@@ -338,7 +338,7 @@ function FlightReports({ employeeId = 1 }) {
                                             ).toLocaleString()
                                             : 'N/A'}
                                     </td>
-                                    <td>{flight.aircraft_id || 'N/A'}</td>
+                                    <td>{flight.aircraft_name || `Aircraft ${flight.aircraft_id}`}</td>
                                     <td>
                                         <button
                                             className="action-button"
@@ -1027,7 +1027,7 @@ function FlightReports({ employeeId = 1 }) {
 
                                     <p>
                                         <strong>Aircraft:</strong>{' '}
-                                        {reportDetails?.aircraft_id || 'N/A'}
+                                        {reportDetails.aircraft_name || `Aircraft ${reportDetails.aircraft_id}`}
                                     </p>
 
                                     <p>
