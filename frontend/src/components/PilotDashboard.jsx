@@ -1,4 +1,5 @@
 import { useState } from 'react';
+//shift calendar is for managing schedule requests
 import PilotPersonalInfo from '../pages/pilotPersonalInfo.jsx';
 import PilotScheduledFlights from '../pages/pilotScheduledFlights.jsx';
 import PilotShiftCalendar from '../pages/pilotShiftCalendar.jsx';
@@ -9,52 +10,36 @@ function PilotDashboard({ employeeId, onLogout }) {
   const [page, setPage] = useState('shift');
 
   return (
-    <div className="portal-dashboard-layout">
-      <aside className="portal-sidebar">
+    <div className="dashboard-layout">
+      <aside className="sidebar">
         <div>
-          <div className="portal-sidebar-logo">ACME Airlines</div>
-          <p className="portal-sidebar-subtitle">Pilot Portal</p>
+          <div className="sidebar-logo">ACME Airlines</div>
+          <p className="sidebar-subtitle">Pilot Portal</p>
 
-          <div className="portal-sidebar-nav">
+          <div className="sidebar-nav">
             <button
-              className={
-                page === 'shift'
-                  ? 'portal-sidebar-button active'
-                  : 'portal-sidebar-button'
-              }
+              className={page === 'shift' ? 'sidebar-button active' : 'sidebar-button'}
               onClick={() => setPage('shift')}
             >
               Shift Calendar
             </button>
 
             <button
-              className={
-                page === 'flights'
-                  ? 'portal-sidebar-button active'
-                  : 'portal-sidebar-button'
-              }
+              className={page === 'flights' ? 'sidebar-button active' : 'sidebar-button'}
               onClick={() => setPage('flights')}
             >
               Scheduled Flights
             </button>
 
             <button
-              className={
-                page === 'personal'
-                  ? 'portal-sidebar-button active'
-                  : 'portal-sidebar-button'
-              }
+              className={page === 'personal' ? 'sidebar-button active' : 'sidebar-button'}
               onClick={() => setPage('personal')}
             >
               Personal Info
             </button>
 
             <button
-              className={
-                page === 'reports'
-                  ? 'portal-sidebar-button active'
-                  : 'portal-sidebar-button'
-              }
+              className={page === 'reports' ? 'sidebar-button active' : 'sidebar-button'}
               onClick={() => setPage('reports')}
             >
               Flight Reports / Logs
@@ -62,12 +47,12 @@ function PilotDashboard({ employeeId, onLogout }) {
           </div>
         </div>
 
-        <button className="portal-logout-button" onClick={onLogout}>
+        <button className="logout-button" onClick={onLogout}>
           Logout
         </button>
       </aside>
 
-      <main className="portal-dashboard-content">
+      <main className="dashboard-content">
         {page === 'shift' && <PilotShiftCalendar employeeId={employeeId} />}
         {page === 'flights' && <PilotScheduledFlights employeeId={employeeId} />}
         {page === 'personal' && <PilotPersonalInfo employeeId={employeeId} />}
