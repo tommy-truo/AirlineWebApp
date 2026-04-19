@@ -14,8 +14,8 @@ export const findFlights = async (req, res) => {
         }
         if (!departureDate) { return res.status(400).json({message: "Date parameter is required."}); }
 
-        if (!passengersNumber) { passengersNumber = 0; }
-        if (isNaN(passengersNumber) || passengersNumber < 0) {
+        if (!passengersNumber) { return res.status(400).json({message: "passengersNumber parameter is required."}); }
+        if (isNaN(passengersNumber) || passengersNumber < 1) {
             return res.status(400).json({
                 message: "passengersNumber must be a positive integer."
             });
