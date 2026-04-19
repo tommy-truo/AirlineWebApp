@@ -1,0 +1,62 @@
+.manager-shell {
+    min-height: 100vh;
+    background: #fff7f7;
+}
+
+.manager-content-area {
+    background: linear-gradient(to bottom, #fff7f7 0%, #fffdfd 100%);
+    min-height: 100vh;
+    min-width: 0;
+}
+
+.manager-header {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* NEW sidebar class */
+.manager-sidebar {
+    width: 260px;
+    min-width: 260px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #fff8f8 0%, #fff2f2 100%);
+    border-right: 1px solid #f2dede;
+    padding: 20px 10px;
+    flex-shrink: 0;
+}
+
+.manager-sidebar .sidebar-title {
+    color: #b71c1c;
+    font-weight: 700;
+}
+
+.manager-sidebar .sidebar-link {
+    color: #444 !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.manager-sidebar .sidebar-sub-link {
+    color: #555 !important;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.manager-sidebar .sidebar-link.active,
+.manager-sidebar .sidebar-sub-link.active {
+    background: linear-gradient(135deg, #d32f2f, #bb2020);
+    color: white !important;
+}
+
+/* FIX layout issue */
+.manager-shell .form-wrapper {
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 20px;
+}
+
+.manager-shell .signup-container {
+    margin: 0;
+    width: 100%;
+    max-width: none;
+}
