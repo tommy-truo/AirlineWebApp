@@ -27,6 +27,10 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
         hours_flown: '',
         distance_flown_km: '',
         status: 'Completed',
+        incident_type: '',
+        cabin_class_affected: '',
+        passengers_involved: '',
+        follow_up_required: false,
         irregular_reason: '',
         notes: ''
     });
@@ -100,15 +104,21 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
             hours_flown: '',
             distance_flown_km: '',
             status: 'Completed',
+            incident_type: '',
+            cabin_class_affected: '',
+            passengers_involved: '',
+            follow_up_required: false,
             irregular_reason: '',
             notes: ''
         });
     };
 
     const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: type === 'checkbox' ? checked : value
         });
     };
 
@@ -151,6 +161,10 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                     hours_flown: '',
                     distance_flown_km: '',
                     status: 'Completed',
+                    incident_type: '',
+                    cabin_class_affected: '',
+                    passengers_involved: '',
+                    follow_up_required: false,
                     irregular_reason: '',
                     notes: ''
                 });
@@ -251,7 +265,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                 Cabin Crew Dashboard
             </h2>
 
-            <h1 className="title">Flight Reports / Logs</h1>
+            <h1 className="title">Cabin Reports / Logs</h1>
 
             <p
                 style={{
@@ -262,7 +276,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                     fontSize: '16px'
                 }}
             >
-                Submit completed flights and view report history
+                Submit cabin incidents, service issues, and post-flight feedback
             </p>
 
             {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
@@ -415,16 +429,61 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                 <option value="Diverted">Diverted</option>
                             </select>
 
-                            {formData.status !== 'Completed' && (
+                            <select
+                                name="incident_type"
+                                value={formData.incident_type}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Incident Type</option>
+                                <option value="Medical Emergency">Medical Emergency</option>
+                                <option value="Passenger Conflict">Passenger Conflict</option>
+                                <option value="Safety Issue">Safety Issue</option>
+                                <option value="Service Shortage">Service Shortage</option>
+                                <option value="Passenger Complaint">Passenger Complaint</option>
+                                <option value="Other">Other</option>
+                            </select>
+
+                            <select
+                                name="cabin_class_affected"
+                                value={formData.cabin_class_affected}
+                                onChange={handleChange}
+                            >
+                                <option value="">Cabin Class Affected</option>
+                                <option value="First">First</option>
+                                <option value="Business">Business</option>
+                                <option value="Premium Economy">Premium Economy</option>
+                                <option value="Economy">Economy</option>
+                                <option value="Multiple">Multiple</option>
+                            </select>
+
+                            <input
+                                type="number"
+                                min="0"
+                                name="passengers_involved"
+                                value={formData.passengers_involved}
+                                onChange={handleChange}
+                                placeholder="Passengers Involved"
+                            />
+
+                            <label style={{ display: 'flex', gap: '10px', alignItems: 'center', fontWeight: 600 }}>
                                 <input
-                                    type="text"
-                                    name="irregular_reason"
-                                    value={formData.irregular_reason}
+                                    type="checkbox"
+                                    name="follow_up_required"
+                                    checked={formData.follow_up_required}
                                     onChange={handleChange}
-                                    placeholder="Reason for irregular status"
-                                    required
                                 />
-                            )}
+                                Follow-up Required
+                            </label>
+
+                            <input
+                                type="text"
+                                name="irregular_reason"
+                                value={formData.irregular_reason}
+                                onChange={handleChange}
+                                placeholder="Issue / Incident Reason"
+                                required
+                            />
 
                             <textarea
                                 name="notes"
@@ -716,8 +775,10 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                             <th>Flight Number</th>
                             <th>Date Flown</th>
                             <th>Aircraft</th>
-                            <th>Hours</th>
-                            <th>Distance (km)</th>
+                            <th>Incident Type</th>
+                            <th>Cabin Class</th>
+                            <th>Passengers</th>
+                            <th>Follow-up</th>
                             <th>Status</th>
                             <th>Reason</th>
                             <th>Report Submitted On</th>
@@ -726,7 +787,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                     <tbody>
                         {reports.length === 0 ? (
                             <tr>
-                                <td colSpan="8" style={{ textAlign: 'center', padding: '40px' }}>
+                                <td colSpan="10" style={{ textAlign: 'center', padding: '40px' }}>
                                     <div style={{ color: '#888' }}>
                                         ✈️ No flight reports submitted yet.
                                     </div>
@@ -743,14 +804,23 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                             {report.flight_number || 'N/A'}
                                         </span>
                                     </td>
+
                                     <td>
                                         {report.scheduled_departure_datetime
                                             ? new Date(report.scheduled_departure_datetime).toLocaleDateString()
                                             : 'N/A'}
                                     </td>
+
                                     <td>{report.aircraft_name || `Aircraft ${report.aircraft_id}`}</td>
-                                    <td>{report.hours_flown || 'N/A'}</td>
-                                    <td>{report.distance_flown_km || 'N/A'}</td>
+
+                                    <td>{report.incident_type || '—'}</td>
+
+                                    <td>{report.cabin_class_affected || '—'}</td>
+
+                                    <td>{report.passengers_involved ?? '—'}</td>
+
+                                    <td>{report.follow_up_required ? 'Yes' : 'No'}</td>
+
                                     <td>
                                         <span
                                             style={{
@@ -775,7 +845,9 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                             {report.final_status || 'N/A'}
                                         </span>
                                     </td>
+
                                     <td>{report.irregular_reason || '—'}</td>
+
                                     <td>
                                         {report.submitted_at
                                             ? new Date(report.submitted_at).toLocaleString()
@@ -834,9 +906,11 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                     <tr>
                                         <th>Flight Number</th>
                                         <th>Date Flown</th>
-                                        <th>Aircraft ID</th>
-                                        <th>Hours</th>
-                                        <th>Distance (km)</th>
+                                        <th>Aircraft</th>
+                                        <th>Incident Type</th>
+                                        <th>Cabin Class</th>
+                                        <th>Passengers</th>
+                                        <th>Follow-up</th>
                                         <th>Status</th>
                                         <th>Reason</th>
                                         <th>Report Submitted On</th>
@@ -891,6 +965,35 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                                     {report.final_status || 'N/A'}
                                                 </span>
                                             </td>
+                                            <td>{report.aircraft_name || `Aircraft ${report.aircraft_id}`}</td>
+                                            <td>{report.incident_type || '—'}</td>
+                                            <td>{report.cabin_class_affected || '—'}</td>
+                                            <td>{report.passengers_involved ?? '—'}</td>
+                                            <td>{report.follow_up_required ? 'Yes' : 'No'}</td>
+                                            <td>
+                                                <span
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        padding: '6px 10px',
+                                                        borderRadius: '999px',
+                                                        fontWeight: '600',
+                                                        background:
+                                                            report.final_status === 'Completed' ? '#e6f4ea' :
+                                                                report.final_status === 'Delayed' ? '#fff4e5' :
+                                                                    report.final_status === 'Cancelled' ? '#fdecea' :
+                                                                        report.final_status === 'Diverted' ? '#e8f0fe' :
+                                                                            '#f3f3f3',
+                                                        color:
+                                                            report.final_status === 'Completed' ? '#2e7d32' :
+                                                                report.final_status === 'Delayed' ? '#ed6c02' :
+                                                                    report.final_status === 'Cancelled' ? '#c62828' :
+                                                                        report.final_status === 'Diverted' ? '#1565c0' :
+                                                                            '#333'
+                                                    }}
+                                                >
+                                                    {report.final_status || 'N/A'}
+                                                </span>
+                                            </td>
                                             <td>{report.irregular_reason || '—'}</td>
                                             <td>
                                                 {report.submitted_at
@@ -899,6 +1002,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                                     ).toLocaleString()
                                                     : 'N/A'}
                                             </td>
+
                                         </tr>
                                     ))}
                                 </tbody>
@@ -1028,6 +1132,22 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                     <p>
                                         <strong>Aircraft:</strong>{' '}
                                         {reportDetails?.aircraft_name || `Aircraft ${reportDetails?.aircraft_id}`}
+                                    </p>
+
+                                    <p>
+                                        <strong>Incident Type:</strong> {reportDetails?.incident_type || '—'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Cabin Class Affected:</strong> {reportDetails?.cabin_class_affected || '—'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Passengers Involved:</strong> {reportDetails?.passengers_involved ?? '—'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Follow-up Required:</strong> {reportDetails?.follow_up_required ? 'Yes' : 'No'}
                                     </p>
 
                                     <p>
