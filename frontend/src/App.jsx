@@ -11,15 +11,8 @@ import ManagerChangePassword from './pages/ManagerChangePassword.jsx';
 import EmployeeDashboard from './components/employeeDashboard.jsx';
 import MaintenanceDashboard from './components/MaintenanceDashboard.jsx';
 
-const App = () => {
-  // Initialize view from localStorage so the user stays logged in on refresh
-  const [view, setView] = useState(localStorage.getItem('activeView') || 'login');
+const AppContent = () => {
   const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userID'));
-
-  // added by aya
-  useEffect(() => {
-    console.log('VIEW CHANGED TO:', view);
-  }, [view]);
 
   // Function to handle successful passenger signup
   const handlePassengerSignupSuccess = (userData) => {
@@ -33,6 +26,24 @@ const App = () => {
   };
 
   // Function to handle successful login
+  const [role, setRole] = useState(localStorage.getItem('userRole'));
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    const initSession = () => {
+      const storedId = localStorage.getItem('userID');
+      const storedRole = localStorage.getItem('userRole');
+      
+      if (storedId && storedRole) {
+        setCurrentUserId(storedId);
+        setRole(storedRole);
+      }
+      setIsLoading(false);
+    };
+    initSession();
+  }, []);
+
   const handleLoginSuccess = (userData) => {
     console.log('User logged in:', userData.user);
 
@@ -84,17 +95,32 @@ const App = () => {
     }
 
     localStorage.setItem('userID', storedId);
+    localStorage.setItem('userRole', userRole);
+    
     setCurrentUserId(storedId);
+    setRole(userRole);
+
+    if (userRole === 'passenger') {
+      navigate('/passenger-dashboard');
+    } else {
+      navigate('/pilot-dashboard');
+    }
   };
 
   const handleLogout = () => {
-    setView('login');
+    localStorage.clear();
     setCurrentUserId(null);
     localStorage.removeItem('activeView');
     localStorage.removeItem('userID');
     localStorage.removeItem('userRole');
     sessionStorage.clear();
+    setRole(null);
+    navigate('/');
   };
+
+  if (isLoading) {
+    return <div className="loading-screen">Loading...</div>;
+  }
 
   return (
     <BrowserRouter>
@@ -170,6 +196,14 @@ const App = () => {
       )}
       </div>
     </BrowserRouter>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 };
 

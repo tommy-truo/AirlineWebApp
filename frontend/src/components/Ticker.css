@@ -1,0 +1,60 @@
+
+
+.ticker-container {
+    /* 1. This is the magic line that keeps it on screen during scroll */
+    position: fixed; 
+    
+    /* 2. Pin it to the very bottom */
+    bottom: 0;
+    left: 0;
+    
+    /* 3. Ensure it spans the full width */
+    width: 100%;
+    
+    /* 4. Ensure it stays ABOVE all other content (Hero, Search, etc.) */
+    z-index: 9999; 
+  
+    /* Keep your existing styling below */
+    background-color: #002244; 
+    color: #ffffff;
+    padding: 12px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-top: 2px solid #d32f2f; 
+  }
+  
+  /* Ensure the animation still works */
+  .ticker-scroll {
+    display: inline-flex;
+    animation: scrollTicker 40s linear infinite;
+  }
+  
+  @keyframes scrollTicker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  .ticker-scroll {
+    display: inline-flex;
+    animation: scrollTicker 40s linear infinite;
+  }
+  
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 0 40px;
+    text-transform: uppercase;
+  }
+  
+  .ticker-divider {
+    margin-left: 80px;
+    color: #d32f2f;
+  }
+  
+  @keyframes scrollTicker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }

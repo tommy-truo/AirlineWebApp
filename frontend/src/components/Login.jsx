@@ -38,10 +38,10 @@ const Login = ({onLoginSuccess, onSwitch}) => {
 
 
       } catch (err) {
-          console.error("Login Error:", err);
-          alert("Connection error. Is the backend running?");
+        console.error("Login Error:", err);
+        alert("Connection error. Is the backend running?");
       }
-  };
+    };
 
 
 
