@@ -52,6 +52,11 @@ function TransactionReports() {
     }
   }
 
+  function formatDateTime(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString();
+  }
+
   function handleChange(e) {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
@@ -59,6 +64,8 @@ function TransactionReports() {
 
   async function handleGenerateReport(e) {
     e.preventDefault();
+
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     try {
       const params = new URLSearchParams({
@@ -291,7 +298,7 @@ function TransactionReports() {
                             <td>{row.transaction_id}</td>
                             <td>{row.booking_id}</td>
                             <td>${Number(row.amount || 0).toFixed(2)}</td>
-                            <td>{row.transaction_datetime}</td>
+                            <td>{formatDateTime(row.transaction_datetime)}</td>
                             <td>{row.transaction_type}</td>
                             <td>{row.payment_method}</td>
                           </tr>
