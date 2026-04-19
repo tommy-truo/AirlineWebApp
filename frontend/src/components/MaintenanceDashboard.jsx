@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import MaintenancePage from '../pages/MaintenancePage.jsx';
-import ShiftCalendar from '../pages/shiftCalendar.jsx';
-import PersonalInfo from '../pages/personalInfo.jsx';
+import ShiftCalendar from '../pages/pilotShiftCalendar.jsx';
+import PersonalInfo from '../pages/pilotPersonalInfo.jsx';
 import './PilotDashboard.css';
 
 function MaintenanceDashboard({ employeeId, onLogout }) {
