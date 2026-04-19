@@ -242,8 +242,8 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
     ).length;
 
     const displayedReports = filteredReports.filter(report =>
-    report.irregular_reason?.toLowerCase().includes(reasonSearch.toLowerCase())
-);
+        report.irregular_reason?.toLowerCase().includes(reasonSearch.toLowerCase())
+    );
 
     return (
         <div className="page">
@@ -338,7 +338,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                             ).toLocaleString()
                                             : 'N/A'}
                                     </td>
-                                    <td>{flight.aircraft_id || 'N/A'}</td>
+                                    <td>{flight.aircraft_name || `Aircraft ${flight.aircraft_id}`}</td>
                                     <td>
                                         <button
                                             className="action-button"
@@ -377,7 +377,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
 
                         <div className="summary-card">
                             <h3>Aircraft</h3>
-                            <p>{selectedFlight.aircraft_id || 'N/A'}</p>
+                            <p>{selectedFlight.aircraft_name || `Aircraft ${selectedFlight.aircraft_id}`}</p>
                         </div>
                     </div>
 
@@ -601,7 +601,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                         </div>
                         <div>
                             <label
-                            style={{
+                                style={{
                                     display: 'block',
                                     marginBottom: '6px',
                                     fontSize: '0.9rem',
@@ -610,13 +610,13 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                 }}
                             >
                                 Reason Search
-                                </label>
-                                <input
+                            </label>
+                            <input
                                 type="text"
                                 placeholder="e.g thunder"
                                 value={reasonSearch}
                                 onChange={(e) => setReasonSearch(e.target.value)}
-                                />
+                            />
                         </div>
                     </div>
 
@@ -748,7 +748,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                             ? new Date(report.scheduled_departure_datetime).toLocaleDateString()
                                             : 'N/A'}
                                     </td>
-                                    <td>{report.aircraft_id || 'N/A'}</td>
+                                    <td>{report.aircraft_name || `Aircraft ${report.aircraft_id}`}</td>
                                     <td>{report.hours_flown || 'N/A'}</td>
                                     <td>{report.distance_flown_km || 'N/A'}</td>
                                     <td>
@@ -834,7 +834,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                     <tr>
                                         <th>Flight Number</th>
                                         <th>Date Flown</th>
-                                        <th>Aircraft</th>
+                                        <th>Aircraft ID</th>
                                         <th>Hours</th>
                                         <th>Distance (km)</th>
                                         <th>Status</th>
@@ -1027,7 +1027,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
 
                                     <p>
                                         <strong>Aircraft:</strong>{' '}
-                                        {reportDetails?.aircraft_id || 'N/A'}
+                                        {reportDetails?.aircraft_name || `Aircraft ${reportDetails?.aircraft_id}`}
                                     </p>
 
                                     <p>
