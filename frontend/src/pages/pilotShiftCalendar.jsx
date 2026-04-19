@@ -120,7 +120,7 @@ function PilotShiftCalendar({ employeeId = 1 }) {
         <>
             <div className="page">
                 <h2 style={{ textAlign: 'center', marginBottom: '6px', color: '#777' }}>
-                    Pilot Dashboard
+                    Shift Calendar
                 </h2>
 
                 <h1 className="title" style={{ marginBottom: '4px' }}>

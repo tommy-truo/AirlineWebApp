@@ -18,9 +18,11 @@ import flashSaleRouter from './src/routes/flashSaleRouter.js';
 import airportRouter from './src/routes/airportRouter.js';
 import startExpireJob from './src/jobs/bookingExpireCronJob.js';
 import employeeRoutes from './src/routes/empDashRoutes.js';
+import maintenanceRouter from './routes/maintenanceRouter.js';
+import cabinRouter from './routes/cabinRouter.js';
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5001;
 
 app.use(cors()); 
 
@@ -43,6 +45,8 @@ app.use('/api/flight-reports', flightReportRouter);
 app.use('/api/flash-sales', flashSaleRouter);
 app.use('/api/airports', airportRouter);
 app.use('/api/employee', employeeRoutes);
+app.use('/api/maintenance', maintenanceRouter);
+app.use('/api/cabin-brief', cabinRouter);
 
 app.use((err, req, res, next) => {
     console.error("SERVER ERROR:", err);

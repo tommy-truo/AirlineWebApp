@@ -9,6 +9,7 @@ import CabinCrewDashboard from './components/cabinCrewDashboard.jsx';
 import ManagerDashboard from './pages/ManagerDashboard.jsx';
 import ManagerChangePassword from './pages/ManagerChangePassword.jsx';
 import EmployeeDashboard from './components/employeeDashboard.jsx';
+import MaintenanceDashboard from './components/MaintenanceDashboard.jsx';
 
 const App = () => {
   // Initialize view from localStorage so the user stays logged in on refresh
@@ -76,6 +77,11 @@ const App = () => {
       localStorage.setItem('activeView', 'employeeDashboard');
       setView('employeeDashboard');
     }
+    else if (userData.user.role === 'maintenance') {
+      storedId = userData.user.employee_id ?? userData.user.id;
+      localStorage.setItem('activeView', 'maintenanceDashboard');
+      setView('maintenanceDashboard');
+    }
 
     localStorage.setItem('userID', storedId);
     setCurrentUserId(storedId);
@@ -126,6 +132,9 @@ const App = () => {
       
       {view === 'cabinCrewDashboard' && (
       <CabinCrewDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
+
+      {view === 'maintenanceDashboard' && (
+        <MaintenanceDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
 
         {/* 5. Manager View */}
         {/* added by aya */}
