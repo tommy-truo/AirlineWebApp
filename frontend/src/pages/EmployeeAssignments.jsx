@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import '../components/styles.css'
+import '../styles/styles.css'
 
 function EmployeeAssignments() {
   const [assignments, setAssignments] = useState([])
@@ -9,6 +9,7 @@ function EmployeeAssignments() {
 
   const [search, setSearch] = useState('')
   const [filterRole, setFilterRole] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
 
   const [form, setForm] = useState({
     employee_id: '',
@@ -19,155 +20,97 @@ function EmployeeAssignments() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  const assignmentsPerPage = 8
 
   useEffect(() => {
     fetchAssignments()
     fetchDropdowns()
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, filterRole])
+
   function formatDateTime(dateString) {
     if (!dateString) return ''
     return new Date(dateString).toLocaleString()
   }
 
-  // function fetchAssignments() {
-
-  //   fetch(`${API_BASE_URL}/api/assignments`)
-  //     .then(res => res.json())
-  //     .then(data => setAssignments(data))
-  // }
-
-  // function fetchDropdowns() {
-  //   fetch(`${API_BASE_URL}/api/employees`)
-  //     .then(res => res.json())
-  //     .then(data => setEmployees(data))
-
-  //   fetch(`${API_BASE_URL}/api/flights/all`)
-  //     .then(res => res.json())
-  //     .then(data => setFlights(data))
-
-  //   fetch(`${API_BASE_URL}/api/assignments/types`)
-  //     .then(res => res.json())
-  //     .then(data => setRoles(data))
-  // }
-
   function fetchAssignments() {
-  fetch(`${API_BASE_URL}/api/assignments`)
-    .then(res => res.json())
-    .then(data => setAssignments(data))
-    .catch(err => {
-      console.log(err);
-      setError('Error loading assignments.');
-    });
-}
+    fetch(`${API_BASE_URL}/api/assignments`)
+      .then(res => res.json())
+      .then(data => setAssignments(data))
+      .catch(() => setError('Error loading assignments.'))
+  }
 
-function fetchDropdowns() {
-  fetch(`${API_BASE_URL}/api/employees`)
-    .then(res => res.json())
-    .then(data => setEmployees(data))
-    .catch(err => {
-      console.log(err);
-      setError('Error loading employees.');
-    });
+  function fetchDropdowns() {
+    fetch(`${API_BASE_URL}/api/employees`)
+      .then(res => res.json())
+      .then(data => setEmployees(data))
 
-  fetch(`${API_BASE_URL}/api/flights/all`)
-    .then(res => res.json())
-    .then(data => setFlights(data))
-    .catch(err => {
-      console.log(err);
-      setError('Error loading flights.');
-    });
+    fetch(`${API_BASE_URL}/api/flights/all`)
+      .then(res => res.json())
+      .then(data => setFlights(data))
 
-  fetch(`${API_BASE_URL}/api/assignments/types`)
-    .then(res => res.json())
-    .then(data => setRoles(data))
-    .catch(err => {
-      console.log(err);
-      setError('Error loading assignment types.');
-    });
-}
+    fetch(`${API_BASE_URL}/api/assignments/types`)
+      .then(res => res.json())
+      .then(data => setRoles(data))
+  }
 
   function handleChange(e) {
     const { id, value } = e.target
     setForm(prev => ({ ...prev, [id]: value }))
   }
 
-  // function handleSubmit(e) {
-  //   e.preventDefault()
-
-  //   fetch(`${API_BASE_URL}/api/assignments`, {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify(form)
-  //   })
-  //     .then(res => res.json())
-  //     .then((data) => {
-  //       if (data.message === 'Employee is already assigned to this flight.') {
-  //         setError(data.message)
-  //         setMessage('')
-  //         return
-  //       }
-
-  //       setMessage('Assignment created successfully.')
-  //       setError('')
-  //       setForm({
-  //         employee_id: '',
-  //         flight_instance_id: '',
-  //         assignment_type_id: ''
-  //       })
-  //       fetchAssignments()
-  //     })
-  // }
-
-  // function handleDelete(id) {
-  //   fetch(`${API_BASE_URL}/api/assignments/${id}`, {
-  //     method: 'DELETE'
-  //   }).then(() => fetchAssignments())
-  // }
-
   function handleSubmit(e) {
-  e.preventDefault();
+    e.preventDefault()
 
-  fetch(`${API_BASE_URL}/api/assignments`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(form)
-  })
-    .then(res => res.json())
-    .then((data) => {
-      if (data.message === 'Employee is already assigned to this flight.') {
-        setError(data.message);
-        setMessage('');
-        return;
-      }
-
-      setMessage('Assignment created successfully.');
-      setError('');
-      setForm({
-        employee_id: '',
-        flight_instance_id: '',
-        assignment_type_id: ''
-      });
-      fetchAssignments();
+    fetch(`${API_BASE_URL}/api/assignments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
     })
-    .catch(err => {
-      console.log(err);
-      setError('Error creating assignment.');
-      setMessage('');
-    });
-}
+      .then(res => res.json())
+      .then((data) => {
+        if (data.message) {
+          if (
+            data.message.includes('assigned') ||
+            data.message.includes('conflict') ||
+            data.message.includes('Only') ||
+            data.message.includes('required') ||
+            data.message.includes('Invalid')
+          ) {
+            setError(data.message)
+            setMessage('')
+            return
+          }
+        }
 
-function handleDelete(id) {
-  fetch(`${API_BASE_URL}/api/assignments/${id}`, {
-    method: 'DELETE'
-  })
-    .then(() => fetchAssignments())
-    .catch(err => {
-      console.log(err);
-      setError('Error removing assignment.');
-    });
-}
+        setMessage('Assignment created successfully.')
+        setError('')
+        setForm({
+          employee_id: '',
+          flight_instance_id: '',
+          assignment_type_id: ''
+        })
+        setCurrentPage(1)
+        fetchAssignments()
+      })
+      .catch(() => {
+        setError('Error creating assignment.')
+        setMessage('')
+      })
+  }
+
+  function handleDelete(id) {
+    fetch(`${API_BASE_URL}/api/assignments/${id}`, {
+      method: 'DELETE'
+    }).then(() => {
+      fetchAssignments()
+      setCurrentPage(1)
+    })
+  }
 
   const filteredAssignments = assignments.filter(a => {
     const matchesSearch =
@@ -179,6 +122,23 @@ function handleDelete(id) {
 
     return matchesSearch && matchesRole
   })
+
+  const indexOfLastAssignment = currentPage * assignmentsPerPage
+  const indexOfFirstAssignment = indexOfLastAssignment - assignmentsPerPage
+  const currentAssignments = filteredAssignments.slice(indexOfFirstAssignment, indexOfLastAssignment)
+  const totalPages = Math.ceil(filteredAssignments.length / assignmentsPerPage)
+
+  function handleNextPage() {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  function handlePrevPage() {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
 
   return (
     <div className="container-fluid form-wrapper">
@@ -212,11 +172,13 @@ function handleDelete(id) {
                   <label>Flight</label>
                   <select id="flight_instance_id" className="form-control" value={form.flight_instance_id} onChange={handleChange}>
                     <option value="">Select Flight</option>
-                    {flights.map(f => (
-                      <option key={f.flight_instance_id} value={f.flight_instance_id}>
-                        {f.flight_number} — {f.departure_city} → {f.arrival_city} — {formatDateTime(f.scheduled_departure_datetime)}
-                      </option>
-                    ))}
+                    {flights
+                      .filter(f => new Date(f.scheduled_departure_datetime) > new Date())
+                      .map(f => (
+                        <option key={f.flight_instance_id} value={f.flight_instance_id}>
+                          {f.flight_number} — {f.departure_city} → {f.arrival_city} — {formatDateTime(f.scheduled_departure_datetime)}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
@@ -233,7 +195,11 @@ function handleDelete(id) {
                 </div>
               </div>
 
-              <button type="submit" className="login-button mt-2">
+              <button
+                type="submit"
+                className="login-button mt-2"
+                disabled={!form.employee_id || !form.flight_instance_id || !form.assignment_type_id}
+              >
                 Assign Employee
               </button>
             </div>
@@ -286,26 +252,62 @@ function handleDelete(id) {
                   </thead>
 
                   <tbody>
-                    {filteredAssignments.map(a => (
-                      <tr key={a.assignment_id}>
-                        <td>{a.employee_name}</td>
-                        <td>{a.title_name || '-'}</td>
-                        <td>{a.type_name}</td>
-                        <td>{a.flight_number}</td>
-                        <td>{a.departure_city}</td>
-                        <td>{a.arrival_city}</td>
-                        <td>{formatDateTime(a.scheduled_departure_datetime)}</td>
-                        <td>{formatDateTime(a.scheduled_arrival_datetime)}</td>
-                        <td>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(a.assignment_id)}>
-                            Remove
-                          </button>
+                    {currentAssignments.length > 0 ? (
+                      currentAssignments.map(a => (
+                        <tr key={a.assignment_id}>
+                          <td>{a.employee_name}</td>
+                          <td>{a.title_name || '-'}</td>
+                          <td>{a.type_name}</td>
+                          <td>{a.flight_number}</td>
+                          <td>{a.departure_city}</td>
+                          <td>{a.arrival_city}</td>
+                          <td>{formatDateTime(a.scheduled_departure_datetime)}</td>
+                          <td>{formatDateTime(a.scheduled_arrival_datetime)}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDelete(a.assignment_id)}
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="9" className="text-center">
+                          No assignments found.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
 
                 </table>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+
+                <span className="fw-semibold">
+                  Page {currentPage} of {totalPages || 1}
+                </span>
+
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                >
+                  Next
+                </button>
               </div>
             </div>
 
