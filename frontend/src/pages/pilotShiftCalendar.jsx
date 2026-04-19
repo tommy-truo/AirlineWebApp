@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function ShiftCalendar({ employeeId = 1 }) {
+function PilotShiftCalendar({ employeeId = 1 }) {
     const [shifts, setShifts] = useState([]);
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
@@ -389,4 +389,4 @@ function ShiftCalendar({ employeeId = 1 }) {
     );
 }
 
-export default ShiftCalendar;
+export default PilotShiftCalendar;

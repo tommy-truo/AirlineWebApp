@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function ScheduledFlights({ employeeId = 1 }) {
+function PilotScheduledFlights({ employeeId = 1 }) {
     const [flights, setFlights] = useState([]);
     const [error, setError] = useState('');
     const [selectedFlight, setSelectedFlight] = useState(null);
@@ -343,4 +343,4 @@ function ScheduledFlights({ employeeId = 1 }) {
     );
 }
 
-export default ScheduledFlights;
+export default PilotScheduledFlights;
