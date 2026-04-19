@@ -190,7 +190,9 @@ const Dashboard = ({ onLogout }) => {
                     <h2>Select Your Station</h2>
                     <div className="station-grid">
                         {airports.map(a => (
-                            <button key={a.iata} className="station-btn" onClick={() => setSelectedAirport(a.iata)}>
+                            <button key={a.iata} className="station-btn" onClick={() => {
+                                setSelectedAirport(a.iata);
+                                setActiveTab("flight-schedules");}}>
                                 {a.name} ({a.iata})
                             </button>
                         ))}
