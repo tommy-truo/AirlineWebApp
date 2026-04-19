@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import '../styles/styles.css'
+import '../components/styles.css'
 
 function EmployeeAssignments() {
   const [assignments, setAssignments] = useState([])
