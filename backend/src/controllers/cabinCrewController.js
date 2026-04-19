@@ -386,6 +386,7 @@ export const getCabinCrewFlightReports = async (req, res, next) => {
         rep.flight_instance_id,
         rep.employee_id,
         rep.aircraft_id,
+        ac.aircraft_name,
         rep.hours_flown,
         rep.distance_flown_km,
         rep.final_status,
@@ -400,6 +401,8 @@ export const getCabinCrewFlightReports = async (req, res, next) => {
         ON rep.flight_instance_id = fi.flight_instance_id
       JOIN airline.flight_routes fr
         ON fi.flight_route_id = fr.flight_route_id
+      JOIN airline.aircrafts ac
+        ON rep.aircraft_id = ac.aircraft_id
       WHERE rep.employee_id = ?
     `;
 
@@ -449,29 +452,32 @@ export const getCabinCrewPendingFlightReports = async (req, res, next) => {
     const [rows] = await db.query(
       `
       SELECT
-        fi.flight_instance_id,
-        fr.flight_number,
-        da.city AS departure_city,
-        aa.city AS arrival_city,
-        fi.scheduled_departure_datetime,
-        fi.scheduled_arrival_datetime,
-        fi.aircraft_id
-      FROM airline.flight_employee_assignments fea
-      JOIN airline.flight_instances fi
-        ON fea.flight_instance_id = fi.flight_instance_id
-      JOIN airline.flight_routes fr
-        ON fi.flight_route_id = fr.flight_route_id
-      JOIN airline.airports da
-        ON fr.departure_airport_id = da.airport_id
-      JOIN airline.airports aa
-        ON fr.arrival_airport_id = aa.airport_id
-      LEFT JOIN airline.flight_reports rep
-        ON rep.flight_instance_id = fi.flight_instance_id
-       AND rep.employee_id = fea.employee_id
-      WHERE fea.employee_id = ?
-        AND fi.scheduled_arrival_datetime < NOW()
-        AND rep.report_id IS NULL
-      ORDER BY fi.scheduled_departure_datetime DESC
+  fi.flight_instance_id,
+  fr.flight_number,
+  da.city AS departure_city,
+  aa.city AS arrival_city,
+  fi.scheduled_departure_datetime,
+  fi.scheduled_arrival_datetime,
+  fi.aircraft_id,
+  ac.aircraft_name
+FROM airline.flight_employee_assignments fea
+JOIN airline.flight_instances fi
+  ON fea.flight_instance_id = fi.flight_instance_id
+JOIN airline.flight_routes fr
+  ON fi.flight_route_id = fr.flight_route_id
+JOIN airline.airports da
+  ON fr.departure_airport_id = da.airport_id
+JOIN airline.airports aa
+  ON fr.arrival_airport_id = aa.airport_id
+JOIN airline.aircrafts ac
+  ON fi.aircraft_id = ac.aircraft_id
+LEFT JOIN airline.flight_reports rep
+  ON rep.flight_instance_id = fi.flight_instance_id
+ AND rep.employee_id = fea.employee_id
+WHERE fea.employee_id = ?
+  AND fi.scheduled_arrival_datetime < NOW()
+  AND rep.report_id IS NULL
+ORDER BY fi.scheduled_departure_datetime DESC
       `,
       [employee_id]
     );
@@ -550,38 +556,41 @@ export const getCabinCrewFlightReportDetails = async (req, res, next) => {
     const [rows] = await db.query(
       `
       SELECT
-        fr.report_id,
-        fr.hours_flown,
-        fr.distance_flown_km,
-        fr.final_status,
-        fr.irregular_reason,
-        fr.notes,
-        fr.submitted_at,
-        fi.flight_instance_id,
-        fi.scheduled_departure_datetime,
-        fi.scheduled_arrival_datetime,
-        fi.actual_departure_datetime,
-        fi.actual_arrival_datetime,
-        fi.aircraft_id,
-        TIMESTAMPDIFF(
-          MINUTE,
-          fi.actual_departure_datetime,
-          fi.actual_arrival_datetime
-        ) AS actual_duration,
-        r.flight_number,
-        CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
-        CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
-      FROM flight_reports fr
-      JOIN flight_instances fi
-        ON fr.flight_instance_id = fi.flight_instance_id
-      JOIN flight_routes r
-        ON fi.flight_route_id = r.flight_route_id
-      JOIN airports dep
-        ON r.departure_airport_id = dep.airport_id
-      JOIN airports arr
-        ON r.arrival_airport_id = arr.airport_id
-      WHERE fr.report_id = ?
-        AND fr.employee_id = ?
+  fr.report_id,
+  fr.hours_flown,
+  fr.distance_flown_km,
+  fr.final_status,
+  fr.irregular_reason,
+  fr.notes,
+  fr.submitted_at,
+  fi.flight_instance_id,
+  fi.scheduled_departure_datetime,
+  fi.scheduled_arrival_datetime,
+  fi.actual_departure_datetime,
+  fi.actual_arrival_datetime,
+  fi.aircraft_id,
+  ac.aircraft_name,
+  TIMESTAMPDIFF(
+    MINUTE,
+    fi.actual_departure_datetime,
+    fi.actual_arrival_datetime
+  ) AS actual_duration,
+  r.flight_number,
+  CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
+  CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
+FROM flight_reports fr
+JOIN flight_instances fi
+  ON fr.flight_instance_id = fi.flight_instance_id
+JOIN flight_routes r
+  ON fi.flight_route_id = r.flight_route_id
+JOIN airports dep
+  ON r.departure_airport_id = dep.airport_id
+JOIN airports arr
+  ON r.arrival_airport_id = arr.airport_id
+JOIN airline.aircrafts ac
+  ON fi.aircraft_id = ac.aircraft_id
+WHERE fr.report_id = ?
+  AND fr.employee_id = ?
       `,
       [reportId, employee_id]
     );
@@ -597,12 +606,17 @@ export const getCabinCrewFlightReportDetails = async (req, res, next) => {
       SELECT
   e.first_name,
   e.last_name,
-  feat.type_name AS assignment_role
+  feat.type_name AS assignment_role,
+  ac.aircraft_name
 FROM flight_employee_assignments fea
 JOIN employees e
   ON fea.employee_id = e.employee_id
 JOIN flight_employee_assignment_types feat
   ON fea.assignment_type_id = feat.assignment_type_id
+JOIN flight_instances fi
+  ON fea.flight_instance_id = fi.flight_instance_id
+JOIN airline.aircrafts ac
+  ON fi.aircraft_id = ac.aircraft_id
 WHERE fea.flight_instance_id = ?
 ORDER BY
   CASE

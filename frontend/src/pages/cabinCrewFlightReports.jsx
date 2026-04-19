@@ -864,7 +864,7 @@ function CabinCrewFlightReports({ employeeId = 1 }) {
                                                     ).toLocaleDateString()
                                                     : 'N/A'}
                                             </td>
-                                            <td>{report.aircraft_id || 'N/A'}</td>
+                                            <td>{report.aircraft_name || `Aircraft ${report.aircraft_id}`}</td>
                                             <td>{report.hours_flown || 'N/A'}</td>
                                             <td>{report.distance_flown_km || 'N/A'}</td>
                                             <td>
