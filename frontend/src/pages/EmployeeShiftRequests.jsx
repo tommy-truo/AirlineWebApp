@@ -7,6 +7,8 @@ function EmployeeRequest() {
     const [message, setMessage] = useState('')
     const [error, setError] = useState('')
 
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
     useEffect(() => {
         fetchRequests()
     }, [])
@@ -20,7 +22,14 @@ function EmployeeRequest() {
             .catch(() => setError('Error loading requests'))
     }
 
+    function formatDateTime(dateString) {
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleString();
+    }
+
     function handleUpdate(id, status) {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
         fetch(`${API_BASE_URL}/api/requests/${id}`, {
             method: 'PUT',
             headers: {
@@ -46,7 +55,7 @@ function EmployeeRequest() {
             <div className="card signup-container shadow-sm border-danger">
                 <div className="card-body">
 
-                    <h2 className="form-title mb-3">Employee Requests</h2>
+                    <h2 className="form-title mb-3">Employee Shift Requests</h2>
 
                     {message && <div className="alert alert-success">{message}</div>}
                     {error && <div className="alert alert-danger">{error}</div>}
@@ -87,7 +96,7 @@ function EmployeeRequest() {
                                                 {r.status}
                                             </span>
                                         </td>
-                                        <td>{r.submitted_datetime}</td>
+                                        <td>{formatDateTime(r.submitted_datetime)}</td>
 
                                         <td>
                                             {r.status === 'Pending' ? (
