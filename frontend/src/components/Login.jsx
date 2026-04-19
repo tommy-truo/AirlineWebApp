@@ -15,7 +15,7 @@ const Login = ({onLoginSuccess, onSwitch}) => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-          const API = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+          const API = import.meta.env.VITE_API_URL || 'https://airlinewebapp.onrender.com';
           const response = await fetch(API + '/api/auth/login', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
