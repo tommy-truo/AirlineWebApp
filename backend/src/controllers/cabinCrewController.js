@@ -208,8 +208,110 @@ export const getCabinCrewProfile = async (req, res) => {
   }
 };
 
+export const updateCCProfile = async (req, res, next) => {
+  const {
+    employee_id,
+    first_name,
+    middle_initial,
+    last_name,
+    email,
+    emergency_contact_name,
+    emergency_contact_phone,
+    emergency_contact_relationship
+  } = req.body;
+
+  if (!employee_id) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const getAccountSql = `
+    SELECT account_id
+    FROM airline.employees
+    WHERE employee_id = ?
+  `;
+
+  const updateEmployeeSql = `
+    UPDATE airline.employees
+    SET
+      first_name = ?,
+      middle_initial = ?,
+      last_name = ?,
+      emergency_contact_name = ?,
+      emergency_contact_phone = ?,
+      emergency_contact_relationship = ?
+    WHERE employee_id = ?
+  `;
+
+  const updateAccountSql = `
+    UPDATE airline.accounts
+    SET email = ?
+    WHERE account_id = ?
+  `;
+
+  try {
+    const [results] = await db.query(getAccountSql, [employee_id]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const accountId = results[0].account_id;
+
+    await db.query(updateEmployeeSql, [
+      first_name,
+      middle_initial,
+      last_name,
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      employee_id
+    ]);
+
+    await db.query(updateAccountSql, [email, accountId]);
+
+    res.json({ message: 'Personal info updated successfully' });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 export const updateCabinCrewEmergencyContact = async (req, res) => {
-  res.json({ message: 'Update not implemented yet' });
+  const {
+    employee_id,
+    emergency_contact_name,
+    emergency_contact_phone,
+    emergency_contact_relationship
+  } = req.body;
+
+  if (!employee_id) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    UPDATE airline.employees
+    SET
+      emergency_contact_name = ?,
+      emergency_contact_phone = ?,
+      emergency_contact_relationship = ?
+    WHERE employee_id = ?
+  `;
+
+  try {
+    const [result] = await db.query(sql, [
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      employee_id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.json({ message: 'Emergency contact updated successfully' });
+  } catch (err) {
+    return next(err);
+  }
 };
 
 export const getCabinCrewManifest = async (req, res) => {
