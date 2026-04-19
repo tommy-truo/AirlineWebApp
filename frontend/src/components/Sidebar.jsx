@@ -10,7 +10,7 @@ function Sidebar({ onLogout }) {
   }
 
   return (
-    <div className="manager-sidebar d-flex flex-column justify-content-between">
+    <div className="sidebar d-flex flex-column justify-content-between">
       <div>
         <div className="p-3">
           <h5 className="mb-4 sidebar-title">Manager Panel</h5>
