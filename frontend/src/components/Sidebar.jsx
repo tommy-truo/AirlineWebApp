@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import "../styles/styles.css";
+import "../components/styles.css";
 
 function Sidebar({ onLogout }) {
   const location = useLocation();
