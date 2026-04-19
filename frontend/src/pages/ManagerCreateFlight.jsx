@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../components/styles.css';
+import "../components/ManagerStyles.css";
 
 function CreateFlight() {
     const [form, setForm] = useState({

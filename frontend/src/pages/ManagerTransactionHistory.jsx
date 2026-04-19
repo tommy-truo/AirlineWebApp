@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import '../components/styles.css';
+import "../components/ManagerStyles.css";
 
 function TransactionHistory() {
 
