@@ -44,12 +44,14 @@ const SeatSelection = ({ flight, passengers, initialSeats, onBack, onSeatsConfir
     }
   };
 
-  const groupedSeats = seats.reduce((acc, seat) => {
-    const cn = seat.class || 'Economy';
-    if (!acc[cn]) acc[cn] = [];
-    acc[cn].push(seat);
-    return acc;
-  }, {});
+const groupedSeats = Array.isArray(seats) 
+  ? seats.reduce((acc, seat) => {
+      const cn = seat.class || 'Economy';
+      if (!acc[cn]) acc[cn] = [];
+      acc[cn].push(seat);
+      return acc;
+    }, {})
+  : {};
 
   const renderCabin = (cn, cSeats) => {
     const rows = [...new Set(cSeats.map(s => s.row))].sort((a,b) => a-b);
