@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import "../components/styles.css";
+import "../styles/styles.css";
 
 function Sidebar({ onLogout }) {
   const location = useLocation();
@@ -79,6 +79,13 @@ function Sidebar({ onLogout }) {
 
               <div className="collapse show" id="flights-menu">
                 <ul className="list-unstyled ms-3">
+
+                  <li>
+                    <Link className={`nav-link sidebar-sub-link ${isActive("/create-flight")}`} to="/create-flight">
+                      Create Flight
+                    </Link>
+                  </li>
+
                   <li>
                     <Link className={`nav-link sidebar-sub-link ${isActive("/flights")}`} to="/flights">
                       Directory
@@ -86,8 +93,20 @@ function Sidebar({ onLogout }) {
                   </li>
 
                   <li>
-                    <Link className={`nav-link sidebar-sub-link ${isActive("/create-flight")}`} to="/create-flight">
-                      Create Flight
+                    <Link
+                      className={`nav-link sidebar-sub-link ${isActive("/create-flash-sale")}`}
+                      to="/create-flash-sale"
+                    >
+                      Create Flash Sale
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      className={`nav-link sidebar-sub-link ${isActive("/flash-sales")}`}
+                      to="/flash-sales"
+                    >
+                      Flash Sales
                     </Link>
                   </li>
 
