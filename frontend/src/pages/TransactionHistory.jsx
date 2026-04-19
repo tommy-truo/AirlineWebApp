@@ -69,6 +69,11 @@ function TransactionHistory() {
     }
   }
 
+  function formatDateTime(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString();
+  }
+
   return (
     <div className="container-fluid form-wrapper">
 
@@ -139,7 +144,7 @@ function TransactionHistory() {
                       <td>{transaction.transaction_id}</td>
                       <td>{transaction.booking_id}</td>
                       <td>${Number(transaction.transaction_amount).toFixed(2)}</td>
-                      <td>{transaction.transaction_datetime}</td>
+                      <td>{formatDateTime(transaction.transaction_datetime)}</td>
                       <td>{transaction.transaction_type}</td>
                       <td>{transaction.payment_method}</td>
                     </tr>
