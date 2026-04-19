@@ -4,7 +4,7 @@ import * as BookingModel from "../models/booking-model.js";
 const startExpireJob = () => {
   // Runs every minute
   cron.schedule('* * * * *', async () => {
-    console.log(`[${new Date().toISOString()}] Checking for expired bookings...`);
+    console.log(`[${new Date()}] Checking for expired bookings...`);
 
     try {
       // Fetch the bookings
