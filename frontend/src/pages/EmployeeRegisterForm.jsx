@@ -30,6 +30,8 @@ function EmployeeRegisterForm() {
         supervisors: []
     });
 
+
+
     useEffect(() => {
         async function fetchDropdowns() {
             try {
@@ -65,6 +67,7 @@ function EmployeeRegisterForm() {
         e.preventDefault();
 
         try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
             const res = await fetch(`${API_BASE_URL}/api/employees`, {
                 method: 'POST',
@@ -181,10 +184,10 @@ function EmployeeRegisterForm() {
                                         required
                                     >
                                         <option value="">Select Gender</option>
-                                        <option value="M">M</option>
-                                        <option value="F">F</option>
-                                        <option value="X">X</option>
-                                        <option value="U">U</option>
+                                        <option value="M">Male</option>
+                                        <option value="F">Female</option>
+                                        <option value="X">Non-Binary</option>
+                                        <option value="U">Other</option>
                                     </select>
                                 </div>
 
