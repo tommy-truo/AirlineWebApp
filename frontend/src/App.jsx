@@ -4,9 +4,8 @@ import Login from './components/Login.jsx';
 import Signup from './components/SignUp.jsx';
 import PassengerDashboard from './components/Layout.jsx';
 // IMPORT YALLS SPECIFIC COMPONENTS HERE
-import PilotDashboard from './components/PilotDashboard.jsx'; // dex
-
-// added by aya
+import PilotDashboard from './components/PilotDashboard.jsx'; //dex
+import CabinCrewDashboard from './components/cabinCrewDashboard.jsx';
 import ManagerDashboard from './pages/ManagerDashboard.jsx';
 import ChangePassword from './pages/ChangePassword.jsx';
 
@@ -61,11 +60,15 @@ const App = () => {
       localStorage.setItem('activeView', 'shiftCalendar');
       setView('shiftCalendar');
     } 
-    // added by aya
     else if (userData.user.role === 'manager') {
       storedId = userData.user.employee_id ?? userData.user.account_id ?? userData.user.id;
       localStorage.setItem('activeView', 'managerDashboard');
       setView('managerDashboard');
+    }
+    else if(userData.user.role === 'flightcrew'){
+      storedId = userData.user.employee_id ?? userData.user.id;
+      localStorage.setItem('activeView', 'cabinCrewDashboard');
+      setView('cabinCrewDashboard');
     }
 
     localStorage.setItem('userID', storedId);
@@ -112,10 +115,12 @@ const App = () => {
           <PassengerDashboard userID={currentUserId} onLogout={handleLogout} />
         )}
 
-        {/* 4. Pilot View */}
-        {view === 'shiftCalendar' && (
-          <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />
-        )}
+      {/* pilot and cabincrew views*/}
+      {view === 'shiftCalendar' && (
+        <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
+      
+      {view === 'cabinCrewDashboard' && (
+      <CabinCrewDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
 
         {/* 5. Manager View */}
         {/* added by aya */}

@@ -56,6 +56,20 @@ export async function getPassengersByUser(req, res) {
     }
 }
 
+export async function getPassengersByFlight(req, res) {
+    try {
+        const flightInstanceID = req.params.flightInstanceID;
+        if (!flightInstanceID) {
+            return res.status(400).json({ message: "Flight Instance ID is required" });
+        }
+
+        const ids = await PassengerModel.getPassengersByFlight(flightInstanceID);
+        return res.status(200).json(ids);
+    } catch (err) {
+        handleControllerError(res, err, "Controller Error in getPassengersByFlight");
+    }
+}
+
 // POST /users/:userID/passengers
 // Creates and links new guest passenger to an account
 export async function createAndLinkPassenger(req, res) {
@@ -213,5 +227,19 @@ export async function unlinkPassenger(req, res) {
 
     } catch (err) {
         handleControllerError(res, err, "Controller Error in unlinkPassenger");
+    }
+}
+
+// PATCH /api/passengers/:passengerID/enroll
+export async function enrollPassenger(req, res) {
+    try {
+        const { passengerID } = req.params;
+        if (!passengerID) throw new Error("Passenger ID is required");
+
+        await PassengerModel.enrollPassenger(passengerID);
+
+        return res.status(200).json({message: "Successfully enrolled"});
+    } catch (err) {
+        handleControllerError(res, err, "Controller Error in enrollPassenger");
     }
 }

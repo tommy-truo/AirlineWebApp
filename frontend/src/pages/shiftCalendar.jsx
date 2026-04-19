@@ -11,12 +11,9 @@ function ShiftCalendar({ employeeId = 1 }) {
     const [requests, setRequests] = useState([]);
     const [requestError, setRequestError] = useState('');
 
-    //const API_URL = 'https://airline-web-app.onrender.com';
-    //const API_URL = 'http://localhost:5001';
     const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
-
         fetch(`${API_URL}/api/pilot/shift_calendar?employee_id=${employeeId}`)
             .then((res) => {
                 if (!res.ok) {
@@ -32,7 +29,7 @@ function ShiftCalendar({ employeeId = 1 }) {
                 console.error(err);
                 setError('Could not load shift data.');
             });
-    }, []);
+    }, [API_URL, employeeId]);
 
     const fetchShiftRequests = () => {
         fetch(`${API_URL}/api/pilot/shift_requests?employee_id=${employeeId}`)
@@ -53,26 +50,43 @@ function ShiftCalendar({ employeeId = 1 }) {
 
     useEffect(() => {
         fetchShiftRequests();
-    }, []);
+    }, [API_URL, employeeId]);
 
-    const nextFlight = shifts.length > 0 ? shifts[0] : null;
+    const now = new Date();
+
+    const upcomingShifts = shifts
+        .filter((shift) => new Date(shift.scheduled_departure_datetime) >= now)
+        .sort(
+            (a, b) =>
+                new Date(a.scheduled_departure_datetime) -
+                new Date(b.scheduled_departure_datetime)
+        );
+
+
+    const nextFlight = upcomingShifts.length > 0 ? upcomingShifts[0] : null;
 
     const openRequestForm = (type, shiftId) => {
         setRequestType(type);
         setSelectedShift(shiftId);
         setReason('');
         setSuccessMessage('');
+        setError('');
         setShowForm(true);
     };
 
     const handleSubmitRequest = (e) => {
         e.preventDefault();
 
+        if (!reason.trim()) {
+            setError('A reason for your shift request is required before submission.');
+            return;
+        }
+
         const payload = {
             employee_id: employeeId,
             assignment_id: selectedShift,
             request_type: requestType,
-            reason: reason
+            reason: reason.trim()
         };
 
         fetch(`${API_URL}/api/pilot/submit_request`, {
@@ -93,6 +107,7 @@ function ShiftCalendar({ employeeId = 1 }) {
                 setSuccessMessage('Request submitted successfully.');
                 setShowForm(false);
                 setReason('');
+                setError('');
                 fetchShiftRequests();
             })
             .catch((err) => {
@@ -109,9 +124,11 @@ function ShiftCalendar({ employeeId = 1 }) {
                 </h2>
 
                 <h1 className="title" style={{ marginBottom: '4px' }}>
-                    {shifts[0]
-                        ? `${shifts[0].first_name} ${shifts[0].last_name}`
-                        : 'Pilot'}
+                    {upcomingShifts[0]
+                        ? `${upcomingShifts[0].first_name} ${upcomingShifts[0].last_name}`
+                        : shifts[0]
+                            ? `${shifts[0].first_name} ${shifts[0].last_name}`
+                            : 'Pilot'}
                 </h1>
 
                 <p
@@ -123,7 +140,7 @@ function ShiftCalendar({ employeeId = 1 }) {
                         marginBottom: '24px'
                     }}
                 >
-                    {shifts[0]?.assignment_role || 'Pilot'} • Shift Calendar
+                    {upcomingShifts[0]?.assignment_role || shifts[0]?.assignment_role || 'Pilot'} • Shift Calendar
                 </p>
 
                 {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
@@ -133,8 +150,8 @@ function ShiftCalendar({ employeeId = 1 }) {
 
                 <div className="summary-cards">
                     <div className="summary-card">
-                        <h3>Total Shifts</h3>
-                        <p>{shifts.length}</p>
+                        <h3>Total Upcoming Shifts</h3>
+                        <p>{upcomingShifts.length}</p>
                     </div>
 
                     <div className="summary-card">
@@ -148,9 +165,9 @@ function ShiftCalendar({ employeeId = 1 }) {
                     </div>
 
                     <div className="summary-card">
-                        <h3>Total Hours</h3>
+                        <h3>Total Upcoming Hours</h3>
                         <p>
-                            {shifts.reduce((sum, shift) => {
+                            {upcomingShifts.reduce((sum, shift) => {
                                 const start = new Date(`1970-01-01T${shift.start_time}`);
                                 const end = new Date(`1970-01-01T${shift.end_time}`);
                                 return sum + (end - start) / (1000 * 60 * 60);
@@ -169,6 +186,10 @@ function ShiftCalendar({ employeeId = 1 }) {
                 </div>
 
                 <div className="table-wrapper">
+                    <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
+                        Upcoming Shifts
+                    </h2>
+
                     <table className="shift-table">
                         <thead>
                             <tr>
@@ -186,60 +207,69 @@ function ShiftCalendar({ employeeId = 1 }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {shifts.map((shift, index) => (
-                                <tr key={shift.shift_id || index}>
-                                    <td>
-                                        {shift.shift_date
-                                            ? new Date(shift.shift_date).toLocaleDateString()
-                                            : shift.day
-                                                ? new Date(shift.day).toLocaleDateString()
-                                                : 'N/A'}
-                                    </td>
-                                    <td>{shift.day_name || 'N/A'}</td>
-                                    <td>{shift.start_time ? String(shift.start_time).slice(0, 5) : 'N/A'}</td>
-                                    <td>{shift.end_time ? String(shift.end_time).slice(0, 5) : 'N/A'}</td>
-                                    <td>{shift.departure_city || shift.start_location || 'N/A'}</td>
-                                    <td>{shift.arrival_city || 'N/A'}</td>
-                                    <td>{shift.flight_number || 'N/A'}</td>
-                                    <td>{shift.aircraft_id || 'N/A'}</td>
-                                    <td>{shift.assignment_role || 'N/A'}</td>
-                                    <td>
-                                        <span
-                                            style={{
-                                                display: 'inline-block',
-                                                padding: '6px 10px',
-                                                borderRadius: '999px',
-                                                background: '#f3f3f3',
-                                                fontSize: '14px',
-                                                fontWeight: '600'
-                                            }}
-                                        >
-                                            {shift.flight_status || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                            <button
-                                                className="action-button"
-                                                style={{ backgroundColor: '#3498db', color: 'white', border: 'none' }}
-                                                onClick={() => openRequestForm('swap', shift.shift_id)}
-                                            >
-                                                Swap
-                                            </button>
-                                            <button
-                                                className="action-button"
-                                                style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none' }}
-                                                onClick={() => openRequestForm('drop', shift.shift_id)}
-                                            >
-                                                Drop
-                                            </button>
-                                        </div>
+                            {upcomingShifts.length === 0 ? (
+                                <tr>
+                                    <td colSpan="11" style={{ textAlign: 'center' }}>
+                                        No upcoming shifts.
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                upcomingShifts.map((shift, index) => (
+                                    <tr key={shift.shift_id || index}>
+                                        <td>
+                                            {shift.shift_date
+                                                ? new Date(shift.shift_date).toLocaleDateString()
+                                                : shift.day
+                                                    ? new Date(shift.day).toLocaleDateString()
+                                                    : 'N/A'}
+                                        </td>
+                                        <td>{shift.day_name || 'N/A'}</td>
+                                        <td>{shift.start_time ? String(shift.start_time).slice(0, 5) : 'N/A'}</td>
+                                        <td>{shift.end_time ? String(shift.end_time).slice(0, 5) : 'N/A'}</td>
+                                        <td>{shift.departure_city || shift.start_location || 'N/A'}</td>
+                                        <td>{shift.arrival_city || 'N/A'}</td>
+                                        <td>{shift.flight_number || 'N/A'}</td>
+                                        <td>{shift.aircraft_name || `Aircraft ${shift.aircraft_id}`}</td>
+                                        <td>{shift.assignment_role || 'N/A'}</td>
+                                        <td>
+                                            <span
+                                                style={{
+                                                    display: 'inline-block',
+                                                    padding: '6px 10px',
+                                                    borderRadius: '999px',
+                                                    background: '#f3f3f3',
+                                                    fontSize: '14px',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                {shift.flight_status || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                <button
+                                                    className="action-button"
+                                                    style={{ backgroundColor: '#3498db', color: 'white', border: 'none' }}
+                                                    onClick={() => openRequestForm('swap', shift.shift_id)}
+                                                >
+                                                    Swap
+                                                </button>
+                                                <button
+                                                    className="action-button"
+                                                    style={{ backgroundColor: '#e74c3c', color: 'white', border: 'none' }}
+                                                    onClick={() => openRequestForm('drop', shift.shift_id)}
+                                                >
+                                                    Drop
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
+
 
                 <div className="table-wrapper" style={{ marginTop: '30px' }}>
                     <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
@@ -312,10 +342,14 @@ function ShiftCalendar({ employeeId = 1 }) {
                             {requestType.toUpperCase()} Shift Request
                         </h3>
 
+                        <p style={{ color: '#666', marginBottom: '10px' }}>
+                            A reason for your request is required before submission.
+                        </p>
+
                         <textarea
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder="Enter reason for request"
+                            placeholder="Enter reason for request (required)"
                             rows="4"
                             style={{
                                 width: '100%',
@@ -329,7 +363,15 @@ function ShiftCalendar({ employeeId = 1 }) {
                         />
 
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <button type="submit" className="action-button">
+                            <button
+                                type="submit"
+                                className="action-button"
+                                disabled={!reason.trim()}
+                                style={{
+                                    opacity: reason.trim() ? 1 : 0.6,
+                                    cursor: reason.trim() ? 'pointer' : 'not-allowed'
+                                }}
+                            >
                                 Submit Request
                             </button>
                             <button

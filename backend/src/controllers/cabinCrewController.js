@@ -1,7 +1,7 @@
 import { json } from 'express';
 import { db } from '../config/db.js';
 // Shift Calendar
-export const getShiftCalendar = async (req, res, next) => {
+export const getCabinCrewShiftCalendar = async (req, res, next) => {
   const employeeId = req.query.employee_id;
 
   if (!employeeId) {
@@ -9,7 +9,7 @@ export const getShiftCalendar = async (req, res, next) => {
   }
 
   const sql = `
-    SELECT
+  SELECT
     fea.assignment_id AS shift_id,
     fi.scheduled_departure_datetime,
     fi.scheduled_arrival_datetime,
@@ -21,10 +21,10 @@ export const getShiftCalendar = async (req, res, next) => {
     da.city AS departure_city,
     aa.city AS arrival_city,
     fi.aircraft_id,
-    ac.aircraft_name,
     feat.type_name AS assignment_role,
     e.first_name,
     e.last_name,
+    ac.aircraft_name AS aircraft_name,
     fs.status_name AS flight_status
   FROM airline.flight_employee_assignments fea
   JOIN airline.employees e
@@ -41,11 +41,12 @@ export const getShiftCalendar = async (req, res, next) => {
     ON fr.arrival_airport_id = aa.airport_id
   JOIN airline.flight_statuses fs
     ON fi.status_id = fs.flight_status_id
-  JOIN airline.aircrafts ac
-    ON fi.aircraft_id = ac.aircraft_id
+    JOIN airline.aircrafts ac
+  ON fi.aircraft_id = ac.aircraft_id
   WHERE e.employee_id = ?
+    AND feat.type_name = 'Cabin Crew'
   ORDER BY fi.scheduled_departure_datetime
-  `;
+`;
 
   try {
     const [results] = await db.query(sql, [employeeId]);
@@ -57,7 +58,7 @@ export const getShiftCalendar = async (req, res, next) => {
 };
 
 // add, swap, drop shifts
-export const submitShiftRequest = async (req, res, next) => {
+export const submitCabinCrewShiftRequest = async (req, res, next) => {
   const { employee_id, assignment_id, request_type, reason } = req.body;
 
   const sql = `
@@ -75,58 +76,8 @@ export const submitShiftRequest = async (req, res, next) => {
   }
 };
 
-// scheduled flights
-export const getScheduledFlights = async (req, res, next) => {
-  const employeeId = req.query.employee_id;
-
-  if (!employeeId) {
-    return res.status(400).json({ error: 'employee_id is required' });
-  }
-
-  const sql = `
-  SELECT
-    fea.assignment_id,
-    fi.flight_instance_id,
-    e.employee_id,
-    e.first_name,
-    e.last_name,
-    fr.flight_number,
-    da.city AS departure_city,
-    aa.city AS arrival_city,
-    fi.scheduled_departure_datetime,
-    fi.scheduled_arrival_datetime,
-    fr.estimated_distance_km,
-    fr.estimated_duration_minutes,
-    fi.aircraft_id,
-    ac.aircraft_name
-  FROM airline.flight_employee_assignments fea
-  JOIN airline.employees e
-    ON fea.employee_id = e.employee_id
-  JOIN airline.flight_instances fi
-    ON fea.flight_instance_id = fi.flight_instance_id
-  JOIN airline.flight_routes fr
-    ON fi.flight_route_id = fr.flight_route_id
-  JOIN airline.aircrafts ac
-    ON fi.aircraft_id = ac.aircraft_id
-  JOIN airline.airports da
-    ON fr.departure_airport_id = da.airport_id
-  JOIN airline.airports aa
-    ON fr.arrival_airport_id = aa.airport_id
-  WHERE e.employee_id = ?
-  ORDER BY fi.scheduled_departure_datetime
-`;
-
-  try {
-    const [results] = await db.query(sql, [employeeId]);
-    res.json(results);
-  }
-  catch (err) {
-    return next(err);
-  }
-};
-
 // to see shift requests
-export const getShiftRequests = async (req, res, next) => {
+export const getCabinCrewShiftRequests = async (req, res, next) => {
   const employeeId = req.query.employee_id;
 
   if (!employeeId) {
@@ -168,8 +119,51 @@ export const getShiftRequests = async (req, res, next) => {
   }
 };
 
-// personal info / HR
-export const getProfile = async (req, res, next) => {
+//scheduled flights
+export const getCabinCrewScheduledFlights = async (req, res, next) => {
+  try {
+    const { employee_id } = req.query;
+
+    const [rows] = await db.query(
+      `
+      SELECT
+        fi.flight_instance_id,
+        fr.flight_number,
+        fi.scheduled_departure_datetime,
+        fi.scheduled_arrival_datetime,
+        da.city AS departure_city,
+        aa.city AS arrival_city,
+        fi.aircraft_id,
+        ac.aircraft_name,
+        fr.estimated_distance_km,
+        fr.estimated_duration_minutes
+      FROM flight_employee_assignments fea
+      JOIN flight_instances fi 
+        ON fea.flight_instance_id = fi.flight_instance_id
+      JOIN aircrafts ac
+        on fi.aircraft_id = ac.aircraft_id
+      JOIN flight_routes fr 
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airports da 
+        ON fr.departure_airport_id = da.airport_id
+      JOIN airports aa 
+        ON fr.arrival_airport_id = aa.airport_id
+      JOIN flight_employee_assignment_types feat
+        ON fea.assignment_type_id = feat.assignment_type_id
+      WHERE fea.employee_id = ?
+        AND feat.type_name = 'Cabin Crew'
+      ORDER BY fi.scheduled_departure_datetime
+      `,
+      [employee_id]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getCabinCrewProfile = async (req, res) => {
   const employeeId = req.query.employee_id;
 
   if (!employeeId) {
@@ -214,7 +208,7 @@ export const getProfile = async (req, res, next) => {
   }
 };
 
-export const updateProfile = async (req, res, next) => {
+export const updateCabinCrewProfile = async (req, res, next) => {
   const {
     employee_id,
     first_name,
@@ -281,7 +275,46 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
-export const getCrewManifest = async (req, res, next) => {
+export const updateCabinCrewEmergencyContact = async (req, res) => {
+  const {
+    employee_id,
+    emergency_contact_name,
+    emergency_contact_phone,
+    emergency_contact_relationship
+  } = req.body;
+
+  if (!employee_id) {
+    return res.status(400).json({ error: 'employee_id is required' });
+  }
+
+  const sql = `
+    UPDATE airline.employees
+    SET
+      emergency_contact_name = ?,
+      emergency_contact_phone = ?,
+      emergency_contact_relationship = ?
+    WHERE employee_id = ?
+  `;
+
+  try {
+    const [result] = await db.query(sql, [
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      employee_id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.json({ message: 'Emergency contact updated successfully' });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getCabinCrewManifest = async (req, res) => {
   const { employee_id, flight_id } = req.query;
 
   if (!employee_id || !flight_id) {
@@ -332,46 +365,7 @@ export const getCrewManifest = async (req, res, next) => {
   }
 };
 
-export const updateEmergencyContact = async (req, res, next) => {
-  const {
-    employee_id,
-    emergency_contact_name,
-    emergency_contact_phone,
-    emergency_contact_relationship
-  } = req.body;
-
-  if (!employee_id) {
-    return res.status(400).json({ error: 'employee_id is required' });
-  }
-
-  const sql = `
-    UPDATE airline.employees
-    SET
-      emergency_contact_name = ?,
-      emergency_contact_phone = ?,
-      emergency_contact_relationship = ?
-    WHERE employee_id = ?
-  `;
-
-  try {
-    const [result] = await db.query(sql, [
-      emergency_contact_name,
-      emergency_contact_phone,
-      emergency_contact_relationship,
-      employee_id
-    ]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Employee not found' });
-    }
-
-    res.json({ message: 'Emergency contact updated successfully' });
-  } catch (err) {
-    return next(err);
-  }
-};
-
-export const getFlightReports = async (req, res, next) => {
+export const getCabinCrewFlightReports = async (req, res, next) => {
   try {
     const {
       employee_id,
@@ -387,30 +381,34 @@ export const getFlightReports = async (req, res, next) => {
     }
 
     let sql = `
-  SELECT
-    rep.report_id,
-    rep.flight_instance_id,
-    rep.employee_id,
-    rep.aircraft_id,
-    ac.aircraft_name,
-    rep.hours_flown,
-    rep.distance_flown_km,
-    rep.final_status,
-    rep.irregular_reason,
-    rep.notes,
-    rep.submitted_at,
-    fr.flight_number,
-    fi.scheduled_departure_datetime,
-    fi.scheduled_arrival_datetime
-  FROM airline.flight_reports rep
-  JOIN airline.flight_instances fi
-    ON rep.flight_instance_id = fi.flight_instance_id
-  JOIN airline.flight_routes fr
-    ON fi.flight_route_id = fr.flight_route_id
-  JOIN airline.aircrafts ac
-    ON rep.aircraft_id = ac.aircraft_id
-  WHERE rep.employee_id = ?
-`;
+     SELECT
+  rep.report_id,
+  rep.flight_instance_id,
+  rep.employee_id,
+  rep.aircraft_id,
+  ac.aircraft_name,
+  rep.hours_flown,
+  rep.distance_flown_km,
+  rep.final_status,
+  rep.incident_type,
+  rep.cabin_class_affected,
+  rep.passengers_involved,
+  rep.follow_up_required,
+  rep.irregular_reason,
+  rep.notes,
+  rep.submitted_at,
+  fr.flight_number,
+  fi.scheduled_departure_datetime,
+  fi.scheduled_arrival_datetime
+      FROM airline.flight_reports rep
+      JOIN airline.flight_instances fi
+        ON rep.flight_instance_id = fi.flight_instance_id
+      JOIN airline.flight_routes fr
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airline.aircrafts ac
+        ON rep.aircraft_id = ac.aircraft_id
+      WHERE rep.employee_id = ?
+    `;
 
     const params = [employee_id];
 
@@ -447,7 +445,7 @@ export const getFlightReports = async (req, res, next) => {
   }
 };
 
-export const getPendingFlightReports = async (req, res, next) => {
+export const getCabinCrewPendingFlightReports = async (req, res, next) => {
   try {
     const { employee_id } = req.query;
 
@@ -457,33 +455,34 @@ export const getPendingFlightReports = async (req, res, next) => {
 
     const [rows] = await db.query(
       `
-      SELECT
-    fi.flight_instance_id,
-    fr.flight_number,
-    da.city AS departure_city,
-    aa.city AS arrival_city,
-    fi.scheduled_departure_datetime,
-    fi.scheduled_arrival_datetime,
-    fi.aircraft_id,
-    ac.aircraft_name
-  FROM airline.flight_employee_assignments fea
-  JOIN airline.flight_instances fi
-    ON fea.flight_instance_id = fi.flight_instance_id
-  JOIN airline.flight_routes fr
-    ON fi.flight_route_id = fr.flight_route_id
-  JOIN airline.airports da
-    ON fr.departure_airport_id = da.airport_id
-  JOIN airline.airports aa
-    ON fr.arrival_airport_id = aa.airport_id
-  JOIN airline.aircrafts ac
-    ON fi.aircraft_id = ac.aircraft_id
-  LEFT JOIN airline.flight_reports rep
-    ON rep.flight_instance_id = fi.flight_instance_id
-   AND rep.employee_id = fea.employee_id
-  WHERE fea.employee_id = ?
-    AND fi.scheduled_arrival_datetime < NOW()
-    AND rep.report_id IS NULL
-  ORDER BY fi.scheduled_departure_datetime DESC
+      
+ SELECT
+        fi.flight_instance_id,
+        fr.flight_number,
+        da.city AS departure_city,
+        aa.city AS arrival_city,
+        fi.scheduled_departure_datetime,
+        fi.scheduled_arrival_datetime,
+        fi.aircraft_id,
+        ac.aircraft_name
+      FROM airline.flight_employee_assignments fea
+      JOIN airline.flight_instances fi
+        ON fea.flight_instance_id = fi.flight_instance_id
+      JOIN airline.flight_routes fr
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airline.airports da
+        ON fr.departure_airport_id = da.airport_id
+      JOIN airline.airports aa
+        ON fr.arrival_airport_id = aa.airport_id
+      JOIN airline.aircrafts ac
+        ON fi.aircraft_id = ac.aircraft_id
+      LEFT JOIN airline.flight_reports rep
+        ON rep.flight_instance_id = fi.flight_instance_id
+       AND rep.employee_id = fea.employee_id
+      WHERE fea.employee_id = ?
+        AND fi.scheduled_arrival_datetime < NOW()
+        AND rep.report_id IS NULL
+      ORDER BY fi.scheduled_departure_datetime DESC
       `,
       [employee_id]
     );
@@ -494,7 +493,7 @@ export const getPendingFlightReports = async (req, res, next) => {
   }
 };
 
-export const submitFlightReport = async (req, res, next) => {
+export const submitCabinCrewFlightReport = async (req, res, next) => {
   try {
     const {
       employee_id,
@@ -503,6 +502,10 @@ export const submitFlightReport = async (req, res, next) => {
       hours_flown,
       distance_flown_km,
       status,
+      incident_type,
+      cabin_class_affected,
+      passengers_involved,
+      follow_up_required,
       irregular_reason,
       notes
     } = req.body;
@@ -517,18 +520,22 @@ export const submitFlightReport = async (req, res, next) => {
 
     const [result] = await db.query(
       `
-            INSERT INTO airline.flight_reports (
-                flight_instance_id,
-                employee_id,
-                aircraft_id,
-                hours_flown,
-                distance_flown_km,
-                final_status,
-                irregular_reason,
-                notes
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `,
+  INSERT INTO airline.flight_reports (
+      flight_instance_id,
+      employee_id,
+      aircraft_id,
+      hours_flown,
+      distance_flown_km,
+      final_status,
+      incident_type,
+      cabin_class_affected,
+      passengers_involved,
+      follow_up_required,
+      irregular_reason,
+      notes
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `,
       [
         flight_instance_id,
         employee_id,
@@ -536,6 +543,10 @@ export const submitFlightReport = async (req, res, next) => {
         hours_flown,
         distance_flown_km,
         status,
+        incident_type || null,
+        cabin_class_affected || null,
+        passengers_involved || null,
+        follow_up_required ? 1 : 0,
         irregular_reason || null,
         notes || null
       ]
@@ -546,11 +557,11 @@ export const submitFlightReport = async (req, res, next) => {
       report_id: result.insertId
     });
   } catch (err) {
-    return next(err);
+    next(err);
   }
 };
 
-export const getFlightReportDetails = async (req, res, next) => {
+export const getCabinCrewFlightReportDetails = async (req, res, next) => {
   try {
     const { reportId } = req.params;
     const { employee_id } = req.query;
@@ -562,41 +573,45 @@ export const getFlightReportDetails = async (req, res, next) => {
     const [rows] = await db.query(
       `
       SELECT
-    fr.report_id,
-    fr.hours_flown,
-    fr.distance_flown_km,
-    fr.final_status,
-    fr.irregular_reason,
-    fr.notes,
-    fr.submitted_at,
-    fi.flight_instance_id,
-    fi.scheduled_departure_datetime,
-    fi.scheduled_arrival_datetime,
+  fr.report_id,
+  fr.hours_flown,
+  fr.distance_flown_km,
+  fr.final_status,
+  fr.irregular_reason,
+  fr.notes,
+  fr.submitted_at,
+  fi.flight_instance_id,
+  fi.scheduled_departure_datetime,
+  fi.scheduled_arrival_datetime,
+  fi.actual_departure_datetime,
+  fi.actual_arrival_datetime,
+  fi.aircraft_id,
+  fr.incident_type,
+fr.cabin_class_affected,
+fr.passengers_involved,
+fr.follow_up_required,
+  ac.aircraft_name,
+  TIMESTAMPDIFF(
+    MINUTE,
     fi.actual_departure_datetime,
-    fi.actual_arrival_datetime,
-    fi.aircraft_id,
-    ac.aircraft_name,
-    TIMESTAMPDIFF(
-      MINUTE,
-      fi.actual_departure_datetime,
-      fi.actual_arrival_datetime
-    ) AS actual_duration,
-    r.flight_number,
-    CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
-    CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
-  FROM flight_reports fr
-  JOIN flight_instances fi
-    ON fr.flight_instance_id = fi.flight_instance_id
-  JOIN flight_routes r
-    ON fi.flight_route_id = r.flight_route_id
-  JOIN airports dep
-    ON r.departure_airport_id = dep.airport_id
-  JOIN airports arr
-    ON r.arrival_airport_id = arr.airport_id
-  JOIN airline.aircrafts ac
-    ON fi.aircraft_id = ac.aircraft_id
-  WHERE fr.report_id = ?
-    AND fr.employee_id = ?
+    fi.actual_arrival_datetime
+  ) AS actual_duration,
+  r.flight_number,
+  CONCAT(dep.city, ' (', dep.iata, ')') AS departure_city,
+  CONCAT(arr.city, ' (', arr.iata, ')') AS arrival_city
+FROM flight_reports fr
+JOIN flight_instances fi
+  ON fr.flight_instance_id = fi.flight_instance_id
+JOIN flight_routes r
+  ON fi.flight_route_id = r.flight_route_id
+JOIN airports dep
+  ON r.departure_airport_id = dep.airport_id
+JOIN airports arr
+  ON r.arrival_airport_id = arr.airport_id
+JOIN airline.aircrafts ac
+  ON fi.aircraft_id = ac.aircraft_id
+WHERE fr.report_id = ?
+  AND fr.employee_id = ?
       `,
       [reportId, employee_id]
     );
@@ -612,12 +627,17 @@ export const getFlightReportDetails = async (req, res, next) => {
       SELECT
   e.first_name,
   e.last_name,
-  feat.type_name AS assignment_role
+  feat.type_name AS assignment_role,
+  ac.aircraft_name
 FROM flight_employee_assignments fea
 JOIN employees e
   ON fea.employee_id = e.employee_id
 JOIN flight_employee_assignment_types feat
   ON fea.assignment_type_id = feat.assignment_type_id
+JOIN flight_instances fi
+  ON fea.flight_instance_id = fi.flight_instance_id
+JOIN airline.aircrafts ac
+  ON fi.aircraft_id = ac.aircraft_id
 WHERE fea.flight_instance_id = ?
 ORDER BY
   CASE

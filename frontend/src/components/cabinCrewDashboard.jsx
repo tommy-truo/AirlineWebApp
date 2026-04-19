@@ -1,14 +1,11 @@
 import { useState } from 'react';
-//shift calendar is for managing schedule requests
-import ShiftCalendar from '../pages/shiftCalendar.jsx';
-
-//scheduled flights is for viewing flight assignments, both future and past
-import ScheduledFlights from '../pages/scheduledFlights.jsx';
-import PersonalInfo from '../pages/personalInfo.jsx';
-import FlightReports from '../pages/flightReports.jsx';
+import CabinCrewShiftCalendar from '../pages/cabinCrewShiftCalendar.jsx';
+import CabinCrewScheduledFlights from '../pages/cabinCrewScheduledFlights.jsx';
+import CabinCrewPersonalInfo from '../pages/cabinCrewPersonalInfo.jsx';
+import CabinCrewFlightReports from '../pages/cabinCrewFlightReports.jsx';
 import './PilotDashboard.css';
 
-function PilotDashboard({ employeeId, onLogout }) {
+function CabinCrewDashboard({ employeeId, onLogout }) {
   const [page, setPage] = useState('shift');
 
   return (
@@ -16,7 +13,7 @@ function PilotDashboard({ employeeId, onLogout }) {
       <aside className="sidebar">
         <div>
           <div className="sidebar-logo">ACME Airlines</div>
-          <p className="sidebar-subtitle">Pilot Portal</p>
+          <p className="sidebar-subtitle">Cabin Crew Portal</p>
 
           <div className="sidebar-nav">
             <button
@@ -55,13 +52,13 @@ function PilotDashboard({ employeeId, onLogout }) {
       </aside>
 
       <main className="dashboard-content">
-        {page === 'shift' && <ShiftCalendar employeeId={employeeId} />}
-        {page === 'flights' && <ScheduledFlights employeeId={employeeId} />}
-        {page === 'personal' && <PersonalInfo employeeId={employeeId} />}
-        {page === 'reports' && <FlightReports employeeId={employeeId} />}
+        {page === 'shift' && <CabinCrewShiftCalendar employeeId={employeeId} />}
+        {page === 'flights' && <CabinCrewScheduledFlights employeeId={employeeId} />}
+        {page === 'personal' && <CabinCrewPersonalInfo employeeId={employeeId} />}
+        {page === 'reports' && <CabinCrewFlightReports employeeId={employeeId} />}
       </main>
     </div>
   );
 }
 
-export default PilotDashboard;
+export default CabinCrewDashboard;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function ScheduledFlights({ employeeId = 1 }) {
+function CabinCrewScheduledFlights({ employeeId = 1 }) {
     const [flights, setFlights] = useState([]);
     const [error, setError] = useState('');
     const [selectedFlight, setSelectedFlight] = useState(null);
@@ -10,9 +10,9 @@ function ScheduledFlights({ employeeId = 1 }) {
     const [loadingFlights, setLoadingFlights] = useState(true);
 
     const API_URL = import.meta.env.VITE_API_URL;
-    useEffect(() => {
 
-        fetch(`${API_URL}/api/pilot/scheduled_flights?employee_id=${employeeId}`)
+    useEffect(() => {
+        fetch(`${API_URL}/api/cabin_crew/scheduled_flights?employee_id=${employeeId}`)
             .then((res) => {
                 if (!res.ok) throw new Error('Failed to fetch scheduled flights');
                 return res.json();
@@ -37,7 +37,7 @@ function ScheduledFlights({ employeeId = 1 }) {
 
         try {
             const res = await fetch(
-                `${API_URL}/api/pilot/crew_manifest?employee_id=${employeeId}&flight_id=${flight.flight_instance_id}`
+                `${API_URL}/api/cabin_crew/crew_manifest?employee_id=${employeeId}&flight_id=${flight.flight_instance_id}`
             );
 
             if (!res.ok) {
@@ -69,6 +69,10 @@ function ScheduledFlights({ employeeId = 1 }) {
                 new Date(a.scheduled_departure_datetime) -
                 new Date(b.scheduled_departure_datetime)
         );
+
+    const totalFlights = upcomingFlights.length;
+
+    const totalDistance = upcomingFlights.reduce((sum, f) => sum + (f.distance || 0), 0);
 
     const pastFlights = flights.filter(
         (f) => new Date(f.scheduled_departure_datetime) < now
@@ -159,7 +163,7 @@ function ScheduledFlights({ employeeId = 1 }) {
     return (
         <div className="page">
             <h2 style={{ textAlign: 'center', color: '#777' }}>
-                Pilot Dashboard
+                Cabin Crew Dashboard
             </h2>
 
             <h1 className="title">
@@ -185,11 +189,10 @@ function ScheduledFlights({ employeeId = 1 }) {
                     <h3>Next Route</h3>
                     <p>
                         {nextFlight
-                            ? `${nextFlight.departure_city} → ${nextFlight.arrival_city}`
+                            ? `${nextFlight.departure_city || 'N/A'} → ${nextFlight.arrival_city || 'N/A'}`
                             : 'N/A'}
                     </p>
                 </div>
-            </div>
 
                 <div className="summary-card">
                     <h3>Upcoming Distance</h3>
@@ -197,6 +200,7 @@ function ScheduledFlights({ employeeId = 1 }) {
                         {upcomingFlights.reduce((sum, f) => sum + (f.estimated_distance_km || 0), 0)} km
                     </p>
                 </div>
+            </div>
 
             {loadingFlights ? (
                 <div className="table-wrapper" style={{ marginTop: '30px', textAlign: 'center' }}>
@@ -267,7 +271,7 @@ function ScheduledFlights({ employeeId = 1 }) {
                                 : 'N/A'}
                         </p>
 
-                        <p><strong>Aircraft:</strong> {selectedFlight.aircraft_id || 'N/A'}</p>
+                        <p><strong>Aircraft:</strong> {selectedFlight.aircraft_name || `Aircraft ${selectedFlight.aircraft_id}`}</p>
 
                         <p>
                             <strong>Distance:</strong>{' '}
@@ -343,4 +347,4 @@ function ScheduledFlights({ employeeId = 1 }) {
     );
 }
 
-export default ScheduledFlights;
+export default CabinCrewScheduledFlights;

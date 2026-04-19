@@ -14,19 +14,11 @@ body {
   background-color: var(--background-light);
 }
 
-/* Navbar */
-.navbar {
-  background-color: var(--primary-red);
-  color: white;
-  padding: 16px 32px;
-  font-size: 1.6rem;
-  font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
 /* Page */
 .page {
   padding: 40px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Title */
@@ -68,10 +60,11 @@ body {
 }
 
 /* Table container */
+/* Table container */
 .table-wrapper {
   background: var(--card-white);
   border-radius: 16px;
-  padding: 24px;
+  padding: 28px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   overflow-x: auto;
 }
@@ -79,35 +72,107 @@ body {
 /* Table */
 .shift-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 1100px;
 }
 
+/* Header */
 .shift-table th {
   background-color: var(--primary-red);
   color: white;
-  padding: 14px;
+  padding: 16px 14px;
   text-align: left;
   font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
+.shift-table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.shift-table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+/* Cells */
 .shift-table td {
-  padding: 14px;
+  padding: 18px 14px;
   border-bottom: 1px solid var(--border-light);
   color: var(--text-dark);
-  font-size: 0.95rem;
+  font-size: 0.98rem;
+  vertical-align: middle;
+  line-height: 1.5;
 }
 
-.shift-table tr:hover {
-  background-color: #f9f9f9;
+/* Hover */
+.shift-table tbody tr:hover {
+  background-color: #fafafa;
 }
 
-/* Button */
+/* Keep important columns from wrapping awkwardly */
+.shift-table th:nth-child(1),
+.shift-table td:nth-child(1),   /* Date */
+.shift-table th:nth-child(2),
+.shift-table td:nth-child(2),   /* Day */
+.shift-table th:nth-child(3),
+.shift-table td:nth-child(3),   /* Start */
+.shift-table th:nth-child(4),
+.shift-table td:nth-child(4),   /* End */
+.shift-table th:nth-child(7),
+.shift-table td:nth-child(7),   /* Flight */
+.shift-table th:nth-child(8),
+.shift-table td:nth-child(8),   /* Aircraft */
+.shift-table th:nth-child(10),
+.shift-table td:nth-child(10) { /* Status */
+  white-space: nowrap;
+}
+
+/* Give route columns more room */
+.shift-table th:nth-child(5),
+.shift-table td:nth-child(5),
+.shift-table th:nth-child(6),
+.shift-table td:nth-child(6) {
+  min-width: 105px;
+}
+
+/* Role column */
+.shift-table th:nth-child(9),
+.shift-table td:nth-child(9) {
+  min-width: 100px;
+}
+
+/* Action column */
+.shift-table th:last-child,
+.shift-table td:last-child {
+  min-width: 140px;
+}
+
+/* Better spacing for stacked action buttons */
+.shift-table td:last-child > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Optional: slightly nicer status pill */
+.status-pill {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* General buttons */
 .action-button {
   background-color: var(--primary-red);
   color: white;
   border: none;
-  padding: 8px 14px;
+  padding: 7px 10px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
@@ -117,8 +182,83 @@ body {
   background-color: var(--primary-red-dark);
 }
 
+/* Layout */
+.dashboard-layout {
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #7f1d1d, #00072d);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 10px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+
+/* Logo */
+.logo {
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+/* Sidebar buttons */
+.sidebar button {
+  background: none;
+  border: none;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.sidebar button:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar .active {
+  background-color: #d32f2f;
+  font-weight: 600;
+}
+
+/* Logout button */
+.logout-btn {
+  margin-top: auto;
+  background-color: #ef5350 !important;
+  font-weight: 600;
+}
+
+/* Main content */
+.dashboard-content {
+  margin-left: 220px;
+  min-height: 100vh;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .dashboard-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
   .page {
     padding: 20px;
   }
@@ -130,4 +270,15 @@ body {
   .summary-card {
     min-width: 100%;
   }
+}
+
+.clickable-flight {
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.clickable-flight:hover {
+  color: #7f1d1d;
 }
