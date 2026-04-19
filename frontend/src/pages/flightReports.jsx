@@ -1027,7 +1027,7 @@ function FlightReports({ employeeId = 1 }) {
 
                                     <p>
                                         <strong>Aircraft:</strong>{' '}
-                                        {reportDetails?.aircraft_id || 'N/A'}
+                                        {reportDetails.aircraft_name || `Aircraft ${reportDetails.aircraft_id}`}
                                     </p>
 
                                     <p>
