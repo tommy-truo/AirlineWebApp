@@ -8,7 +8,6 @@ function FlightManagement() {
   const [expandedId, setExpandedId] = useState(null);
   const [editedFlight, setEditedFlight] = useState({});
   const [dropdowns, setDropdowns] = useState({
-    statuses: [],
     reasons: [],
     aircrafts: [],
     gates: []
@@ -32,7 +31,6 @@ function FlightManagement() {
   async function fetchFlights() {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
       const res = await fetch(`${API_BASE_URL}/api/flights/all`);
 
       if (!res.ok) {
@@ -51,7 +49,6 @@ function FlightManagement() {
   async function fetchDropdowns() {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
       const res = await fetch(`${API_BASE_URL}/api/flights/dropdowns`);
 
       if (!res.ok) {
@@ -61,7 +58,6 @@ function FlightManagement() {
       const result = await res.json();
 
       setDropdowns({
-        statuses: result.statuses || [],
         reasons: result.reasons || [],
         aircrafts: result.aircrafts || [],
         gates: result.gates || []
@@ -73,36 +69,52 @@ function FlightManagement() {
     }
   }
 
-  function isClosedFlight(flight) {
-    return Number(flight.status_id) === 4 || Number(flight.status_id) === 7;
+  function isLockedFlight(flight) {
+    return [4, 5, 6, 7].includes(Number(flight.status_id));
   }
 
-  function needsReason(statusId) {
-    return Number(statusId) === 3 || Number(statusId) === 4;
+  function formatDateTime(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString();
   }
 
-  function canEditSchedule(statusId) {
-    return Number(statusId) === 3;
+  function getFlightStatusClass(status) {
+    switch (status) {
+      case 'On Schedule':
+        return 'status-green';
+      case 'Boarding':
+        return 'status-blue';
+      case 'Delayed':
+        return 'status-yellow';
+      case 'Departed':
+        return 'status-purple';
+      case 'En Route':
+        return 'status-cyan';
+      case 'Arrived':
+        return 'status-dark-green';
+      case 'Cancelled':
+        return 'status-red';
+      default:
+        return 'status-default';
+    }
   }
 
-  function getAllowedStatuses(currentStatusId) {
-    const id = Number(currentStatusId);
+  function getActionFromStatusId(statusId) {
+    if (Number(statusId) === 3) return 'delay';
+    if (Number(statusId) === 4) return 'cancel';
+    return '';
+  }
 
-    const allowedMap = {
-      1: [2, 3, 4],
-      2: [3, 5, 6, 4],
-      3: [2, 5, 6, 4],
-      4: [],
-      5: [6, 7],
-      6: [7],
-      7: []
-    };
-
-    const allowedIds = allowedMap[id] || [];
-
-    return dropdowns.statuses.filter((status) =>
-      allowedIds.includes(Number(status.flight_status_id))
+  function getDefaultReasonIdForNoIssue() {
+    const noIssueReason = dropdowns.reasons.find(
+      (reason) => Number(reason.flight_irregularity_reason_id) === 6
     );
+
+    return noIssueReason ? String(noIssueReason.flight_irregularity_reason_id) : '6';
+  }
+
+  function shouldRequireReason(action) {
+    return action === 'delay' || action === 'cancel';
   }
 
   function handleEditClick(flight) {
@@ -113,53 +125,15 @@ function FlightManagement() {
       aircraft_id: flight.aircraft_id || '',
       departure_gate_id: flight.departure_gate_id || '',
       arrival_gate_id: flight.arrival_gate_id || '',
-      status_id: flight.status_id || '',
-      status_reason_id: flight.status_reason_id || '',
-      scheduled_departure_datetime: '',
-      scheduled_arrival_datetime: ''
+      manager_action: getActionFromStatusId(flight.status_id),
+      status_reason_id: flight.status_reason_id
+        ? String(flight.status_reason_id)
+        : getDefaultReasonIdForNoIssue(),
+      scheduled_departure_datetime: flight.scheduled_departure_datetime
+        ? new Date(flight.scheduled_departure_datetime).toISOString().slice(0, 16)
+        : '',
+      scheduled_arrival_datetime: flight.scheduled_arrival_datetime || ''
     });
-  }
-
-  function handleFieldChange(e) {
-    const { name, value } = e.target;
-
-    setEditedFlight((prev) => {
-      const updated = { ...prev, [name]: value };
-
-      if (name === 'status_id' && !needsReason(value)) {
-        updated.status_reason_id = '6';
-      }
-
-      return updated;
-    });
-  }
-
-  async function handleSaveEdit(id) {
-    try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-      const res = await fetch(`${API_BASE_URL}/api/flights/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(editedFlight)
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to update flight");
-      }
-
-      setEditingId(null);
-      setEditedFlight({});
-      setMessage("Flight updated successfully.");
-      setError('');
-      fetchFlights();
-    } catch (err) {
-      console.log(err);
-      setError("Error updating flight.");
-      setMessage('');
-    }
   }
 
   function handleCancelEdit() {
@@ -169,6 +143,110 @@ function FlightManagement() {
 
   function toggleExpanded(flightId) {
     setExpandedId((prev) => (prev === flightId ? null : flightId));
+  }
+
+  function handleFieldChange(e) {
+    const { name, value } = e.target;
+
+    setEditedFlight((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      if (name === 'manager_action' && !shouldRequireReason(value)) {
+        updated.status_reason_id = getDefaultReasonIdForNoIssue();
+      }
+
+      return updated;
+    });
+  }
+
+  async function handleSaveEdit(id) {
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const currentFlight = data.find((flight) => flight.flight_instance_id === id);
+
+      if (!currentFlight) {
+        throw new Error("Flight not found.");
+      }
+
+      if (!editedFlight.aircraft_id || !editedFlight.departure_gate_id || !editedFlight.arrival_gate_id) {
+        throw new Error("Aircraft and both gates are required.");
+      }
+
+      if (String(editedFlight.departure_gate_id) === String(editedFlight.arrival_gate_id)) {
+        throw new Error("Departure and arrival gates cannot be the same.");
+      }
+
+      if (shouldRequireReason(editedFlight.manager_action) && !editedFlight.status_reason_id) {
+        throw new Error("Please select a reason for this action.");
+      }
+
+      let finalStatusId = currentFlight.status_id;
+      let finalReasonId = getDefaultReasonIdForNoIssue();
+      let finalScheduledDeparture = '';
+      let finalScheduledArrival = '';
+
+      if (editedFlight.manager_action === 'delay') {
+        finalStatusId = 3;
+        finalReasonId = editedFlight.status_reason_id;
+
+        if (!editedFlight.scheduled_departure_datetime) {
+          throw new Error("Please enter a new scheduled departure time for a delayed flight.");
+        }
+
+        if (new Date(editedFlight.scheduled_departure_datetime) <= new Date()) {
+          throw new Error("Delayed departure time must be in the future.");
+        }
+
+        const originalDeparture = new Date(currentFlight.scheduled_departure_datetime).getTime();
+        const originalArrival = new Date(currentFlight.scheduled_arrival_datetime).getTime();
+        const durationMs = originalArrival - originalDeparture;
+
+        finalScheduledDeparture = editedFlight.scheduled_departure_datetime;
+        finalScheduledArrival = new Date(
+          new Date(editedFlight.scheduled_departure_datetime).getTime() + durationMs
+        );
+      } else if (editedFlight.manager_action === 'cancel') {
+        finalStatusId = 4;
+        finalReasonId = editedFlight.status_reason_id;
+      } else {
+        finalStatusId = currentFlight.status_id;
+        finalReasonId = getDefaultReasonIdForNoIssue();
+      }
+
+      const payload = {
+        aircraft_id: editedFlight.aircraft_id,
+        departure_gate_id: editedFlight.departure_gate_id,
+        arrival_gate_id: editedFlight.arrival_gate_id,
+        status_id: finalStatusId,
+        status_reason_id: finalReasonId,
+        scheduled_departure_datetime: finalScheduledDeparture,
+        scheduled_arrival_datetime: finalScheduledArrival
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/flights/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to update flight");
+      }
+
+      setEditingId(null);
+      setEditedFlight({});
+      setMessage("Flight updated successfully.");
+      setError('');
+      fetchFlights();
+    } catch (err) {
+      console.log(err);
+      setError(err.message || "Error updating flight.");
+      setMessage('');
+    }
   }
 
   const filteredFlights = data.filter((flight) => {
@@ -203,49 +281,14 @@ function FlightManagement() {
     }
   }
 
-  function getFlightStatusClass(status) {
-    switch (status) {
-      case 'On Schedule':
-        return 'status-green';
-      case 'Boarding':
-        return 'status-blue';
-      case 'Delayed':
-        return 'status-yellow';
-      case 'Departed':
-        return 'status-purple';
-      case 'En Route':
-        return 'status-cyan';
-      case 'Arrived':
-        return 'status-dark-green';
-      case 'Cancelled':
-        return 'status-red';
-      default:
-        return 'status-default';
-    }
-  }
-
-  function formatDateTime(dateString) {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleString();
-  }
-
   return (
     <div className="container-fluid form-wrapper">
       <div className="card signup-container directory-card shadow-sm border-danger">
         <div className="card-body">
           <h2 className="form-title mb-3">Flight Management</h2>
 
-          {message && (
-            <div className="alert alert-success">
-              {message}
-            </div>
-          )}
-
-          {error && (
-            <div className="alert alert-danger">
-              {error}
-            </div>
-          )}
+          {message && <div className="alert alert-success">{message}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
 
           <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <div className="d-flex gap-2 flex-wrap">
@@ -300,37 +343,32 @@ function FlightManagement() {
               <tbody>
                 {currentFlights.length > 0 ? (
                   currentFlights.map((flight) => {
-                    const closedFlight = isClosedFlight(flight);
+                    const lockedFlight = isLockedFlight(flight);
                     const editingThisRow = editingId === flight.flight_instance_id;
                     const showDetails = expandedId === flight.flight_instance_id || editingThisRow;
-                    const selectedStatusId = editingThisRow ? editedFlight.status_id : flight.status_id;
 
                     return (
                       <FragmentRow
                         key={flight.flight_instance_id}
                         flight={flight}
-                        closedFlight={closedFlight}
+                        lockedFlight={lockedFlight}
                         editingThisRow={editingThisRow}
                         showDetails={showDetails}
-                        selectedStatusId={selectedStatusId}
                         editedFlight={editedFlight}
                         dropdowns={dropdowns}
-                        handleFieldChange={handleFieldChange}
-                        getAllowedStatuses={getAllowedStatuses}
-                        needsReason={needsReason}
-                        canEditSchedule={canEditSchedule}
                         formatDateTime={formatDateTime}
                         getFlightStatusClass={getFlightStatusClass}
-                        toggleExpanded={toggleExpanded}
+                        handleFieldChange={handleFieldChange}
                         handleEditClick={handleEditClick}
                         handleSaveEdit={handleSaveEdit}
                         handleCancelEdit={handleCancelEdit}
+                        toggleExpanded={toggleExpanded}
                       />
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center">
+                    <td colSpan="8" className="text-center">
                       No flights found.
                     </td>
                   </tr>
@@ -368,26 +406,25 @@ function FlightManagement() {
 
 function FragmentRow({
   flight,
-  closedFlight,
+  lockedFlight,
   editingThisRow,
   showDetails,
-  selectedStatusId,
   editedFlight,
   dropdowns,
-  handleFieldChange,
-  getAllowedStatuses,
-  needsReason,
-  canEditSchedule,
   formatDateTime,
   getFlightStatusClass,
-  toggleExpanded,
+  handleFieldChange,
   handleEditClick,
   handleSaveEdit,
-  handleCancelEdit
+  handleCancelEdit,
+  toggleExpanded
 }) {
+  const selectedAction = editingThisRow ? editedFlight.manager_action : '';
+  const showReasonSelect = selectedAction === 'delay' || selectedAction === 'cancel';
+  const showDelaySchedule = selectedAction === 'delay';
+
   return (
     <>
-
       <tr>
         <td className="fw-semibold">{flight.flight_number}</td>
 
@@ -395,7 +432,7 @@ function FragmentRow({
           {flight.departure_city} → {flight.arrival_city}
         </td>
 
-        <td>{`Aircraft ${flight.aircraft_id}`}</td>
+        <td>{flight.aircraft_name || `Aircraft ${flight.aircraft_id}`}</td>
 
         <td>
           <span className={`status-badge ${getFlightStatusClass(flight.status_name)}`}>
@@ -435,6 +472,7 @@ function FragmentRow({
                 >
                   Save
                 </button>
+
                 <button
                   className="btn btn-secondary btn-sm"
                   onClick={handleCancelEdit}
@@ -442,8 +480,8 @@ function FragmentRow({
                   Cancel
                 </button>
               </>
-            ) : closedFlight ? (
-              <span className="text-muted fw-semibold align-self-center">Closed</span>
+            ) : lockedFlight ? (
+              <span className="text-muted fw-semibold align-self-center">Locked</span>
             ) : (
               <button
                 className="btn btn-primary btn-sm"
@@ -464,7 +502,7 @@ function FragmentRow({
                 <div className="col-md-4 mb-3">
                   <strong>Reason</strong>
                   {editingThisRow ? (
-                    needsReason(selectedStatusId) ? (
+                    showReasonSelect ? (
                       <select
                         name="status_reason_id"
                         value={editedFlight.status_reason_id}
@@ -517,34 +555,30 @@ function FragmentRow({
                       className="form-control form-control-sm mt-2"
                     >
                       <option value="">Select Aircraft</option>
-                      {dropdowns.aircrafts.map((aircraft) => (
-                        <option
-                          key={aircraft.aircraft_id}
-                          value={aircraft.aircraft_id}
-                        >
-                          Aircraft {aircraft.aircraft_id}
-                        </option>
-                      ))}
+                      {dropdowns.aircrafts
+                        .filter((aircraft) => aircraft.status_name === 'Active')
+                        .map((aircraft) => (
+                          <option
+                            key={aircraft.aircraft_id}
+                            value={aircraft.aircraft_id}
+                          >
+                            {aircraft.aircraft_name} ({aircraft.status_name})
+                          </option>
+                        ))}
                     </select>
                   </div>
 
                   <div className="col-md-4 mb-3">
-                    <strong>Status</strong>
+                    <strong>Manager Action</strong>
                     <select
-                      name="status_id"
-                      value={editedFlight.status_id}
+                      name="manager_action"
+                      value={editedFlight.manager_action}
                       onChange={handleFieldChange}
                       className="form-control form-control-sm mt-2"
                     >
-                      <option value="">Select Status</option>
-                      {getAllowedStatuses(flight.status_id).map((status) => (
-                        <option
-                          key={status.flight_status_id}
-                          value={status.flight_status_id}
-                        >
-                          {status.status_name}
-                        </option>
-                      ))}
+                      <option value="">No special action</option>
+                      <option value="delay">Delay Flight</option>
+                      <option value="cancel">Cancel Flight</option>
                     </select>
                   </div>
 
@@ -557,14 +591,13 @@ function FragmentRow({
                       className="form-control form-control-sm mt-2"
                     >
                       <option value="">Select Departure Gate</option>
-                      {dropdowns.gates.map((gate) => (
-                        <option
-                          key={gate.gate_id}
-                          value={gate.gate_id}
-                        >
-                          {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
-                        </option>
-                      ))}
+                      {dropdowns.gates
+                        .filter((gate) => String(gate.airport_id) === String(flight.departure_airport_id))
+                        .map((gate) => (
+                          <option key={gate.gate_id} value={gate.gate_id}>
+                            {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
+                          </option>
+                        ))}
                     </select>
                   </div>
 
@@ -577,20 +610,19 @@ function FragmentRow({
                       className="form-control form-control-sm mt-2"
                     >
                       <option value="">Select Arrival Gate</option>
-                      {dropdowns.gates.map((gate) => (
-                        <option
-                          key={gate.gate_id}
-                          value={gate.gate_id}
-                        >
-                          {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
-                        </option>
-                      ))}
+                      {dropdowns.gates
+                        .filter((gate) => String(gate.airport_id) === String(flight.arrival_airport_id))
+                        .map((gate) => (
+                          <option key={gate.gate_id} value={gate.gate_id}>
+                            {gate.iata_code} - {gate.terminal_name} - Gate {gate.gate_number}
+                          </option>
+                        ))}
                     </select>
                   </div>
 
                   <div className="col-md-3 mb-3">
                     <strong>Scheduled Departure</strong>
-                    {canEditSchedule(selectedStatusId) ? (
+                    {showDelaySchedule ? (
                       <input
                         type="datetime-local"
                         name="scheduled_departure_datetime"
@@ -599,23 +631,17 @@ function FragmentRow({
                         className="form-control form-control-sm mt-2"
                       />
                     ) : (
-                      <div className="mt-2">{formatDateTime(flight.scheduled_departure_datetime)}</div>
+                      <div className="mt-2">
+                        {formatDateTime(flight.scheduled_departure_datetime)}
+                      </div>
                     )}
                   </div>
 
                   <div className="col-md-3 mb-3">
                     <strong>Scheduled Arrival</strong>
-                    {canEditSchedule(selectedStatusId) ? (
-                      <input
-                        type="datetime-local"
-                        name="scheduled_arrival_datetime"
-                        value={editedFlight.scheduled_arrival_datetime}
-                        onChange={handleFieldChange}
-                        className="form-control form-control-sm mt-2"
-                      />
-                    ) : (
-                      <div className="mt-2">{formatDateTime(flight.scheduled_arrival_datetime)}</div>
-                    )}
+                    <div className="mt-2">
+                      {formatDateTime(flight.scheduled_arrival_datetime)}
+                    </div>
                   </div>
                 </div>
               )}
@@ -623,7 +649,6 @@ function FragmentRow({
           </td>
         </tr>
       )}
-
     </>
   );
 }
