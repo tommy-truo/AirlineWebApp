@@ -1,5 +1,6 @@
 .manager-shell {
     min-height: 100vh;
+    display: flex;
     background: #fff7f7;
 }
 
@@ -14,7 +15,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* NEW sidebar class */
+/* Sidebar */
 .manager-sidebar {
     width: 260px;
     min-width: 260px;
@@ -28,47 +29,330 @@
 .manager-sidebar .sidebar-title {
     color: #b71c1c;
     font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
 .manager-sidebar .sidebar-link {
     color: #444 !important;
     border-radius: 10px;
     padding: 10px 12px;
+    margin-bottom: 6px;
+    transition: all 0.22s ease;
+    font-weight: 500;
 }
 
 .manager-sidebar .sidebar-sub-link {
     color: #555 !important;
     border-radius: 8px;
     padding: 8px 10px;
+    margin-bottom: 4px;
+    transition: all 0.22s ease;
+    font-size: 0.96rem;
+}
+
+.manager-sidebar .sidebar-link:hover,
+.manager-sidebar .sidebar-sub-link:hover {
+    background-color: #fce4e4;
+    color: #d32f2f !important;
+    transform: translateX(3px);
 }
 
 .manager-sidebar .sidebar-link.active,
 .manager-sidebar .sidebar-sub-link.active {
     background: linear-gradient(135deg, #d32f2f, #bb2020);
     color: white !important;
+    font-weight: 600;
+    box-shadow: 0 8px 18px rgba(211, 47, 47, 0.16);
 }
 
-/* FIX layout issue */
+.manager-sidebar .btn-toggle {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    color: #7a1a1a !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 600;
+    transition: all 0.22s ease;
+}
+
+.manager-sidebar .btn-toggle:hover {
+    background-color: #fce4e4;
+    color: #d32f2f !important;
+}
+
+.manager-sidebar .sidebar-footer {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+.manager-sidebar .logout-button {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.manager-sidebar .logout-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(183, 28, 28, 0.18);
+}
+
+/* Manager page wrappers */
 .manager-shell .form-wrapper {
+    display: flex;
+    flex: 1;
     justify-content: flex-start;
-    align-items: stretch;
-    /* padding: 20px; */
+    align-items: flex-start;
+    width: 100%;
+    padding: 34px 26px;
 }
 
 .manager-shell .signup-container {
     margin: 0;
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     width: 100%;
+    max-width: none;
+    animation: fadeInUp 0.35s ease;
+}
+
+.manager-shell .directory-card {
     max-width: none;
 }
 
-.manager-content-area {
-    min-width: 0;
+.manager-shell .signup-container h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
 }
 
-.manager-shell {
-    display: flex;
+.manager-shell .form-section {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
 }
 
-.manager-sidebar {
-    flex-shrink: 0;
+.manager-shell .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.manager-shell .form-field {
+    margin-bottom: 20px;
+}
+
+.manager-shell .form-field label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.manager-shell .form-field input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.manager-shell .form-field input:focus {
+    outline: none;
+    border-color: #d32f2f;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.manager-shell .login-button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s;
+    margin-bottom: 20px;
+}
+
+.manager-shell .login-button:hover {
+    background: linear-gradient(135deg, #c62828, #a81414);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(183, 28, 28, 0.18);
+}
+
+.manager-shell .alert {
+    border-radius: 10px;
+}
+
+.manager-shell .form-control,
+.manager-shell select,
+.manager-shell input {
+    border-radius: 8px !important;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+.manager-shell .form-control:focus,
+.manager-shell select:focus,
+.manager-shell input:focus {
+    border-color: #d32f2f !important;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1) !important;
+}
+
+/* Tables */
+.manager-shell .table {
+    width: 100%;
+    border-color: #f1d1d1 !important;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.manager-shell .table thead.table-light th {
+    background: linear-gradient(135deg, #f8d7da, #fbe5e7) !important;
+    color: #8f1d1d;
+    border-color: #efc5c8 !important;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.manager-shell .table tbody tr {
+    transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.manager-shell .table tbody tr:hover {
+    background-color: #fff6f6;
+}
+
+.manager-shell .table tbody td {
+    vertical-align: middle;
+    border-color: #f3dddd !important;
+}
+
+/* Overview cards */
+.manager-shell .overview-card {
+    background: linear-gradient(135deg, #fff5f5, #ffffff);
+    border: 1px solid #f2dede;
+    border-radius: 14px;
+    padding: 24px 16px;
+    text-align: center;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.manager-shell .overview-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.07);
+}
+
+.manager-shell .overview-label {
+    margin-bottom: 8px;
+    color: #7c4b4b;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.manager-shell .overview-value {
+    margin: 0;
+    color: #b71c1c;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Status badges */
+.manager-shell .status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.manager-shell .status-active {
+    background: #e6f7ec;
+    color: #1b7f3c;
+}
+
+.manager-shell .status-inactive {
+    background: #fdeaea;
+    color: #b71c1c;
+}
+
+.manager-shell .status-approved {
+    background: #e6f7ec;
+    color: #1b7f3c;
+}
+
+.manager-shell .status-denied {
+    background: #fdeaea;
+    color: #b71c1c;
+}
+
+.manager-shell .status-pending {
+    background: #fff4e5;
+    color: #cc7a00;
+}
+
+.manager-shell .status-green {
+    background: #e6f7ec;
+    color: #1b7f3c;
+}
+
+.manager-shell .status-blue {
+    background: #e6f0ff;
+    color: #1e4db7;
+}
+
+.manager-shell .status-yellow {
+    background: #fff4e5;
+    color: #cc7a00;
+}
+
+.manager-shell .status-purple {
+    background: #f3e6ff;
+    color: #6a1bb7;
+}
+
+.manager-shell .status-cyan {
+    background: #e6f9ff;
+    color: #008b8b;
+}
+
+.manager-shell .status-dark-green {
+    background: #d9f2e6;
+    color: #0d5c2a;
+}
+
+.manager-shell .status-red {
+    background: #fdeaea;
+    color: #b71c1c;
+}
+
+.manager-shell .status-default {
+    background: #f2f2f2;
+    color: #555;
+}
+
+.manager-shell .btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.manager-shell .btn:hover {
+    transform: translateY(-1px);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
