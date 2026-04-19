@@ -33,6 +33,7 @@ export const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT) || 3306,
+  timezone: 'local',
   
   // SSL CA Certification (necessary to authorize access to DB)
   ssl: getSslConfig(),

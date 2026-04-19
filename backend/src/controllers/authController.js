@@ -3,7 +3,7 @@ import { db } from '../config/db.js'; // Ensure this points to a .js file
 // SIGNUP FUNCTION
 export const signup = async (req, res) => {
     console.log("Data received from frontend:", req.body);
-    
+
     const { firstName, middleInitial, lastName, dob, email, password, isLoyaltyMember } = req.body;
     const loyaltyValue = isLoyaltyMember ? 1 : 0;
 
@@ -23,15 +23,15 @@ export const signup = async (req, res) => {
         const [linkResult] = await db.execute(linkSql, [accountId, passengerId, 'Self', 1]);
 
         // Successful Message
-        return res.status(200).json({ 
+        return res.status(200).json({
             message: "Signup successful! Details saved in both tables.",
-            user: { id: accountId, email: email, role: 'passenger' } 
+            user: { id: accountId, email: email, role: 'passenger' }
         });
 
     } catch (err) {
         // Error Catcher
         console.error("❌ DATABASE ERROR:", err.sqlMessage || err);
-        
+
         if (err.code === 'ETIMEDOUT') {
             return res.status(503).json({ message: "Database timed out. Please try again." });
         }
@@ -46,7 +46,7 @@ export const signup = async (req, res) => {
 // LOGIN FUNCTION
 export const login = async (req, res) => {
     console.log("Login attempt:", req.body.email);
-    
+
     const { email, password } = req.body;
 
     try {
@@ -56,12 +56,13 @@ export const login = async (req, res) => {
                 a.password,
                 a.is_active,
                 a.role,
+                a.must_change_password,
                 e.employee_id
             FROM accounts a
             LEFT JOIN employees e
                 ON a.account_id = e.account_id
             WHERE a.email = ? AND a.password = ?`;
-        
+
         const [rows] = await db.execute(sql, [email, password]);
 
         if (rows.length > 0) {
@@ -71,9 +72,9 @@ export const login = async (req, res) => {
                 return res.status(403).json({ message: "This account is inactive." });
             }
 
-            return res.status(200).json({ 
+            return res.status(200).json({
                 message: "Login successful!",
-                user: { account_id: user.account_id, employee_id: user.employee_id, email: user.email, role: user.role } 
+                user: { account_id: user.account_id, employee_id: user.employee_id, email: user.email, role: user.role, must_change_password: user.must_change_password }
             });
         } else {
             return res.status(401).json({ message: "The account or password is not valid" });
@@ -85,5 +86,26 @@ export const login = async (req, res) => {
 
         console.error("LOGIN ERROR: ", err.message || err);
         return res.status(500).json({ message: "Error during login." });
+    }
+};
+
+// CHANGE PASSWORD FUNCTION by aya
+export const changePassword = async (req, res) => {
+    const { account_id, newPassword } = req.body;
+
+    try {
+        const sql = `
+            UPDATE accounts
+            SET password = ?, must_change_password = 0
+            WHERE account_id = ?
+        `;
+
+        await db.execute(sql, [newPassword, account_id]);
+
+        return res.status(200).json({ message: "Password updated successfully." });
+
+    } catch (err) {
+        console.error("CHANGE PASSWORD ERROR:", err.message || err);
+        return res.status(500).json({ message: "Error updating password." });
     }
 };

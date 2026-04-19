@@ -5,7 +5,13 @@ import {
   getScheduledFlights,
   getShiftRequests,
   getProfile,
-  updateProfile
+  updateProfile,
+  getCrewManifest,
+  updateEmergencyContact,
+  getFlightReports,
+  getPendingFlightReports,
+  submitFlightReport,
+  getFlightReportDetails
 } from '../controllers/pilotController.js';
 
 const router = express.Router();
@@ -28,4 +34,17 @@ router.get('/profile', getProfile);
 // updating basic contact info
 router.put('/profile', updateProfile);
 
+//crew manifest
+router.get('/crew_manifest', getCrewManifest);
+
+// updates for emergency contact only
+router.put('/profile/emergency-contact', updateEmergencyContact);
+
+router.get('/flight_reports', getFlightReports);
+
+router.get('/flight_reports/pending', getPendingFlightReports);
+
+router.post('/flight_reports', submitFlightReport);
+
+router.get('/flight_reports/:reportId', getFlightReportDetails);
 export default router;

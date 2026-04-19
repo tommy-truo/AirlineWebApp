@@ -1,0 +1,115 @@
+/* Container holds the sidebar and main content side-by-side */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; 
+  background-color: #f4f4f9; /* Light grey/blue background */
+  font-family: sans-serif;
+}
+
+/* Sidebar Layout */
+.sidebar {
+  width: 250px;
+  background-color: #1a202c; /* Slate Blue/Dark */
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Navigation Links */
+.nav-links {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: #a0aec0; /* Subdued grey-blue */
+  padding: 12px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+
+.nav-button:hover {
+  background-color: #2d3748;
+  color: white;
+}
+
+.nav-button.active {
+  background-color: #3182ce; /* Primary Blue */
+  color: white;
+  font-weight: 600;
+}
+
+/* Footer / Logout Section */
+.sidebar-footer {
+  margin-top: auto; 
+  padding-top: 20px;
+  border-top: 1px solid #2d3748;
+}
+
+.signout-button {
+  background-color: #e53e3e; /* Alert Red */
+  color: white;
+  border: none;
+  padding: 12px;
+  text-align: center;
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 6px;
+  transition: 0.2s;
+  font-weight: bold;
+}
+
+.signout-button:hover {
+  background-color: #c53030;
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  background-color: transparent; /* Shows the dashboard-container bg */
+}
+
+/* Shared UI Components for child features (Search, Bookings, etc.) */
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
