@@ -3,47 +3,51 @@
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Prevents the whole page from scrolling */
-  background-color: #f4f7f6;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden; 
+  background-color: #f4f4f9; /* Light grey/blue background */
+  font-family: sans-serif;
 }
 
-/* Sidebar Styling */
+/* Sidebar Layout */
 .sidebar {
-  width: 260px;
-  background-color: #1a202c; /* Dark Navy/Slate */
+  width: 250px;
+  background-color: #1a202c; /* Slate Blue/Dark */
   color: white;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  padding: 30px 20px;
+  height: 100vh;
+  box-sizing: border-box;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
 .sidebar h2 {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #63b3ed; /* Light Blue accent */
+  color: #ffffff;
   text-align: center;
+  margin-bottom: 30px;
 }
 
-/* Nav Buttons */
+/* Navigation Links */
 .nav-links {
-  flex-grow: 1; /* Pushes the footer/logout button to the bottom */
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 .nav-button {
   background: none;
   border: none;
-  color: #a0aec0;
+  color: #a0aec0; /* Subdued grey-blue */
+  padding: 12px;
   text-align: left;
-  padding: 12px 15px;
-  font-size: 1rem;
+  width: 100%;
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  transition: 0.2s;
 }
 
 .nav-button:hover {
@@ -52,25 +56,29 @@
 }
 
 .nav-button.active {
-  background-color: #3182ce; /* Bright Blue */
+  background-color: #3182ce; /* Primary Blue */
   color: white;
   font-weight: 600;
 }
 
-/* Footer / Logout */
+/* Footer / Logout Section */
 .sidebar-footer {
-  border-top: 1px solid #2d3748;
+  margin-top: auto; 
   padding-top: 20px;
+  border-top: 1px solid #2d3748;
 }
 
 .signout-button {
-  width: 100%;
-  background-color: #e53e3e; /* Red */
+  background-color: #e53e3e; /* Alert Red */
   color: white;
   border: none;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  width: 100%;
   cursor: pointer;
+  font-size: 16px;
+  border-radius: 6px;
+  transition: 0.2s;
   font-weight: bold;
 }
 
@@ -80,8 +88,28 @@
 
 /* Main Content Area */
 .main-content {
-  flex-grow: 1;
+  flex: 1;
   padding: 40px;
-  overflow-y: auto; /* Only the content scrolls, not the sidebar */
-  background-color: #ffffff;
+  overflow-y: auto;
+  background-color: transparent; /* Shows the dashboard-container bg */
+}
+
+/* Shared UI Components for child features (Search, Bookings, etc.) */
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
 }
