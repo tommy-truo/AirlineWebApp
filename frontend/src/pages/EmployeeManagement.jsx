@@ -44,6 +44,8 @@ function EmployeeManagement() {
 
   async function fetchDropdowns() {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
       const res = await fetch(`${API_BASE_URL}/api/employees/dropdowns`);
       const result = await res.json();
       setDropdowns(result);
@@ -55,6 +57,8 @@ function EmployeeManagement() {
 
   async function handleDelete(id) {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
       const res = await fetch(`${API_BASE_URL}/api/employees/${id}`, {
         method: "DELETE"
       });
@@ -96,6 +100,8 @@ function EmployeeManagement() {
 
   async function handleSaveEdit(id) {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
       const res = await fetch(`${API_BASE_URL}/api/employees/${id}`, {
         method: "PUT",
         headers: {
