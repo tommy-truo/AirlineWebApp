@@ -52,11 +52,23 @@
 .manager-shell .form-wrapper {
     justify-content: flex-start;
     align-items: stretch;
-    padding: 20px;
+    /* padding: 20px; */
 }
 
 .manager-shell .signup-container {
     margin: 0;
     width: 100%;
     max-width: none;
+}
+
+.manager-content-area {
+    min-width: 0;
+}
+
+.manager-shell {
+    display: flex;
+}
+
+.manager-sidebar {
+    flex-shrink: 0;
 }
