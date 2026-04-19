@@ -1,312 +1,370 @@
-import { useEffect, useState } from 'react'
-import '../components/styles.css'
+import { useState, useEffect } from 'react';
+import '../components/styles.css';
 
-function FlightReports() {
-  const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    statusId: '',
-    departureAirportId: '',
-    arrivalAirportId: ''
-  })
-
-  const [dropdowns, setDropdowns] = useState({
-    statuses: [],
-    airports: []
-  })
-
-  const [reportData, setReportData] = useState({
-    reportMeta: null,
-    summary: null,
-    rawData: []
-  })
-
-  const [hasGenerated, setHasGenerated] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    fetchDropdowns()
-  }, [])
-
-  function formatDateTime(dateString) {
-    if (!dateString) return ''
-    return new Date(dateString).toLocaleString()
-  }
-
-  function fetchDropdowns() {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-    fetch(`${API_BASE_URL}/api/flight-reports/dropdowns`)
-      .then(res => res.json())
-      .then(data => {
-        setDropdowns({
-          statuses: data.statuses || [],
-          airports: data.airports || []
-        })
-      })
-      .catch(() => {
-        setError('Error loading report filter options.')
-        setMessage('')
-      })
-  }
-
-  function handleChange(e) {
-    const { name, value } = e.target
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  function handleGenerateReport(e) {
-    e.preventDefault()
-
-    const queryParams = new URLSearchParams({
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      statusId: filters.statusId,
-      departureAirportId: filters.departureAirportId,
-      arrivalAirportId: filters.arrivalAirportId
+function PayrollReports() {
+    const [filters, setFilters] = useState({
+        departmentId: '',
+        jobTitleId: '',
+        activeOnly: '',
+        startDateFrom: '',
+        startDateTo: ''
     })
 
-    fetch(`${API_BASE_URL}/api/flight-reports?${queryParams.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        setReportData({
-          reportMeta: data.reportMeta || null,
-          summary: data.summary || null,
-          rawData: data.rawData || []
-        })
-        setHasGenerated(true)
-        setMessage('Report generated successfully.')
-        setError('')
-      })
-      .catch(() => {
-        setError('Error generating flight report.')
-        setMessage('')
-        setHasGenerated(false)
-      })
-  }
+    const [dropdowns, setDropdowns] = useState({
+        departments: [],
+        jobTitles: []
+    })
 
-  return (
-    <div className="container-fluid form-wrapper">
-      <div className="card signup-container directory-card shadow-sm border-danger">
-        <div className="card-body">
+    const [reportData, setReportData] = useState({
+        reportMeta: null,
+        summary: {
+            totalEmployees: 0,
+            activeCount: 0,
+            inactiveCount: 0
+        },
+        formattedReport: [],
+        rawData: []
+    })
 
-          <h2 className="form-title mb-3">Flight Reports</h2>
+    const [hasGenerated, setHasGenerated] = useState(false)
+    const [message, setMessage] = useState('')
+    const [error, setError] = useState('')
 
-          {message && (
-            <div className="alert alert-success">
-              {message}
+    useEffect(() => {
+        fetchDropdowns()
+    }, [])
+
+    async function fetchDropdowns() {
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+            const res = await fetch(`${API_BASE_URL}/api/payroll/dropdowns`)
+
+            if (!res.ok) {
+                throw new Error()
+            }
+
+            const data = await res.json()
+
+            setDropdowns({
+                departments: data.departments || [],
+                jobTitles: data.jobTitles || []
+            })
+        } catch (err) {
+            console.log(err)
+            setError("Error loading payroll report filter options.")
+            setMessage('')
+        }
+    }
+
+    function handleChange(e) {
+        const { name, value } = e.target
+
+        setFilters((prev) => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    async function handleGenerateReport(e) {
+        e.preventDefault()
+
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+            const params = new URLSearchParams({
+                departmentId: filters.departmentId,
+                jobTitleId: filters.jobTitleId,
+                activeOnly: filters.activeOnly,
+                startDateFrom: filters.startDateFrom,
+                startDateTo: filters.startDateTo
+            })
+
+            const res = await fetch(`${API_BASE_URL}/api/payroll/reports?${params.toString()}`)
+
+            if (!res.ok) {
+                throw new Error()
+            }
+
+            const data = await res.json()
+
+            setReportData({
+                reportMeta: data.reportMeta || null,
+                summary: data.summary || {
+                    totalEmployees: 0,
+                    activeCount: 0,
+                    inactiveCount: 0
+                },
+                formattedReport: data.formattedReport || [],
+                rawData: data.rawData || []
+            })
+            setHasGenerated(true)
+            setMessage("Report generated successfully.")
+            setError('')
+        } catch (err) {
+            console.log(err)
+            setError("Error generating payroll report.")
+            setMessage('')
+            setHasGenerated(false)
+        }
+    }
+
+    return (
+        <div className="container-fluid form-wrapper">
+
+            <div className="card signup-container directory-card shadow-sm border-danger">
+                <div className="card-body">
+
+                    <h2 className="form-title mb-3">Employee Payroll Reports</h2>
+
+                    {message && (
+                        <div className="alert alert-success">
+                            {message}
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="alert alert-danger">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="form-section mb-4">
+                        <h5 className="form-title text-center mb-3">Report Request</h5>
+
+                        <form onSubmit={handleGenerateReport}>
+                            <div className="row">
+                                <div className="col-md-4 mb-3 form-field">
+                                    <label>Department</label>
+                                    <select
+                                        name="departmentId"
+                                        className="form-control"
+                                        value={filters.departmentId}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">All Departments</option>
+                                        {dropdowns.departments.map((department) => (
+                                            <option
+                                                key={department.department_id}
+                                                value={department.department_id}
+                                            >
+                                                {department.department_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="col-md-4 mb-3 form-field">
+                                    <label>Job Title</label>
+                                    <select
+                                        name="jobTitleId"
+                                        className="form-control"
+                                        value={filters.jobTitleId}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">All Job Titles</option>
+                                        {dropdowns.jobTitles.map((job) => (
+                                            <option
+                                                key={job.job_title_id}
+                                                value={job.job_title_id}
+                                            >
+                                                {job.title_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="col-md-4 mb-3 form-field">
+                                    <label>Employee Status</label>
+                                    <select
+                                        name="activeOnly"
+                                        className="form-control"
+                                        value={filters.activeOnly}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">All</option>
+                                        <option value="true">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-6 mb-3 form-field">
+                                    <label>Start Date From</label>
+                                    <input
+                                        type="date"
+                                        name="startDateFrom"
+                                        className="form-control"
+                                        value={filters.startDateFrom}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+
+                                <div className="col-md-6 mb-3 form-field">
+                                    <label>Start Date To</label>
+                                    <input
+                                        type="date"
+                                        name="startDateTo"
+                                        className="form-control"
+                                        value={filters.startDateTo}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <button type="submit" className="login-button mt-2">
+                                Generate Report
+                            </button>
+                        </form>
+                    </div>
+
+                    {hasGenerated && (
+                        <>
+                            <hr />
+
+                            <div className="form-section my-4">
+                                <h5 className="form-title text-center mb-3">Report Output</h5>
+
+                                {reportData.reportMeta && (
+                                    <div className="mb-3">
+                                        <p className="mb-1">
+                                            <strong>Report:</strong> {reportData.reportMeta.reportName}
+                                        </p>
+                                        <p className="mb-1">
+                                            <strong>Department:</strong> {reportData.reportMeta.departmentId || 'All'}
+                                        </p>
+                                        <p className="mb-1">
+                                            <strong>Job Title:</strong> {reportData.reportMeta.jobTitleId || 'All'}
+                                        </p>
+                                        <p className="mb-1">
+                                            <strong>Status:</strong> {
+                                                reportData.reportMeta.activeOnly === 'true'
+                                                    ? 'Active'
+                                                    : reportData.reportMeta.activeOnly === 'inactive'
+                                                        ? 'Inactive'
+                                                        : 'All'
+                                            }
+                                        </p>
+                                        <p className="mb-1">
+                                            <strong>Start Date Range:</strong> {reportData.reportMeta.startDateFrom || 'Any'} to {reportData.reportMeta.startDateTo || 'Any'}
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div style={{ overflowX: "auto" }}>
+                                    <table className="table table-bordered">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>Total Employees</th>
+                                                <th>Active Employees</th>
+                                                <th>Inactive Employees</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr>
+                                                <td>{reportData.summary.totalEmployees}</td>
+                                                <td>{reportData.summary.activeCount}</td>
+                                                <td>{reportData.summary.inactiveCount}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div style={{ overflowX: "auto" }}>
+                                    <table className="table table-bordered mt-3">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>Department</th>
+                                                <th>Job Title</th>
+                                                <th>Employee Count</th>
+                                                <th>Total Salary</th>
+                                                <th>Average Salary</th>
+                                                <th>Min Salary</th>
+                                                <th>Max Salary</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {reportData.formattedReport.length > 0 ? (
+                                                reportData.formattedReport.map((row, index) => (
+                                                    <tr key={index}>
+                                                        <td>{row.department_name}</td>
+                                                        <td>{row.job_title}</td>
+                                                        <td>{row.employee_count}</td>
+                                                        <td>${Number(row.total_salary || 0).toFixed(2)}</td>
+                                                        <td>${Number(row.average_salary || 0).toFixed(2)}</td>
+                                                        <td>${Number(row.min_salary || 0).toFixed(2)}</td>
+                                                        <td>${Number(row.max_salary || 0).toFixed(2)}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="7" className="text-center">
+                                                        No report output found for the selected filters.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div className="form-section mt-4">
+                                <h5 className="form-title text-center mb-3">Raw Data Used</h5>
+                                <div style={{ overflowX: "auto" }}>
+                                    <table className="table table-bordered">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>Employee ID</th>
+                                                <th>Employee Name</th>
+                                                <th>Department</th>
+                                                <th>Job Title</th>
+                                                <th>Salary</th>
+                                                <th>Monthly Salary</th>
+                                                <th>Start Date</th>
+                                                <th>Years of Service</th>
+                                                <th>Active</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {reportData.rawData.length > 0 ? (
+                                                reportData.rawData.map((row) => (
+                                                    <tr key={row.employee_id}>
+                                                        <td>{row.employee_id}</td>
+                                                        <td>{row.employee_name}</td>
+                                                        <td>{row.department_name}</td>
+                                                        <td>{row.job_title}</td>
+                                                        <td>${Number(row.salary || 0).toFixed(2)}</td>
+                                                        <td>${Number(row.monthly_salary || 0).toFixed(2)}</td>
+                                                        <td>{row.start_date}</td>
+                                                        <td>{row.years_of_service}</td>
+                                                        <td>{Number(row.is_active) === 1 ? 'Yes' : 'No'}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="9" className="text-center">
+                                                        No raw data found for the selected filters.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                </div>
             </div>
-          )}
-
-          {error && (
-            <div className="alert alert-danger">
-              {error}
-            </div>
-          )}
-
-          <div className="form-section mb-4">
-            <h5 className="form-title text-center mb-3">Report Request</h5>
-
-            <form onSubmit={handleGenerateReport}>
-              <div className="row">
-                <div className="col-md-4 mb-3 form-field">
-                  <label>Start Date</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    className="form-control"
-                    value={filters.startDate}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="col-md-4 mb-3 form-field">
-                  <label>End Date</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    className="form-control"
-                    value={filters.endDate}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="col-md-4 mb-3 form-field">
-                  <label>Status</label>
-                  <select
-                    name="statusId"
-                    className="form-control"
-                    value={filters.statusId}
-                    onChange={handleChange}
-                  >
-                    <option value="">All Statuses</option>
-                    {dropdowns.statuses.map(status => (
-                      <option
-                        key={status.flight_status_id}
-                        value={status.flight_status_id}
-                      >
-                        {status.status_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="col-md-6 mb-3 form-field">
-                  <label>Departure Airport</label>
-                  <select
-                    name="departureAirportId"
-                    className="form-control"
-                    value={filters.departureAirportId}
-                    onChange={handleChange}
-                  >
-                    <option value="">All Departure Airports</option>
-                    {dropdowns.airports.map(airport => (
-                      <option
-                        key={airport.airport_id}
-                        value={airport.airport_id}
-                      >
-                        {airport.iata} — {airport.city}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="col-md-6 mb-3 form-field">
-                  <label>Arrival Airport</label>
-                  <select
-                    name="arrivalAirportId"
-                    className="form-control"
-                    value={filters.arrivalAirportId}
-                    onChange={handleChange}
-                  >
-                    <option value="">All Arrival Airports</option>
-                    {dropdowns.airports.map(airport => (
-                      <option
-                        key={airport.airport_id}
-                        value={airport.airport_id}
-                      >
-                        {airport.iata} — {airport.city}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <button type="submit" className="login-button mt-2">
-                Generate Report
-              </button>
-            </form>
-          </div>
-
-          {hasGenerated && (
-            <>
-              <hr />
-
-              <div className="form-section my-4">
-                <h5 className="form-title text-center mb-3">Report Output</h5>
-
-                {reportData.reportMeta && (
-                  <div className="mb-3">
-                    <p><strong>Report:</strong> {reportData.reportMeta.reportName}</p>
-                    <p><strong>Date Range:</strong> {reportData.reportMeta.startDate || 'Any'} to {reportData.reportMeta.endDate || 'Any'}</p>
-                    <p><strong>Status:</strong> {reportData.reportMeta.statusName || 'All'}</p>
-                    <p><strong>Departure Airport:</strong> {reportData.reportMeta.departureAirport || 'All'}</p>
-                    <p><strong>Arrival Airport:</strong> {reportData.reportMeta.arrivalAirport || 'All'}</p>
-                  </div>
-                )}
-
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="table table-bordered">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Total Flights</th>
-                        <th>On Schedule</th>
-                        <th>Delayed</th>
-                        <th>Cancelled</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {reportData.summary ? (
-                        <tr>
-                          <td>{reportData.summary.totalFlights}</td>
-                          <td>{reportData.summary.onScheduleCount}</td>
-                          <td>{reportData.summary.delayedCount}</td>
-                          <td>{reportData.summary.cancelledCount}</td>
-                        </tr>
-                      ) : (
-                        <tr>
-                          <td colSpan="4" className="text-center">
-                            No report output found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <hr />
-
-              <div className="form-section mt-4">
-                <h5 className="form-title text-center mb-3">Raw Data Used</h5>
-
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="table table-bordered">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Flight</th>
-                        <th>Route</th>
-                        <th>Aircraft</th>
-                        <th>Status</th>
-                        <th>Reason</th>
-                        <th>Scheduled Departure</th>
-                        <th>Scheduled Arrival</th>
-                        <th>Actual Departure</th>
-                        <th>Actual Arrival</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {reportData.rawData.length > 0 ? (
-                        reportData.rawData.map(row => (
-                          <tr key={row.flight_instance_id}>
-                            <td>{row.flight_number}</td>
-                            <td>{row.departure_city} → {row.arrival_city}</td>
-                            <td>{row.aircraft_name}</td>
-                            <td>
-                              <span className={`status-badge ${getFlightStatusClass(row.status_name)}`}>
-                                {row.status_name}
-                              </span>
-                            </td>                            <td>{row.reason_name || '—'}</td>
-                            <td>{formatDateTime(row.scheduled_departure_datetime)}</td>
-                            <td>{formatDateTime(row.scheduled_arrival_datetime)}</td>
-                            <td>{formatDateTime(row.actual_departure_datetime)}</td>
-                            <td>{formatDateTime(row.actual_arrival_datetime)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="9" className="text-center">
-                            No report data found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-          )}
 
         </div>
-      </div>
-    </div>
-  )
+    )
 }
 
-export default FlightReports
+export default PayrollReports;
