@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../App.css';
+import './Passenger.css';
 import FlightSearch from '../features/search/FlightSearch';
 import Profile from '../features/profile/Profile';
 import MyBookings from '../features/bookings/MyBookings';
