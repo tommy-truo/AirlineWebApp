@@ -2,6 +2,48 @@
 
 import { pool } from '../../db.js';
 
+//Returns list of booking IDs eligible for expire status
+export async function getBookingsToExpire() {
+    try {
+        const now = new Date();
+        const queryStatement = `
+            SELECT
+                b.booking_id
+            FROM
+                bookings AS b
+            JOIN booking_statuses AS bs ON b.booking_status_id = bs.booking_status_id
+            WHERE 
+                bs.status_name = 'Pending'
+                AND b.expires_datetime < ?
+            ;
+        `;
+        const [rows] = await pool.query(queryStatement, [now]);
+        return rows;
+    } catch (err) {
+        throw err;
+    }
+}
+
+// Returns string representing status of booking
+export async function getBookingStatus(bookingID) {
+    try {
+        const queryStatement = `
+            SELECT bs.status_name
+            FROM booking_statuses AS bs
+            JOIN bookings AS b ON bs.booking_status_id = b.booking_status_id
+            WHERE b.booking_id = ?
+            LIMIT 1
+            ;
+        `;
+        const [rows] = await pool.query(queryStatement, [bookingID]);
+        if (rows.length === 0) throw new Error("No booking found with matching ID");
+        return rows[0].status_name;
+    } catch (err) {
+        console.error("Database Error in getBookingStatus");
+        throw err;
+    }
+}
+
 // Returns a list of all bookings owned by a passenger
 export async function getPassengerBookings(ownerID) {
     try {
@@ -109,6 +151,7 @@ export async function getPassengerBookings(ownerID) {
             flights: Object.values(b.flights)
         }));
     } catch (err) {
+        console.error("Database Error in getBookingsToExpire");
         throw err;
     }
 }
@@ -390,8 +433,8 @@ export async function expireBooking(bookingID) {
     }
 }
 
-// Cancels booking (refunds it, not actually cancel)
-export async function cancelBooking(bookingID) {
+// Refunds booking
+export async function refundBooking(bookingID) {
     try {
         const now = new Date();
         const updateBookingQuery = `
@@ -400,6 +443,28 @@ export async function cancelBooking(bookingID) {
                 SELECT booking_status_id 
                 FROM booking_statuses 
                 WHERE status_name = 'Refunded' 
+                LIMIT 1
+            ), last_updated_datetime = ?
+            WHERE booking_id = ?
+        `;
+        await pool.query(updateBookingQuery, [now, bookingID]);
+
+    } catch (err) {
+        console.error("Database Error in refundBooking:", err);
+        throw err;
+    }
+}
+
+// Cancels booking
+export async function cancelBooking(bookingID) {
+    try {
+        const now = new Date();
+        const updateBookingQuery = `
+            UPDATE bookings
+            SET booking_status_id = (
+                SELECT booking_status_id 
+                FROM booking_statuses 
+                WHERE status_name = 'Cancelled' 
                 LIMIT 1
             ), last_updated_datetime = ?
             WHERE booking_id = ?
@@ -466,31 +531,6 @@ export async function deleteTicket(bookingID, ticketID) {
         throw err;
     } finally {
         conn.release();
-    }
-}
-
-export async function getBookingsToExpire() {
-    try {
-        const now = new Date();
-        const fetchQuery = `
-            SELECT booking_id
-            FROM bookings
-            WHERE
-                expires_datetime <= ?
-                AND booking_status_id = (
-                    SELECT booking_status_id
-                    FROM booking_statuses
-                    WHERE 
-                        status_name = 'Pending')
-            ;
-        `;
-
-        const [rows] = await pool.query(fetchQuery, [now]);
-
-        return rows;
-    } catch (err) {
-        console.error("Database Error in getBookingsToExpire");
-        throw err;
     }
 }
 

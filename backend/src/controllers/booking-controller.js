@@ -1,5 +1,15 @@
 import * as BookingModel from '../models/booking-model.js';
 
+// GET /api/bookings/to-expire
+export const getBookingsToExpire = async (req, res) => {
+    try {
+        const bookingsToExpire = await BookingModel.getBookingsToExpire();
+        res.status(200).json(bookingsToExpire);
+    } catch (err) {
+        res.status(500).json({error: "Failed to retrieve bookings to expire."});
+    }
+}
+
 // GET /api/bookings/passenger/:ownerID
 export const getPassengerBookings = async (req, res) => {
     try {
@@ -119,7 +129,13 @@ export const deleteTicket = async (req, res) => {
 export const cancelBooking = async (req, res) => {
     try {
         const { bookingID } = req.params;
-        await BookingModel.cancelBooking(bookingID);
+        const status = await BookingModel.getBookingStatus(bookingID);
+        if (status == 'Pending') {
+            await BookingModel.cancelBooking(bookingID);
+        }
+        else if (status == 'Confirmed') {
+            await BookingModel.refundBooking(bookingID);
+        }
 
         res.status(200).json({ 
             message: "Booking cancelled and seats released."

@@ -8,6 +8,9 @@ const router = Router();
 // POST /api/bookings - Create a new booking with tickets
 router.post('/', BookingController.createPendingBooking);
 
+// GET /api/bookings/expire - Get all bookings eligible for expire status
+router.get('/to-expire', BookingController.getBookingsToExpire);
+
 // GET /api/bookings/passenger/:ownerID - Get all bookings for a specific passenger owner
 router.get('/passenger/:ownerID', BookingController.getPassengerBookings);
 
