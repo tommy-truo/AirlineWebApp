@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function PersonalInfo({ employeeId = 1 }) {
+function PilotPersonalInfo({ employeeId = 1 }) {
     const [info, setInfo] = useState(null);
     const [formData, setFormData] = useState({
         first_name: '',
@@ -234,4 +234,4 @@ function PersonalInfo({ employeeId = 1 }) {
     );
 }
 
-export default PersonalInfo;
+export default PilotPersonalInfo;

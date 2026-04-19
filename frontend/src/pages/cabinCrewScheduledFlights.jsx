@@ -81,7 +81,7 @@ function CabinCrewScheduledFlights({ employeeId = 1 }) {
     const nextFlight = upcomingFlights.length > 0 ? upcomingFlights[0] : null;
 
     const renderFlightsTable = (flightList, emptyMessage) => (
-        <table className="shift-table">
+        <table className="flights-table">
             <thead>
                 <tr>
                     <th>Flight</th>

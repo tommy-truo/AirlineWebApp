@@ -1,11 +1,9 @@
 import { useState } from 'react';
 //shift calendar is for managing schedule requests
-import ShiftCalendar from '../pages/shiftCalendar.jsx';
-
-//scheduled flights is for viewing flight assignments, both future and past
-import ScheduledFlights from '../pages/scheduledFlights.jsx';
-import PersonalInfo from '../pages/personalInfo.jsx';
-import FlightReports from '../pages/flightReports.jsx';
+import PilotPersonalInfo from '../pages/pilotPersonalInfo.jsx';
+import PilotScheduledFlights from '../pages/pilotScheduledFlights.jsx';
+import PilotShiftCalendar from '../pages/pilotShiftCalendar.jsx';
+import PilotFlightReports from '../pages/pilotFlightReports.jsx';
 import './PilotDashboard.css';
 
 function PilotDashboard({ employeeId, onLogout }) {
@@ -55,10 +53,10 @@ function PilotDashboard({ employeeId, onLogout }) {
       </aside>
 
       <main className="dashboard-content">
-        {page === 'shift' && <ShiftCalendar employeeId={employeeId} />}
-        {page === 'flights' && <ScheduledFlights employeeId={employeeId} />}
-        {page === 'personal' && <PersonalInfo employeeId={employeeId} />}
-        {page === 'reports' && <FlightReports employeeId={employeeId} />}
+        {page === 'shift' && <PilotShiftCalendar employeeId={employeeId} />}
+        {page === 'flights' && <PilotScheduledFlights employeeId={employeeId} />}
+        {page === 'personal' && <PilotPersonalInfo employeeId={employeeId} />}
+        {page === 'reports' && <PilotFlightReports employeeId={employeeId} />}
       </main>
     </div>
   );

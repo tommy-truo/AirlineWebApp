@@ -282,3 +282,48 @@ body {
 .clickable-flight:hover {
   color: #7f1d1d;
 }
+
+.flights-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1000px;
+}
+
+/* Header */
+.flights-table th {
+  background-color: var(--primary-red);
+  color: white;
+  padding: 16px 14px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Cells */
+.flights-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  white-space: nowrap; /*date issue*/
+}
+
+/* Row hover */
+.flights-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+/* Column sizing */
+.flights-table th:nth-child(4),
+.flights-table td:nth-child(4),
+.flights-table th:nth-child(5),
+.flights-table td:nth-child(5) {
+  min-width: 170px; /* Departure & Arrival */
+}
+
+.flights-table th:last-child,
+.flights-table td:last-child {
+  min-width: 140px; /* Action button */
+}
