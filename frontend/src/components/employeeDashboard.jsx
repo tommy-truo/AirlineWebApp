@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./employeeDashboard.css";
 import printBoardingPass from "./printBoardingPass.jsx";
 
-const API = import.meta.env.VITE_API_URL || "https://airlinewebapp.onrender.com";
+const API = "https://airlinewebapp.onrender.com";
 
 const Dashboard = ({ onLogout }) => {
     const [selectedAirport, setSelectedAirport] = useState(() => sessionStorage.getItem("selectedStation") || "");
