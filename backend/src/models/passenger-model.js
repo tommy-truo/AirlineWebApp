@@ -1,7 +1,37 @@
 // Written by Tommy Truong
 
 import { pool } from '../../db.js';
-import { mapPassenger, mapSearchCriteria } from '../utils/mappers/passenger-mapper.js';
+import { mapPassenger, mapSearchCriteria, mapNotification } from '../utils/mappers/passenger-mapper.js';
+
+// Returns list of notifications
+export async function getNotifications(passengerID) {
+    try {
+        const queryStatement = `
+            SELECT *
+            FROM notifications
+            WHERE passenger_id = ?;
+        `;
+        const [rows] = await pool.query(queryStatement, [passengerID]);
+        return rows.map(row => mapNotification(row));
+    } catch (err) {
+        console.error("Database Error in getNotifications", err);
+        throw err;
+    }
+}
+
+export async function readNotification(notificationID) {
+    try {
+        const queryStatement = `
+            UPDATE notifications
+            SET is_read = 1
+            WHERE notification_id = ?;
+        `;
+        await pool.query(queryStatement, [notificationID]);
+    } catch (err) {
+        console.error("Database Error in readNotification", err);
+        throw err;
+    }
+}
 
 // Returns list of all passenger rows in DB
 export async function getAllPassengers() {

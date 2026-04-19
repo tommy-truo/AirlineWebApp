@@ -28,4 +28,12 @@ router.delete('/users/:userID/passengers/:passengerID', PassengerController.unli
 // PATCH /passengers/:passengerID/enroll
 router.patch('/:passengerID/enroll', PassengerController.enrollPassenger);
 
+//      NOTIFICATION CONTROLLER ROUTES
+
+// GET /:passengerID/notifications
+router.get('/:passengerID/notifications', PassengerController.getNotifications);
+
+// PATCH /:notificationID/read
+router.patch('/notifications/:notificationID/read', PassengerController.readNotification);
+
 export default router;

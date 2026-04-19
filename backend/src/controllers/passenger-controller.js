@@ -33,6 +33,37 @@ export async function functionName(req, res) {
 }
 */
 
+// NOTIFICATION MODEL FUNCTIONS
+export async function getNotifications(req, res) {
+    try {
+        const { passengerID } = req.params;
+
+        if (!passengerID) {
+            return res.status(400).json({message: "Passenger ID required"});
+        }
+
+        const notifications = await PassengerModel.getNotifications(passengerID);
+        return res.status(200).json(notifications);
+    } catch (err) {
+        handleControllerError(res, err, "Controller Error in getNotifications");
+    }
+}
+export async function readNotification(req, res) {
+    try {
+        const {notificationID} = req.params;
+
+        if (!notificationID) {
+            return res.status(400).json({message: "Notification ID required"});
+        }
+
+        await PassengerModel.readNotification(notificationID);
+        return res.status(200).json({message:"Read notif"});
+
+    } catch (err) {
+        handleControllerError(res, err, "Controller Error in readNotification");
+    }
+}
+
 
 //      PASSENGER MODEL FUNCTIONS
 

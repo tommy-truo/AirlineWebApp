@@ -3,9 +3,10 @@ import FlightSearch from '../features/search/FlightSearch';
 import Profile from '../features/profile/Profile';
 import MyBookings from '../features/bookings/MyBookings';
 import LoyaltyPortal from '../features/loyaltyProgram/LoyaltyPortal';
+import NotificationsPage from '../features/notifications/Notifications';
 
 const PassengerDashboard = ({ userID, onLogout }) => {
-  const [activeTab, setActiveTab] = useState('search');
+  const [activeTab, setActiveTab] = useState('notifications');
 
   // Professional Red Color Palette
   const colors = {
@@ -81,6 +82,13 @@ const PassengerDashboard = ({ userID, onLogout }) => {
         
         <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <button 
+            style={getNavButtonStyle(activeTab === 'notifications')}
+            onClick={() => setActiveTab('notifications')}
+          >
+            Notifications
+          </button>
+
+          <button 
             style={getNavButtonStyle(activeTab === 'search')}
             onClick={() => setActiveTab('search')}
           >
@@ -123,6 +131,7 @@ const PassengerDashboard = ({ userID, onLogout }) => {
       </nav>
 
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+        {activeTab === 'notifications' && <NotificationsPage userID={userID} />}
         {activeTab === 'search' && <FlightSearch userID={userID} />}
         {activeTab === 'bookings' && <MyBookings userID={userID} onNavigate={setActiveTab} />}
         {activeTab === 'profile' && <Profile userID={userID} />}

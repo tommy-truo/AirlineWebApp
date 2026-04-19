@@ -56,3 +56,17 @@ export const mapSearchCriteria = (data) => {
         knownTravelerNumber: data.known_traveler_number ?? data.knownTravelerNumber ?? null
     }
 };
+
+export const mapNotification = (data) => {
+    if (!data) return null;
+
+    return {
+        notificationID: data.notificationID ?? data.notification_id ?? null,
+        passengerID: data.passengerID ?? data.passenger_id ?? null,
+        type: data.type ?? null,
+        title: data.title || null,
+        message: data.message || null,
+        isRead: data.isRead ?? data.is_read ?? null,
+        createdDatetime: data.createdDatetime ?? data.created_datetime ?? null
+    }
+}
