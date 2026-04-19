@@ -13,6 +13,8 @@ import PayrollReports from "./PayrollReports.jsx";
 import TransactionHistory from "./TransactionHistory.jsx";
 import TransactionReports from "./TransactionReports.jsx";
 import FlightReports from "./FlightReports.jsx";
+import FlashSaleManagement from "./FlashSaleManagement.jsx";
+import CreateFlashSale from "./CreateFlashSale.jsx";
 
 function ManagerDashboard({ employeeId, onLogout }) {
   return (
@@ -29,6 +31,8 @@ function ManagerDashboard({ employeeId, onLogout }) {
         <Route path="/payroll-reports" element={<PayrollReports employeeId={employeeId} />} />
         <Route path="/transaction-history" element={<TransactionHistory />} />
         <Route path="/transaction-reports" element={<TransactionReports />} />
+        <Route path="/flash-sales" element={<FlashSaleManagement />} />
+        <Route path="/create-flash-sale" element={<CreateFlashSale />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ManagerLayout>
