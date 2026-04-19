@@ -22,7 +22,19 @@ function formatMySQLDateTime(value) {
 export const getFlashSales = async (req, res) => {
     try {
         const sql = `
-            SELECT *
+            SELECT
+                flash_sale_id,
+                name,
+                start_datetime,
+                end_datetime,
+                discount_type,
+                discount_value,
+                departure_iata,
+                arrival_iata,
+                CASE
+                    WHEN end_datetime <= NOW() THEN 0
+                    ELSE is_active
+                END AS is_active
             FROM flash_sales
             ORDER BY start_datetime DESC
         `;
@@ -84,9 +96,11 @@ export const createFlashSale = async (req, res) => {
         ]);
 
         return res.status(201).json({
-            message: "Flash sale created successfully.",
-            flash_sale_id: result.insertId
-        });
+    message: is_active
+        ? "Flash sale created and notifications sent."
+        : "Flash sale created (inactive).",
+    flash_sale_id: result.insertId
+});
 
     } catch (err) {
         console.error("CREATE FLASH SALE ERROR:", err);
@@ -99,6 +113,24 @@ export const toggleFlashSaleStatus = async (req, res) => {
     const { is_active } = req.body;
 
     try {
+        const [saleRows] = await db.execute(`
+    SELECT start_datetime, end_datetime
+    FROM flash_sales
+    WHERE flash_sale_id = ?
+`, [id]);
+
+        if (saleRows.length === 0) {
+            return res.status(404).json({
+                message: "Flash sale not found."
+            });
+        }
+
+        if (is_active && new Date(saleRows[0].end_datetime) <= new Date()) {
+    return res.status(400).json({
+        message: "Cannot activate an expired flash sale."
+    });
+}
+
         const sql = `
             UPDATE flash_sales
             SET is_active = ?
