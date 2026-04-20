@@ -38,8 +38,17 @@ function EmployeeRegisterForm() {
                 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
                 const res = await fetch(`${API_BASE_URL}/api/employees/dropdowns`);
-                const data = await res.json();
-                setDropdowns(data);
+const data = await res.json();
+
+if (!res.ok) {
+    throw new Error(data.message || 'Error loading dropdown options.');
+}
+
+setDropdowns({
+    departments: data.departments || [],
+    jobTitles: data.jobTitles || [],
+    supervisors: data.supervisors || []
+});
             } catch (err) {
                 console.error(err);
                 setError('Error loading dropdown options.');
@@ -104,7 +113,7 @@ function EmployeeRegisterForm() {
 
     };
 
-    const filteredJobTitles = dropdowns.jobTitles.filter(
+    const filteredJobTitles = (dropdowns.jobTitles || []).filter(
     (job) => String(job.department_id) === String(form.department_id)
 );
 
