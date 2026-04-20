@@ -12,7 +12,9 @@ import {
   getCabinCrewPendingFlightReports,
   submitCabinCrewFlightReport,
   getCabinCrewFlightReportDetails,
-  getCabinCrewSwapOptions
+  getCabinCrewSwapOptions,
+  getEmployeeNotifications,
+  readEmployeeNotification
 
 } from '../controllers/cabinCrewController.js';
 
@@ -33,5 +35,7 @@ router.get('/flight_reports/pending', getCabinCrewPendingFlightReports);
 router.post('/flight_reports', submitCabinCrewFlightReport);
 router.get('/flight_reports/:reportId', getCabinCrewFlightReportDetails);
 router.get('/swap_options', getCabinCrewSwapOptions);
+router.get('/employees/:employeeId/notifications', getEmployeeNotifications);
+router.patch('/employees/notifications/:notificationId/read', readEmployeeNotification);
 
 export default router;

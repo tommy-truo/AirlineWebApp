@@ -713,3 +713,91 @@ export const getCabinCrewSwapOptions = async (req, res, next) => {
     next(err);
   }
 };
+
+
+// model for noti's
+export const getEmployeeNotificationsModel = async (employeeId) => {
+  try {
+    const sql = `
+      SELECT
+        notification_id,
+        employee_id,
+        type,
+        title,
+        message,
+        is_read,
+        created_datetime
+      FROM airline.employee_notifications
+      WHERE employee_id = ?
+      ORDER BY created_datetime DESC
+      LIMIT 10
+    `;
+
+    const [rows] = await db.query(sql, [employeeId]);
+
+    return rows.map((row) => ({
+      notificationID: row.notification_id,
+      employeeID: row.employee_id,
+      type: row.type,
+      title: row.title,
+      message: row.message,
+      isRead: row.is_read,
+      createdDatetime: row.created_datetime
+    }));
+  } catch (err) {
+    console.error('Error fetching employee notifications:', err);
+    throw err;
+  }
+};
+
+export const readEmployeeNotificationModel = async (notificationId) => {
+  try {
+    const sql = `
+      UPDATE airline.employee_notifications
+      SET is_read = 1
+      WHERE notification_id = ?
+    `;
+
+    const [result] = await db.query(sql, [notificationId]);
+
+    return { success: result.affectedRows > 0 };
+  } catch (err) {
+    console.error('Error marking notification as read:', err);
+    throw err;
+  }
+};
+
+export const getEmployeeNotificationsController = async (req, res, next) => {
+  try {
+    const { employeeId } = req.params;
+
+    if (!employeeId) {
+      return res.status(400).json({ message: 'Employee ID required' });
+    }
+
+    const notifications = await getEmployeeNotificationsModel(employeeId);
+    return res.status(200).json(notifications);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const readEmployeeNotificationController = async (req, res, next) => {
+  try {
+    const { notificationId } = req.params;
+
+    if (!notificationId) {
+      return res.status(400).json({ message: 'Notification ID required' });
+    }
+
+    const result = await readEmployeeNotificationModel(notificationId);
+
+    if (!result.success) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+
+    return res.status(200).json({ message: 'Notification marked as read' });
+  } catch (err) {
+    return next(err);
+  }
+};
