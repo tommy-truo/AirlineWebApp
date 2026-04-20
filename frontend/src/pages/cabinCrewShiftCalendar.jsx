@@ -7,6 +7,9 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
     const [requestType, setRequestType] = useState('');
     const [selectedShift, setSelectedShift] = useState(null);
     const [reason, setReason] = useState('');
+    const [preferredDate, setPreferredDate] = useState('');
+    const [preferredDeparture, setPreferredDeparture] = useState('');
+    const [preferredArrival, setPreferredArrival] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [requests, setRequests] = useState([]);
     const [requestError, setRequestError] = useState('');
@@ -72,7 +75,7 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
                 new Date(b.scheduled_departure_datetime)
         );
 
-    
+
 
     const nextFlight = upcomingShifts.length > 0 ? upcomingShifts[0] : null;
 
@@ -97,7 +100,10 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
             employee_id: employeeId,
             assignment_id: selectedShift,
             request_type: requestType,
-            reason: reason.trim()
+            reason: reason.trim(),
+            preferred_date: preferredDate,
+            preferred_departure_airport_id: preferredDeparture,
+            preferred_arrival_airport_id: preferredArrival
         };
 
         fetch(`${API_URL}/api/cabin_crew/submit_request`, {
@@ -118,6 +124,9 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
                 setSuccessMessage('Request submitted successfully.');
                 setShowForm(false);
                 setReason('');
+                setPreferredDate('');
+                setPreferredDeparture('');
+                setPreferredArrival('');
                 setError('');
                 fetchShiftRequests();
             })
@@ -280,7 +289,7 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
                 {renderShiftsTable(upcomingShifts, 'No upcoming shifts assigned yet.')}
             </div>
 
-           
+
 
             <div className="table-wrapper" style={{ marginTop: '30px' }}>
                 <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
@@ -372,6 +381,57 @@ function CabinCrewShiftCalendar({ employeeId = 54 }) {
                         }}
                         required
                     />
+
+                    {requestType === 'add' && (
+                        <>
+                            <input
+                                type="date"
+                                value={preferredDate}
+                                onChange={(e) => setPreferredDate(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ccc',
+                                    marginBottom: '10px'
+                                }}
+                            />
+
+                            <select
+                                value={preferredDeparture}
+                                onChange={(e) => setPreferredDeparture(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ccc',
+                                    marginBottom: '10px'
+                                }}
+                            >
+                                <option value="">Preferred Departure Airport</option>
+                                <option value="1">Houston (IAH)</option>
+                                <option value="2">Dallas (DFW)</option>
+                                <option value="3">New York (JFK)</option>
+                            </select>
+
+                            <select
+                                value={preferredArrival}
+                                onChange={(e) => setPreferredArrival(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ccc',
+                                    marginBottom: '15px'
+                                }}
+                            >
+                                <option value="">Optional Destination</option>
+                                <option value="1">Houston (IAH)</option>
+                                <option value="2">Dallas (DFW)</option>
+                                <option value="3">New York (JFK)</option>
+                            </select>
+                        </>
+                    )}
 
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button
