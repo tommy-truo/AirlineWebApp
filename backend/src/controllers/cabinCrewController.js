@@ -665,3 +665,51 @@ ORDER BY
     next(err);
   }
 };
+
+export const getCabinCrewSwapOptions = async (req, res, next) => {
+  try {
+    const { employee_id, assignment_id, preferred_date } = req.query;
+
+    if (!employee_id || !assignment_id || !preferred_date) {
+      return res.status(400).json({ error: 'employee_id, assignment_id, and preferred_date are required' });
+    }
+
+    const sql = `
+      SELECT
+        fea.assignment_id,
+        e.employee_id,
+        e.first_name,
+        e.last_name,
+        e.emergency_contact_phone AS phone_number,
+        a.email,
+        fr.flight_number,
+        da.city AS departure_city,
+        aa.city AS arrival_city,
+        fi.scheduled_departure_datetime
+      FROM airline.flight_employee_assignments fea
+      JOIN airline.employees e
+        ON fea.employee_id = e.employee_id
+      LEFT JOIN airline.accounts a
+        ON e.account_id = a.account_id
+      JOIN airline.flight_instances fi
+        ON fea.flight_instance_id = fi.flight_instance_id
+      JOIN airline.flight_routes fr
+        ON fi.flight_route_id = fr.flight_route_id
+      JOIN airline.airports da
+        ON fr.departure_airport_id = da.airport_id
+      JOIN airline.airports aa
+        ON fr.arrival_airport_id = aa.airport_id
+      JOIN airline.flight_employee_assignment_types feat
+        ON fea.assignment_type_id = feat.assignment_type_id
+      WHERE fea.employee_id <> ?
+        AND feat.type_name = 'Cabin Crew'
+        AND DATE(fi.scheduled_departure_datetime) = ?
+      ORDER BY fi.scheduled_departure_datetime
+    `;
+
+    const [rows] = await db.query(sql, [employee_id, preferred_date]);
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+};

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 function CabinCrewPersonalInfo({ employeeId }) {
-  const [info, setInfo] = useState(null);
+    const [info, setInfo] = useState(null);
     const [formData, setFormData] = useState({
         emergency_contact_name: '',
         emergency_contact_phone: '',
@@ -10,6 +10,7 @@ function CabinCrewPersonalInfo({ employeeId }) {
 
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [showSalary, setShowSalary] = useState(false);
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -116,15 +117,6 @@ function CabinCrewPersonalInfo({ employeeId }) {
                         </div>
 
                         <div className="summary-card">
-                            <h3>Salary</h3>
-                            <p>
-                                {info.salary != null
-                                    ? `$${Number(info.salary).toLocaleString()}`
-                                    : 'N/A'}
-                            </p>
-                        </div>
-
-                        <div className="summary-card">
                             <h3>Start Date</h3>
                             <p>
                                 {info.start_date
@@ -170,7 +162,56 @@ function CabinCrewPersonalInfo({ employeeId }) {
                                 disabled
                                 placeholder="Email"
                             />
+
+                            <input
+                                type="text"
+                                value={info.title_name || ''}
+                                disabled
+                                placeholder="Position"
+                            />
+
+                            <input
+                                type="text"
+                                value={info.department_name || ''}
+                                disabled
+                                placeholder="Department"
+                            />
                         </div>
+
+                        <div
+                            style={{
+                                marginBottom: '30px',
+                                padding: '16px',
+                                borderRadius: '12px',
+                                background: '#f8fafc',
+                                border: '1px solid #e5e7eb'
+                            }}
+                        >
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <p style={{ margin: 0 }}>
+                                    {info.salary != null
+                                        ? showSalary
+                                            ? `$${Number(info.salary).toLocaleString()}`
+                                            : '••••••'
+                                        : 'N/A'}
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSalary(!showSalary)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '16px'
+                                    }}
+                                >
+                                    {showSalary ? '🙈' : '👁️'}
+                                </button>
+                            </div>
+                        </div>
+
 
                         <h2 className="title" style={{ fontSize: '2rem', marginBottom: '20px' }}>
                             Update Emergency Contact

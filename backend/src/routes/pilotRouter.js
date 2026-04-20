@@ -11,7 +11,8 @@ import {
   getFlightReports,
   getPendingFlightReports,
   submitFlightReport,
-  getFlightReportDetails
+  getFlightReportDetails,
+  getPilotOptions
 } from '../controllers/pilotController.js';
 
 const router = express.Router();
@@ -47,4 +48,6 @@ router.get('/flight_reports/pending', getPendingFlightReports);
 router.post('/flight_reports', submitFlightReport);
 
 router.get('/flight_reports/:reportId', getFlightReportDetails);
+router.get('/swap_options', getPilotOptions);
+
 export default router;
