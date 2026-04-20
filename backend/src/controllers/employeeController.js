@@ -104,15 +104,17 @@ export const createEmployee = async (req, res) => {
 
     let role = 'passenger';
 
-    if (jobTitleIdNum === 1 || jobTitleIdNum === 2) {
-      role = 'pilot';
-    } else if (jobTitleIdNum === 3) {
-      role = 'flightcrew';
-    } else if (jobTitleIdNum === 6) {
-      role = 'maintenance';
-    } else if (jobTitleIdNum === 8 || jobTitleIdNum === 9) {
-      role = 'manager';
-    }
+if (jobTitleIdNum === 1 || jobTitleIdNum === 2) {
+  role = 'pilot';
+} else if (jobTitleIdNum === 3) {
+  role = 'flightcrew';
+} else if (jobTitleIdNum === 6) {
+  role = 'maintenance';
+} else if (jobTitleIdNum === 8 || jobTitleIdNum === 9) {
+  role = 'manager';
+} else if (jobTitleIdNum === 10) {
+  role = 'checkIn';
+}
 
     const [accountResult] = await db.execute(accountSql, [
       email,
