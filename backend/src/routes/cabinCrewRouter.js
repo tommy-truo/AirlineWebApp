@@ -14,7 +14,8 @@ import {
   getCabinCrewFlightReportDetails,
   getCabinCrewSwapOptions,
   getEmployeeNotificationsController,
-  readEmployeeNotificationController
+  readEmployeeNotificationController,
+  reviewShiftRequest
 
 } from '../controllers/cabinCrewController.js';
 
@@ -23,6 +24,7 @@ const router = express.Router();
 router.get('/shift_calendar', getCabinCrewShiftCalendar);
 router.post('/submit_request', submitCabinCrewShiftRequest);
 router.get('/shift_requests', getCabinCrewShiftRequests);
+router.put('/shift_requests/:requestId/review', reviewShiftRequest);
 
 router.get('/scheduled_flights', getCabinCrewScheduledFlights);
 

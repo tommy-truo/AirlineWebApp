@@ -801,3 +801,135 @@ export const readEmployeeNotificationController = async (req, res, next) => {
     return next(err);
   }
 };
+
+
+export const reviewShiftRequest = async (req, res, next) => {
+  try {
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    if (!status || !['Approved', 'Denied'].includes(status)) {
+      return res.status(400).json({ error: 'Valid status is required' });
+    }
+
+    const [requests] = await db.query(
+      `
+      SELECT *
+      FROM airline.shift_requests
+      WHERE shift_request_id = ?
+      `,
+      [requestId]
+    );
+
+    if (requests.length === 0) {
+      return res.status(404).json({ error: 'Shift request not found' });
+    }
+
+    const request = requests[0];
+
+    if (request.status !== 'Pending') {
+      return res.status(400).json({ error: 'Request has already been reviewed' });
+    }
+
+    await db.query(
+      `
+      UPDATE airline.shift_requests
+      SET status = ?, reviewed_datetime = NOW()
+      WHERE shift_request_id = ?
+      `,
+      [status, requestId]
+    );
+
+    const notificationTitle =
+      status === 'Approved' ? 'Shift Request Approved' : 'Shift Request Denied';
+
+    const notificationMessage =
+      status === 'Approved'
+        ? `Your ${request.request_type} shift request has been approved.`
+        : `Your ${request.request_type} shift request has been denied.`;
+
+    await db.query(
+      `
+      INSERT INTO airline.employee_notifications
+      (employee_id, type, title, message, is_read, created_datetime)
+      VALUES (?, ?, ?, ?, 0, NOW())
+      `,
+      [
+        request.employee_id,
+        'Shift Request',
+        notificationTitle,
+        notificationMessage
+      ]
+    );
+
+    if (status === 'Approved') {
+      if (request.request_type === 'drop') {
+        await db.query(
+          `
+    UPDATE airline.shift_requests
+    SET assignment_id = NULL
+    WHERE shift_request_id = ?
+    `,
+          [request.shift_request_id]
+        );
+        await db.query(
+          `
+          DELETE FROM airline.flight_employee_assignments
+          WHERE assignment_id = ?
+          `,
+          [request.assignment_id]
+        );
+      } else if (request.request_type === 'add') {
+        await db.query(
+          `
+          INSERT INTO airline.flight_employee_assignments
+          (flight_instance_id, employee_id, assignment_type_id)
+          VALUES (?, ?, ?)
+          `,
+          [
+            request.requested_flight_instance_id,
+            request.employee_id,
+            request.requested_assignment_type_id
+          ]
+        );
+      } else if (request.request_type === 'swap') {
+        const [targetRows] = await db.query(
+          `
+          SELECT employee_id
+          FROM airline.flight_employee_assignments
+          WHERE assignment_id = ?
+          `,
+          [request.requested_swap_assignment_id]
+        );
+
+        if (targetRows.length === 0) {
+          return res.status(400).json({ error: 'Swap target not found' });
+        }
+
+        const otherEmployeeId = targetRows[0].employee_id;
+
+        await db.query(
+          `
+          UPDATE airline.flight_employee_assignments
+          SET employee_id = ?
+          WHERE assignment_id = ?
+          `,
+          [otherEmployeeId, request.assignment_id]
+        );
+
+        await db.query(
+          `
+          UPDATE airline.flight_employee_assignments
+          SET employee_id = ?
+          WHERE assignment_id = ?
+          `,
+          [request.employee_id, request.requested_swap_assignment_id]
+        );
+      }
+    }
+
+    res.json({ message: `Shift request ${status.toLowerCase()} successfully` });
+  } catch (err) {
+    next(err);
+  }
+};

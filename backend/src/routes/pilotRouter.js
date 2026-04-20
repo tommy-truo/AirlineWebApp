@@ -14,7 +14,8 @@ import {
   getFlightReportDetails,
   getPilotOptions,
   getEmployeeNotificationsController,
-  readEmployeeNotificationController
+  readEmployeeNotificationController,
+  reviewShiftRequest
 } from '../controllers/pilotController.js';
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.get('/shift_calendar', getShiftCalendar);
 
 // add, swap, drop shifts
 router.post('/submit_request', submitShiftRequest);
+router.put('/shift_requests/:requestId/review', reviewShiftRequest);
 
 // scheduled flights
 router.get('/scheduled_flights', getScheduledFlights);
