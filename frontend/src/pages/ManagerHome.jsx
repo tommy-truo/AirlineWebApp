@@ -73,10 +73,8 @@ function ManagerHome() {
   }
 
   const flightsNeedingAttention = flightsData
-    .filter((flight) =>
-      ['Delayed', 'Cancelled'].includes(flight.status_name)
-    )
-    .slice(0, 5)
+  .filter((flight) => flight.status_name === 'Delayed')
+  .slice(0, 5)
 
   const upcomingFlights = flightsData
     .filter((flight) =>
