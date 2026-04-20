@@ -11,7 +11,8 @@ import {
   getCabinCrewFlightReports,
   getCabinCrewPendingFlightReports,
   submitCabinCrewFlightReport,
-  getCabinCrewFlightReportDetails
+  getCabinCrewFlightReportDetails,
+  getCabinCrewSwapOptions
 
 } from '../controllers/cabinCrewController.js';
 
@@ -31,5 +32,6 @@ router.get('/flight_reports', getCabinCrewFlightReports);
 router.get('/flight_reports/pending', getCabinCrewPendingFlightReports);
 router.post('/flight_reports', submitCabinCrewFlightReport);
 router.get('/flight_reports/:reportId', getCabinCrewFlightReportDetails);
+router.get('/swap_options', getCabinCrewSwapOptions);
 
 export default router;

@@ -13,6 +13,8 @@ function PilotShiftCalendar({ employeeId = 1 }) {
     const [successMessage, setSuccessMessage] = useState('');
     const [requests, setRequests] = useState([]);
     const [requestError, setRequestError] = useState('');
+    const [swapOptions, setSwapOptions] = useState([]);
+    const [selectedSwapAssignment, setSelectedSwapAssignment] = useState('');
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -75,6 +77,32 @@ function PilotShiftCalendar({ employeeId = 1 }) {
         setSuccessMessage('');
         setError('');
         setShowForm(true);
+        setPreferredDate('');
+        setPreferredDeparture('');
+        setPreferredArrival('');
+        setSwapOptions([]);
+        setSelectedSwapAssignment('');
+    };
+
+    const fetchSwapOptions = (date) => {
+        if (!date || requestType !== 'swap' || !selectedShift) return;
+
+        fetch(
+            `${API_URL}/api/cabin_crew/swap_options?employee_id=${employeeId}&assignment_id=${selectedShift}&preferred_date=${date}`
+        )
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error('Failed to fetch swap options');
+                }
+                return res.json();
+            })
+            .then((data) => {
+                setSwapOptions(Array.isArray(data) ? data : []);
+            })
+            .catch((err) => {
+                console.error(err);
+                setError('Could not load swap options.');
+            });
     };
 
     const handleSubmitRequest = (e) => {
@@ -92,7 +120,9 @@ function PilotShiftCalendar({ employeeId = 1 }) {
             reason: reason.trim(),
             preferred_date: preferredDate,
             preferred_departure_airport_id: preferredDeparture,
-            preferred_arrival_airport_id: preferredArrival
+            preferred_arrival_airport_id: preferredArrival,
+            requested_swap_assignment_id: selectedSwapAssignment || null,
+            preferred_date: preferredDate || null,
         };
 
         fetch(`${API_URL}/api/pilot/submit_request`, {
@@ -371,21 +401,23 @@ function PilotShiftCalendar({ employeeId = 1 }) {
                             required
                         />
 
+                        {(requestType === 'add' || requestType === 'swap') && (
+                            <input
+                                type="date"
+                                value={preferredDate}
+                                onChange={(e) => setPreferredDate(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ccc',
+                                    marginBottom: '10px'
+                                }}
+                            />
+                        )}
+
                         {requestType === 'add' && (
                             <>
-                                <input
-                                    type="date"
-                                    value={preferredDate}
-                                    onChange={(e) => setPreferredDate(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px',
-                                        borderRadius: '8px',
-                                        border: '1px solid #ccc',
-                                        marginBottom: '10px'
-                                    }}
-                                />
-
                                 <select
                                     value={preferredDeparture}
                                     onChange={(e) => setPreferredDeparture(e.target.value)}
@@ -420,6 +452,39 @@ function PilotShiftCalendar({ employeeId = 1 }) {
                                     <option value="3">New York (JFK)</option>
                                 </select>
                             </>
+                        )}
+
+                        {requestType === 'swap' && (
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+                                    Available Swap Options
+                                </label>
+
+                                {swapOptions.length === 0 ? (
+                                    <p style={{ color: '#777', margin: 0 }}>
+                                        No swap options found for that date yet.
+                                    </p>
+                                ) : (
+                                    <select
+                                        value={selectedSwapAssignment}
+                                        onChange={(e) => setSelectedSwapAssignment(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #ccc',
+                                            marginBottom: '10px'
+                                        }}
+                                    >
+                                        <option value="">Select a shift to swap with</option>
+                                        {swapOptions.map((option) => (
+                                            <option key={option.assignment_id} value={option.assignment_id}>
+                                                {option.first_name} {option.last_name} • {option.phone_number || option.email || 'No contact'} • {option.flight_number} • {option.departure_city} → {option.arrival_city}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
                         )}
 
                         <div style={{ display: 'flex', gap: '10px' }}>
