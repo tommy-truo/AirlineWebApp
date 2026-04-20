@@ -227,14 +227,18 @@ setError('');
                                 <div className="col-md-4 mb-3 form-field">
                                     <label>SSN*</label>
                                     <input
-                                        type="number"
-                                        id="ssn"
-                                        className="form-control"
-                                        value={form.ssn}
-                                        onChange={handleChange}
-                                        placeholder='XXX-XX-XXXX'
-                                        required
-                                    />
+    type="text"
+    id="ssn"
+    className="form-control"
+    value={form.ssn}
+    onChange={(e) => {
+        const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+        handleChange({ target: { id: 'ssn', value: val } });
+    }}
+    placeholder='XXXXXXXXX'
+    maxLength="9"
+    required
+/>
                                 </div>
 
                             </div>
