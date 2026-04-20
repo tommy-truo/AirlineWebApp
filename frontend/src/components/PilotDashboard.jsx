@@ -35,6 +35,25 @@ function PilotDashboard({ employeeId, onLogout }) {
     }
   };
 
+
+  const handleMarkAsRead = async (notificationID) => {
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.notificationID === notificationID ? { ...n, isRead: 1 } : n
+      )
+    );
+
+    try {
+      await fetch(`${API_URL}/api/employees/notifications/${notificationID}/read`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
   useEffect(() => {
     fetchNotifications();
   }, [employeeId]);
@@ -148,9 +167,27 @@ function PilotDashboard({ employeeId, onLogout }) {
                 >
                   <strong>{n.title}</strong>
                   <p style={{ margin: '4px 0' }}>{n.message}</p>
-                  <small style={{ color: '#999' }}>
+                  <small style={{ color: '#999', display: 'block', marginBottom: '6px' }}>
                     {new Date(n.createdDatetime).toLocaleString()}
                   </small>
+
+                  {!n.isRead && (
+                    <button
+                      type="button"
+                      onClick={() => handleMarkAsRead(n.notificationID)}
+                      style={{
+                        background: '#f3f4f6',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        padding: '4px 10px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}
+                    >
+                      Mark as Read
+                    </button>
+                  )}
                 </div>
               ))
             )}

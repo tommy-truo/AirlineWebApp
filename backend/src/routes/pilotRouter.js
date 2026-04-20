@@ -13,8 +13,8 @@ import {
   submitFlightReport,
   getFlightReportDetails,
   getPilotOptions,
-  getEmployeeNotifications,
-  readEmployeeNotification
+  getEmployeeNotificationsController,
+  readEmployeeNotificationController
 } from '../controllers/pilotController.js';
 
 const router = express.Router();
@@ -51,7 +51,7 @@ router.post('/flight_reports', submitFlightReport);
 
 router.get('/flight_reports/:reportId', getFlightReportDetails);
 router.get('/swap_options', getPilotOptions);
-router.get('/employees/:employeeId/notifications', getEmployeeNotifications);
-router.patch('/employees/notifications/:notificationId/read', readEmployeeNotification);
+router.get('/employees/:employeeId/notifications', getEmployeeNotificationsController);
+router.patch('/employees/notifications/:notificationId/read', readEmployeeNotificationController);
 
 export default router;

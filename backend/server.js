@@ -9,9 +9,13 @@ import authRouter from './src/routes/authRoutes.js';
 import pilotRouter from './src/routes/pilotRouter.js';
 import cabinCrewRouter from './src/routes/cabinCrewRouter.js';
 import startExpireJob from './src/jobs/bookingExpireCronJob.js';
+import {
+  getEmployeeNotificationsController,
+  readEmployeeNotificationController
+} from './src/controllers/cabinCrewController.js';
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5001;
 
 app.use(cors()); 
 
@@ -25,6 +29,9 @@ app.use('/api/flights', flightRouter)
 app.use('/api/auth', authRouter);
 app.use('/api/pilot', pilotRouter);
 app.use('/api/cabin_crew', cabinCrewRouter);
+app.get('/api/employees/:employeeId/notifications', getEmployeeNotificationsController);
+app.patch('/api/employees/notifications/:notificationId/read', readEmployeeNotificationController);
+
 
 app.use((err, req, res, next) => {
     console.error("SERVER ERROR:", err);
