@@ -9,7 +9,6 @@ import HomeHero from './components/HomeHero.jsx';
 import Ticker from './components/Ticker.jsx';
 
 const App = () => {
-
   const updateView = (newView) => {
     setView(newView);
     localStorage.setItem('activeView', newView);
@@ -29,7 +28,7 @@ const App = () => {
       'passengerSignup',
       'passengerDashboard',
       'shiftCalendar',
-      'employeeDashboard'
+      'employeeDashboard',
     ];
 
     if (savedView && validViews.includes(savedView)) {
@@ -64,48 +63,52 @@ const App = () => {
 
     if (userData.user.role === 'passenger') {
       storedId = userData.user.account_id ?? userData.user.id;
-      updateView('passengerDashboard');
-    }
-    else if (userData.user.role === 'pilot') {
+      localStorage.setItem('activeView', 'passengerDashboard');
+      setView('passengerDashboard');
+    } else if (userData.user.role === 'pilot') {
       storedId = userData.user.employee_id ?? userData.user.id;
-      updateView('shiftCalendar');
-    }
-    else if (userData.user.role === 'checkIn') {
+      localStorage.setItem('activeView', 'shiftCalendar');
+      setView('shiftCalendar');
+    } else if (userData.user.role === 'checkIn') {
       storedId = userData.user.employee_id ?? userData.user.id;
-      updateView('employeeDashboard');
+      localStorage.setItem('activeView', 'employeeDashboard');
+      setView('employeeDashboard');
+    } else {
+      storedId = userData.user.account_id ?? userData.user.employee_id ?? userData.user.id;
+      localStorage.setItem('activeView', 'home');
+      setView('home');
     }
 
-    localStorage.setItem('userID', storedId);
-    setCurrentUserId(storedId);
+    if (storedId) {
+      localStorage.setItem('userID', storedId);
+      setCurrentUserId(storedId);
+    }
   };
 
   const handlePassengerSignupSuccess = (userData) => {
-    localStorage.setItem('userID', userData.user.id);
-    setCurrentUserId(userData.user.id);
+    const storedId = userData.user.account_id ?? userData.user.id;
+    localStorage.setItem('userID', storedId);
+    setCurrentUserId(storedId);
     updateView('passengerDashboard');
   };
 
   const handleLogout = () => {
     setCurrentUserId(null);
     localStorage.removeItem('userID');
+    localStorage.removeItem('activeView');
     sessionStorage.clear();
     updateView('home');
   };
 
   return (
     <div className="app-container">
-
       {view === 'home' && (
         <>
           <HomeNav
             onLoginClick={() => updateView('login')}
             onSignupClick={() => updateView('passengerSignup')}
           />
-
-          <HomeHero
-            onSignupClick={() => updateView('passengerSignup')}
-          />
-
+          <HomeHero onSignupClick={() => updateView('passengerSignup')} />
           <Ticker />
         </>
       )}
@@ -135,7 +138,6 @@ const App = () => {
       {view === 'employeeDashboard' && (
         <EmployeeDashboard employeeId={currentUserId} onLogout={handleLogout} />
       )}
-
     </div>
   );
 };
