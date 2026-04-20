@@ -173,14 +173,22 @@ export const createEmployee = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('CREATE EMPLOYEE ERROR:', err.sqlMessage || err);
+  console.error('CREATE EMPLOYEE ERROR:', err.sqlMessage || err);
 
-    if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ message: 'Duplicate entry. Email or SSN may already exist.' });
-    }
-
-    return res.status(500).json({ message: 'Error creating employee.' });
+  if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+    return res.status(400).json({
+      message: err.sqlMessage || err.message
+    });
   }
+
+  if (err.code === 'ER_DUP_ENTRY') {
+    return res.status(409).json({
+      message: 'Duplicate entry. Email or SSN may already exist.'
+    });
+  }
+
+  return res.status(500).json({ message: 'Error creating employee.' });
+}
 };
 
 export const deleteEmployee = async (req, res) => {
@@ -257,7 +265,14 @@ export const updateEmployee = async (req, res) => {
 
     return res.status(200).json({ message: "Employee updated successfully." });
   } catch (err) {
-    console.error('UPDATE EMPLOYEE ERROR:', err.message || err);
-    return res.status(500).json({ message: 'Error updating employee.' });
+  console.error('UPDATE EMPLOYEE ERROR:', err.sqlMessage || err);
+
+  if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+    return res.status(400).json({
+      message: err.sqlMessage || err.message
+    });
   }
+
+  return res.status(500).json({ message: 'Error updating employee.' });
+}
 };
