@@ -258,7 +258,8 @@ function FlightManagement() {
     const matchesFilter =
       statusFilter === 'ALL' ||
       (statusFilter === 'ACTIVE' && [1, 2, 3, 5, 6].includes(Number(flight.status_id))) ||
-      (statusFilter === 'ATTENTION' && [1, 2, 3].includes(Number(flight.status_id))) ||
+      (statusFilter === 'ATTENTION' && [3].includes(Number(flight.status_id))) ||
+      (statusFilter === 'IN_AIR' && [5, 6].includes(Number(flight.status_id))) ||
       Number(flight.status_id) === Number(statusFilter);
 
     return matchesSearch && matchesFilter;
@@ -308,15 +309,11 @@ function FlightManagement() {
                 style={{ minWidth: "220px" }}
               >
                 <option value="ALL">All Flights</option>
-                <option value="ATTENTION">Needs Attention</option>
                 <option value="ACTIVE">Active Flights</option>
-                <option value="1">On Schedule</option>
-                <option value="2">Boarding</option>
-                <option value="3">Delayed</option>
-                <option value="5">Departed</option>
-                <option value="6">En Route</option>
-                <option value="7">Arrived</option>
+                <option value="IN_AIR">Departed / En Route</option>
+                <option value="ATTENTION">Needs Attention</option>
                 <option value="4">Cancelled</option>
+                <option value="7">Arrived</option>
               </select>
             </div>
 
@@ -429,7 +426,7 @@ function FragmentRow({
         <td className="fw-semibold">{flight.flight_number}</td>
 
         <td className="text-nowrap">
-          {flight.departure_city} → {flight.arrival_city}
+          {flight.departure_airport_iata} ({flight.departure_city}) → {flight.arrival_airport_iata} ({flight.arrival_city})
         </td>
 
         <td>{flight.aircraft_name || `Aircraft ${flight.aircraft_id}`}</td>

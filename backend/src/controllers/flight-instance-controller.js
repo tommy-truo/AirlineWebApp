@@ -8,13 +8,13 @@ export const findFlights = async (req, res) => {
 
         // Basic validation before hitting the database
         if (!departureCity || !arrivalCity) {
-            return res.status(400).json({ 
-                message: "Both departureCity and arrivalCity query parameters are required." 
+            return res.status(400).json({
+                message: "Both departureCity and arrivalCity query parameters are required."
             });
         }
-        if (!departureDate) { return res.status(400).json({message: "Date parameter is required."}); }
+        if (!departureDate) { return res.status(400).json({ message: "Date parameter is required." }); }
 
-        if (!passengersNumber) { return res.status(400).json({message: "passengersNumber parameter is required."}); }
+        if (!passengersNumber) { return res.status(400).json({ message: "passengersNumber parameter is required." }); }
         if (isNaN(passengersNumber) || passengersNumber < 1) {
             return res.status(400).json({
                 message: "passengersNumber must be a positive integer."
@@ -329,7 +329,7 @@ export const createFlight = async (req, res) => {
                 actual_departure_datetime,
                 actual_arrival_datetime
             )
-            VALUES (?, ?, ?, ?, 1, 6, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, 1, 6, ?, ?, NULL, NULL)
         `;
 
         const [result] = await db.execute(sql, [
@@ -337,8 +337,6 @@ export const createFlight = async (req, res) => {
             aircraft_id,
             departure_gate_id,
             arrival_gate_id,
-            formattedDeparture,
-            formattedArrival,
             formattedDeparture,
             formattedArrival
         ]);
@@ -364,7 +362,19 @@ export const getAllFlights = async (req, res) => {
                 fi.aircraft_id,
                 fi.departure_gate_id,
                 fi.arrival_gate_id,
-                fi.status_id,
+                CASE
+                    WHEN fi.status_id = 4 THEN 4
+                    WHEN fi.status_id = 3
+                         AND (
+                            ast.status_name <> 'Active'
+                            OR NOW() < DATE_SUB(fi.scheduled_departure_datetime, INTERVAL 30 MINUTE)
+                         ) THEN 3
+                    WHEN NOW() >= fi.scheduled_arrival_datetime THEN 7
+                    WHEN NOW() >= DATE_ADD(fi.scheduled_departure_datetime, INTERVAL 15 MINUTE) THEN 6
+                    WHEN NOW() >= fi.scheduled_departure_datetime THEN 5
+                    WHEN NOW() >= DATE_SUB(fi.scheduled_departure_datetime, INTERVAL 30 MINUTE) THEN 2
+                    ELSE 1
+                END AS status_id,
                 fi.status_reason_id,
                 fr.flight_number,
                 fr.departure_airport_id,
@@ -378,24 +388,56 @@ export const getAllFlights = async (req, res) => {
                 arrGateAp.iata AS arrival_airport_iata,
                 arrTerm.name AS arrival_terminal,
                 arrGate.number AS arrival_gate_number,
-                fs.status_name,
+                CASE
+                    WHEN fi.status_id = 4 THEN 'Cancelled'
+                    WHEN fi.status_id = 3
+                         AND (
+                            ast.status_name <> 'Active'
+                            OR NOW() < DATE_SUB(fi.scheduled_departure_datetime, INTERVAL 30 MINUTE)
+                         ) THEN 'Delayed'
+                    WHEN NOW() >= fi.scheduled_arrival_datetime THEN 'Arrived'
+                    WHEN NOW() >= DATE_ADD(fi.scheduled_departure_datetime, INTERVAL 15 MINUTE) THEN 'En Route'
+                    WHEN NOW() >= fi.scheduled_departure_datetime THEN 'Departed'
+                    WHEN NOW() >= DATE_SUB(fi.scheduled_departure_datetime, INTERVAL 30 MINUTE) THEN 'Boarding'
+                    ELSE 'On Schedule'
+                END AS status_name,
                 fir.reason_name,
                 fi.scheduled_departure_datetime,
                 fi.scheduled_arrival_datetime,
-                fi.actual_departure_datetime,
-                fi.actual_arrival_datetime
+                CASE
+                    WHEN fi.actual_departure_datetime IS NOT NULL THEN fi.actual_departure_datetime
+                    WHEN fi.status_id = 4 THEN NULL
+                    WHEN fi.status_id = 3
+                         AND (
+                            ast.status_name <> 'Active'
+                            OR NOW() < fi.scheduled_departure_datetime
+                         ) THEN NULL
+                    WHEN NOW() >= fi.scheduled_departure_datetime THEN fi.scheduled_departure_datetime
+                    ELSE NULL
+                END AS actual_departure_datetime,
+                CASE
+                    WHEN fi.actual_arrival_datetime IS NOT NULL THEN fi.actual_arrival_datetime
+                    WHEN fi.status_id = 4 THEN NULL
+                    WHEN fi.status_id = 3
+                         AND (
+                            ast.status_name <> 'Active'
+                            OR NOW() < fi.scheduled_arrival_datetime
+                         ) THEN NULL
+                    WHEN NOW() >= fi.scheduled_arrival_datetime THEN fi.scheduled_arrival_datetime
+                    ELSE NULL
+                END AS actual_arrival_datetime
             FROM flight_instances fi
             JOIN flight_routes fr ON fi.flight_route_id = fr.flight_route_id
             JOIN airports dep ON fr.departure_airport_id = dep.airport_id
             JOIN airports arr ON fr.arrival_airport_id = arr.airport_id
             JOIN aircrafts a ON fi.aircraft_id = a.aircraft_id
+            JOIN aircraft_statuses ast ON a.aircraft_status_id = ast.aircraft_status_id
             JOIN gates depGate ON fi.departure_gate_id = depGate.gate_id
             JOIN terminals depTerm ON depGate.terminal_id = depTerm.terminal_id
             JOIN airports depGateAp ON depTerm.airport_id = depGateAp.airport_id
             JOIN gates arrGate ON fi.arrival_gate_id = arrGate.gate_id
             JOIN terminals arrTerm ON arrGate.terminal_id = arrTerm.terminal_id
             JOIN airports arrGateAp ON arrTerm.airport_id = arrGateAp.airport_id
-            JOIN flight_statuses fs ON fi.status_id = fs.flight_status_id
             LEFT JOIN flight_irregularity_reasons fir
                 ON fi.status_reason_id = fir.flight_irregularity_reason_id
             ORDER BY fi.scheduled_departure_datetime DESC
@@ -437,7 +479,11 @@ export const updateFlight = async (req, res) => {
         const finalAircraftId = aircraft_id || existingFlight.aircraft_id;
         const finalDepartureGateId = departure_gate_id || existingFlight.departure_gate_id;
         const finalArrivalGateId = arrival_gate_id || existingFlight.arrival_gate_id;
-        const finalStatusId = status_id ? Number(status_id) : Number(existingFlight.status_id);
+        const requestedStatusId = status_id ? Number(status_id) : null;
+        const finalStatusId =
+            requestedStatusId === 3 || requestedStatusId === 4
+                ? requestedStatusId
+                : Number(existingFlight.status_id);
 
         if (!finalAircraftId || !finalDepartureGateId || !finalArrivalGateId) {
             return res.status(400).json({
@@ -521,24 +567,6 @@ export const updateFlight = async (req, res) => {
             }
 
             finalReasonId = status_reason_id;
-        }
-
-        if (finalStatusId === 5 || finalStatusId === 6) {
-            actualDepartureSql = `CASE
-                WHEN actual_departure_datetime = scheduled_departure_datetime
-                THEN NOW()
-                ELSE actual_departure_datetime
-            END`;
-        }
-
-        if (finalStatusId === 7) {
-            actualArrivalSql = `NOW()`;
-
-            actualDepartureSql = `CASE
-                WHEN actual_departure_datetime = scheduled_departure_datetime
-                THEN NOW()
-                ELSE actual_departure_datetime
-            END`;
         }
 
         const sql = `

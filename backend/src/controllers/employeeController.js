@@ -48,17 +48,17 @@ export const getEmployeeDropdowns = async (req, res) => {
     `;
 
     const jobTitlesSql = `
-      SELECT job_title_id, title_name
-      FROM job_titles
-      ORDER BY title_name ASC
-    `;
+  SELECT job_title_id, title_name, department_id
+  FROM job_titles
+  ORDER BY department_id ASC, title_name ASC
+`;
 
     const supervisorsSql = `
-      SELECT employee_id, first_name, last_name
-      FROM employees
-      WHERE job_title_id = 8 
-      ORDER BY first_name ASC, last_name ASC
-    `;
+  SELECT employee_id, first_name, last_name
+  FROM employees
+  WHERE employee_id IN (1, 8, 9, 40, 56)
+  ORDER BY first_name ASC, last_name ASC
+`;
 
     const [departments] = await db.execute(departmentsSql);
     const [jobTitles] = await db.execute(jobTitlesSql);
@@ -104,15 +104,17 @@ export const createEmployee = async (req, res) => {
 
     let role = 'passenger';
 
-    if (jobTitleIdNum === 1 || jobTitleIdNum === 2) {
-      role = 'pilot';
-    } else if (jobTitleIdNum === 3) {
-      role = 'flightcrew';
-    } else if (jobTitleIdNum === 6) {
-      role = 'maintenance';
-    } else if (jobTitleIdNum === 8 || jobTitleIdNum === 9) {
-      role = 'manager';
-    }
+if (jobTitleIdNum === 1 || jobTitleIdNum === 2) {
+  role = 'pilot';
+} else if (jobTitleIdNum === 3) {
+  role = 'flightcrew';
+} else if (jobTitleIdNum === 6) {
+  role = 'maintenance';
+} else if (jobTitleIdNum === 8 || jobTitleIdNum === 9) {
+  role = 'manager';
+} else if (jobTitleIdNum === 10) {
+  role = 'checkIn';
+}
 
     const [accountResult] = await db.execute(accountSql, [
       email,
@@ -173,14 +175,22 @@ export const createEmployee = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('CREATE EMPLOYEE ERROR:', err.sqlMessage || err);
+  console.error('CREATE EMPLOYEE ERROR:', err.sqlMessage || err);
 
-    if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ message: 'Duplicate entry. Email or SSN may already exist.' });
-    }
-
-    return res.status(500).json({ message: 'Error creating employee.' });
+  if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+    return res.status(400).json({
+      message: err.sqlMessage || err.message
+    });
   }
+
+  if (err.code === 'ER_DUP_ENTRY') {
+    return res.status(409).json({
+      message: 'Duplicate entry. Email or SSN may already exist.'
+    });
+  }
+
+  return res.status(500).json({ message: 'Error creating employee.' });
+}
 };
 
 export const deleteEmployee = async (req, res) => {
@@ -257,7 +267,14 @@ export const updateEmployee = async (req, res) => {
 
     return res.status(200).json({ message: "Employee updated successfully." });
   } catch (err) {
-    console.error('UPDATE EMPLOYEE ERROR:', err.message || err);
-    return res.status(500).json({ message: 'Error updating employee.' });
+  console.error('UPDATE EMPLOYEE ERROR:', err.sqlMessage || err);
+
+  if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+    return res.status(400).json({
+      message: err.sqlMessage || err.message
+    });
   }
+
+  return res.status(500).json({ message: 'Error updating employee.' });
+}
 };

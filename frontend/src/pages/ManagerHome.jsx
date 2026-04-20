@@ -73,10 +73,8 @@ function ManagerHome() {
   }
 
   const flightsNeedingAttention = flightsData
-    .filter((flight) =>
-      ['Delayed', 'Cancelled'].includes(flight.status_name)
-    )
-    .slice(0, 5)
+  .filter((flight) => flight.status_name === 'Delayed')
+  .slice(0, 5)
 
   const upcomingFlights = flightsData
     .filter((flight) =>
@@ -123,17 +121,11 @@ function ManagerHome() {
             </div>
           )}
 
-          <div className="row mt-2">
-            <div className="col-md-6 col-xl-3 mb-3">
-              <div className="overview-card h-100">
-                <p className="overview-label">Total Employees</p>
-                <h3 className="overview-value">{loading ? '...' : stats.employees}</h3>
-              </div>
-            </div>
+          <div className="row mt-2 justify-content-center">
 
             <div className="col-md-6 col-xl-3 mb-3">
               <div className="overview-card h-100">
-                <p className="overview-label">Active Employees</p>
+                <p className="overview-label">Total Active Employees</p>
                 <h3 className="overview-value">{loading ? '...' : stats.activeEmployees}</h3>
               </div>
             </div>

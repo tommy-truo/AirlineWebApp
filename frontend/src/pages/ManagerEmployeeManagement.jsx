@@ -20,6 +20,14 @@ function EmployeeManagement() {
 
   const employeesPerPage = 8;
 
+  const departmentSupervisorMap = {
+    1: 1,   // Flight Operations
+    2: 56,  // Customer Service
+    3: 8,   // Ground Operations
+    4: 9,   // Maintenance
+    5: 40   // Administration
+  };
+
   useEffect(() => {
     fetchEmployees();
     fetchDropdowns();
@@ -95,7 +103,19 @@ function EmployeeManagement() {
 
   function handleFieldChange(e) {
     const { name, value } = e.target;
-    setEditedEmployee((prev) => ({ ...prev, [name]: value }));
+
+    setEditedEmployee((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      if (name === 'department_id') {
+        updated.job_title_id = '';
+
+        const mappedSupervisorId = departmentSupervisorMap[Number(value)];
+        updated.supervisor_id = mappedSupervisorId ? String(mappedSupervisorId) : '';
+      }
+
+      return updated;
+    });
   }
 
   async function handleSaveEdit(id) {
@@ -296,16 +316,24 @@ function EmployeeManagement() {
                           value={editedEmployee.job_title_id}
                           onChange={handleFieldChange}
                           className="form-control form-control-sm"
+                          disabled={!editedEmployee.department_id}
                         >
-                          <option value="">Select Job Title</option>
-                          {dropdowns.jobTitles.map((job) => (
-                            <option
-                              key={job.job_title_id}
-                              value={job.job_title_id}
-                            >
-                              {job.title_name}
-                            </option>
-                          ))}
+                          <option value="">
+                            {editedEmployee.department_id ? 'Select Job Title' : 'Select Department First'}
+                          </option>
+                          {dropdowns.jobTitles
+                            .filter(
+                              (job) =>
+                                String(job.department_id) === String(editedEmployee.department_id)
+                            )
+                            .map((job) => (
+                              <option
+                                key={job.job_title_id}
+                                value={job.job_title_id}
+                              >
+                                {job.title_name}
+                              </option>
+                            ))}
                         </select>
                       ) : (
                         employee.title_name || "N/A"
@@ -333,10 +361,19 @@ function EmployeeManagement() {
                           value={editedEmployee.supervisor_id}
                           onChange={handleFieldChange}
                           className="form-control form-control-sm"
+                          disabled={!editedEmployee.department_id}
                         >
-                          <option value="">No Supervisor</option>
+                          <option value="">
+                            {editedEmployee.department_id ? 'Select Supervisor' : 'Select Department First'}
+                          </option>
                           {dropdowns.supervisors
-                            .filter((supervisor) => supervisor.employee_id !== employee.employee_id)
+                            .filter((supervisor) => {
+                              const mappedSupervisorId = departmentSupervisorMap[Number(editedEmployee.department_id)];
+                              return (
+                                Number(supervisor.employee_id) === mappedSupervisorId &&
+                                Number(supervisor.employee_id) !== Number(employee.employee_id)
+                              );
+                            })
                             .map((supervisor) => (
                               <option
                                 key={supervisor.employee_id}
