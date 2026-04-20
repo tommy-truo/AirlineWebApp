@@ -54,11 +54,11 @@ export const getEmployeeDropdowns = async (req, res) => {
 `;
 
     const supervisorsSql = `
-      SELECT employee_id, first_name, last_name
-      FROM employees
-      WHERE job_title_id = 8 
-      ORDER BY first_name ASC, last_name ASC
-    `;
+  SELECT employee_id, first_name, last_name
+  FROM employees
+  WHERE employee_id IN (1, 8, 9, 40, 56)
+  ORDER BY first_name ASC, last_name ASC
+`;
 
     const [departments] = await db.execute(departmentsSql);
     const [jobTitles] = await db.execute(jobTitlesSql);
