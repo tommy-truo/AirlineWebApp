@@ -51,16 +51,24 @@ function EmployeeRegisterForm() {
 
     const handleChange = (e) => {
 
-        const { id, value } = e.target;
-        let val = value;
+    const { id, value } = e.target;
+    let val = value;
 
-        if (id === 'middle_initial' && val.length > 1) {
-            val = val.charAt(0).toUpperCase();
+    if (id === 'middle_initial' && val.length > 1) {
+        val = val.charAt(0).toUpperCase();
+    }
+
+    setForm((prev) => {
+        const updated = { ...prev, [id]: val };
+
+        if (id === 'department_id') {
+            updated.job_title_id = '';
         }
 
-        setForm({ ...form, [id]: val });
+        return updated;
+    });
 
-    };
+};
 
     const handleSubmit = async (e) => {
 
@@ -95,6 +103,10 @@ function EmployeeRegisterForm() {
         }
 
     };
+
+    const filteredJobTitles = dropdowns.jobTitles.filter(
+    (job) => String(job.department_id) === String(form.department_id)
+);
 
     return (
 
@@ -250,25 +262,28 @@ function EmployeeRegisterForm() {
                                 </div>
 
                                 <div className="col-md-3 mb-3 form-field">
-                                    <label>Job Title*</label>
-                                    <select
-                                        id="job_title_id"
-                                        className="form-control"
-                                        value={form.job_title_id}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Job Title</option>
-                                        {dropdowns.jobTitles.map((job) => (
-                                            <option
-                                                key={job.job_title_id}
-                                                value={job.job_title_id}
-                                            >
-                                                {job.title_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+    <label>Job Title*</label>
+    <select
+        id="job_title_id"
+        className="form-control"
+        value={form.job_title_id}
+        onChange={handleChange}
+        required
+        disabled={!form.department_id}
+    >
+        <option value="">
+            {form.department_id ? 'Select Job Title' : 'Select Department First'}
+        </option>
+        {filteredJobTitles.map((job) => (
+            <option
+                key={job.job_title_id}
+                value={job.job_title_id}
+            >
+                {job.title_name}
+            </option>
+        ))}
+    </select>
+</div>
 
                                 <div className="col-md-3 mb-3 form-field">
                                     <label>Salary*</label>
