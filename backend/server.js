@@ -59,9 +59,6 @@ app.use((err, req, res, next) => {
 //      START SERVER 
 app.listen(PORT,'0.0.0.0', () => {
     console.log(`Server running at https://airlinewebapp.onrender.com`);
-
-    // Start Cron Jobs
-    startExpireJob();  // Updates bookings past expiration time to 'Expired' every minute
 });
 
 export default app;
