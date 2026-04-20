@@ -1,175 +1,142 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import Login from './components/Login.jsx';
 import Signup from './components/SignUp.jsx';
 import PassengerDashboard from './components/Layout.jsx';
-// IMPORT YALLS SPECIFIC COMPONENTS HERE
-import PilotDashboard from './components/PilotDashboard.jsx'; //dex
-import CabinCrewDashboard from './components/cabinCrewDashboard.jsx';
-import ManagerDashboard from './pages/ManagerDashboard.jsx';
-import ManagerChangePassword from './pages/ManagerChangePassword.jsx';
+import PilotDashboard from './components/PilotDashboard.jsx';
 import EmployeeDashboard from './components/employeeDashboard.jsx';
-import MaintenanceDashboard from './components/MaintenanceDashboard.jsx';
+import HomeNav from './components/HomeNav.jsx';
+import HomeHero from './components/HomeHero.jsx';
+import Ticker from './components/Ticker.jsx';
 
 const App = () => {
-  // Initialize view from localStorage so the user stays logged in on refresh
-  const [view, setView] = useState(localStorage.getItem('activeView') || 'login');
-  const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userID'));
 
-  // added by aya
-  useEffect(() => {
-    console.log('VIEW CHANGED TO:', view);
-  }, [view]);
-
-  // Function to handle successful passenger signup
-  const handlePassengerSignupSuccess = (userData) => {
-    console.log('Passenger signed up:', userData.user.id);
-    localStorage.setItem('userID', userData.user.id);
-    setCurrentUserId(userData.user.id);
-
-    // Redirect to passenger dashboard after signup
-    localStorage.setItem('activeView', 'passengerDashboard');
-    setView('passengerDashboard');
+  const updateView = (newView) => {
+    setView(newView);
+    localStorage.setItem('activeView', newView);
+    window.history.pushState({ view: newView }, '', `#${newView}`);
   };
 
-  // Function to handle successful login
-  const handleLoginSuccess = (userData) => {
-    console.log('User logged in:', userData.user);
+  const getInitialView = () => {
+    const userId = localStorage.getItem('userID');
 
-    // added by aya
-    localStorage.setItem('userRole', userData.user.role);
+    if (!userId) return 'home';
 
-    // added by aya
-    // FORCE PASSWORD CHANGE FIRST
-    if (userData.user.must_change_password === 1) {
-      localStorage.setItem('activeView', 'changePassword');
-      setView('changePassword');
-      localStorage.setItem('userID', userData.user.account_id);
-      setCurrentUserId(userData.user.account_id);
-      return;
+    const savedView = localStorage.getItem('activeView');
+
+    const validViews = [
+      'home',
+      'login',
+      'passengerSignup',
+      'passengerDashboard',
+      'shiftCalendar',
+      'employeeDashboard'
+    ];
+
+    if (savedView && validViews.includes(savedView)) {
+      return savedView;
     }
 
+    return 'passengerDashboard';
+  };
+
+  const [view, setView] = useState(getInitialView());
+  const [currentUserId, setCurrentUserId] = useState(localStorage.getItem('userID'));
+
+  useEffect(() => {
+    const onPopState = () => {
+      const savedView = localStorage.getItem('activeView');
+      const userId = localStorage.getItem('userID');
+
+      if (!userId) {
+        setView('home');
+        return;
+      }
+
+      setView(savedView || 'passengerDashboard');
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const handleLoginSuccess = (userData) => {
     let storedId = null;
 
-    // ROLE-BASED REDIRECTION
     if (userData.user.role === 'passenger') {
       storedId = userData.user.account_id ?? userData.user.id;
-      localStorage.setItem('activeView', 'passengerDashboard');
-      setView('passengerDashboard');
-    } 
+      updateView('passengerDashboard');
+    }
     else if (userData.user.role === 'pilot') {
       storedId = userData.user.employee_id ?? userData.user.id;
-      localStorage.setItem('activeView', 'shiftCalendar');
-      setView('shiftCalendar');
-    } 
-    else if (userData.user.role === 'manager') {
-      storedId = userData.user.employee_id ?? userData.user.account_id ?? userData.user.id;
-      localStorage.setItem('activeView', 'managerDashboard');
-      setView('managerDashboard');
+      updateView('shiftCalendar');
     }
-    else if(userData.user.role === 'flightcrew'){
+    else if (userData.user.role === 'checkIn') {
       storedId = userData.user.employee_id ?? userData.user.id;
-      localStorage.setItem('activeView', 'cabinCrewDashboard');
-      setView('cabinCrewDashboard');
-    }
-    else if (userData.user.role ==='checkIn'){
-      storedId = userData.user.employee_id ?? userData.user.id;
-      localStorage.setItem('activeView', 'employeeDashboard');
-      setView('employeeDashboard');
-    }
-    else if (userData.user.role === 'maintenance') {
-      storedId = userData.user.employee_id ?? userData.user.id;
-      localStorage.setItem('activeView', 'maintenanceDashboard');
-      setView('maintenanceDashboard');
+      updateView('employeeDashboard');
     }
 
     localStorage.setItem('userID', storedId);
     setCurrentUserId(storedId);
   };
 
+  const handlePassengerSignupSuccess = (userData) => {
+    localStorage.setItem('userID', userData.user.id);
+    setCurrentUserId(userData.user.id);
+    updateView('passengerDashboard');
+  };
+
   const handleLogout = () => {
-    setView('login');
     setCurrentUserId(null);
-    localStorage.removeItem('activeView');
     localStorage.removeItem('userID');
-    localStorage.removeItem('userRole');
     sessionStorage.clear();
+    updateView('home');
   };
 
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        {/* 1. Login View */}
-        {view === 'login' && (
-          <Login
-            onLoginSuccess={handleLoginSuccess}
-            onSwitch={() => {
-              setView('passengerSignup');
-              localStorage.setItem('activeView', 'passengerSignup');
-            }}
+    <div className="app-container">
+
+      {view === 'home' && (
+        <>
+          <HomeNav
+            onLoginClick={() => updateView('login')}
+            onSignupClick={() => updateView('passengerSignup')}
           />
-        )}
 
-        {/* 2. Passenger Signup View */}
-        {view === 'passengerSignup' && (
-          <Signup
-            onSignupSuccess={handlePassengerSignupSuccess}
-            onSwitch={() => {
-              setView('login');
-              localStorage.setItem('activeView', 'login');
-            }}
+          <HomeHero
+            onSignupClick={() => updateView('passengerSignup')}
           />
-        )}
 
-        {/* 3. Passenger View */}
-        {view === 'passengerDashboard' && (
-          <PassengerDashboard userID={currentUserId} onLogout={handleLogout} />
-        )}
+          <Ticker />
+        </>
+      )}
 
-      {/* pilot and cabincrew views*/}
+      {view === 'login' && (
+        <Login
+          onLoginSuccess={handleLoginSuccess}
+          onSwitch={() => updateView('passengerSignup')}
+        />
+      )}
+
+      {view === 'passengerSignup' && (
+        <Signup
+          onSignupSuccess={handlePassengerSignupSuccess}
+          onSwitch={() => updateView('login')}
+        />
+      )}
+
+      {view === 'passengerDashboard' && (
+        <PassengerDashboard userID={currentUserId} onLogout={handleLogout} />
+      )}
+
       {view === 'shiftCalendar' && (
-        <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
-      
-      {view === 'cabinCrewDashboard' && (
-      <CabinCrewDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
+        <PilotDashboard employeeId={currentUserId} onLogout={handleLogout} />
+      )}
 
-      {view === 'maintenanceDashboard' && (
-        <MaintenanceDashboard employeeId={currentUserId} onLogout={handleLogout} />)}
-
-        {/* 5. Manager View */}
-        {/* added by aya */}
-        {view === 'managerDashboard' && (
-          <ManagerDashboard employeeId={currentUserId} onLogout={handleLogout} />
-        )}
-
-        {/* 6. Change Password View */}
-        {/* added by aya */}
-        {view === 'changePassword' && (
-          <ManagerChangePassword
-            accountId={currentUserId}
-            onSuccess={() => {
-              const role = localStorage.getItem('userRole');
-
-              if (role === 'manager') {
-                localStorage.setItem('activeView', 'managerDashboard');
-                setView('managerDashboard');
-              } else if (role === 'pilot') {
-                localStorage.setItem('activeView', 'shiftCalendar');
-                setView('shiftCalendar');
-              } else {
-                localStorage.setItem('activeView', 'passengerDashboard');
-                setView('passengerDashboard');
-              }
-            }}
-          />
-        )}
-
-        {/* 5. Check-in employee view */}
       {view === 'employeeDashboard' && (
         <EmployeeDashboard employeeId={currentUserId} onLogout={handleLogout} />
       )}
-      </div>
-    </BrowserRouter>
+
+    </div>
   );
 };
 
