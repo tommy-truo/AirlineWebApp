@@ -128,9 +128,16 @@ export const createAssignment = async (req, res) => {
     res.json({ message: 'Assignment created' });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error creating assignment' });
+  console.error(err);
+
+  if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+    return res.status(400).json({
+      message: err.sqlMessage || err.message
+    });
   }
+
+  res.status(500).json({ message: 'Error creating assignment' });
+}
 };
 
 export const deleteAssignment = async (req, res) => {
