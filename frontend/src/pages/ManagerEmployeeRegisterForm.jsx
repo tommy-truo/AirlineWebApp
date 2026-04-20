@@ -235,7 +235,7 @@ setError('');
         const val = e.target.value.replace(/\D/g, '').slice(0, 9);
         handleChange({ target: { id: 'ssn', value: val } });
     }}
-    placeholder='XXXXXXXXX'
+    placeholder='XXX-XX-XXXX'
     maxLength="9"
     required
 />
