@@ -426,7 +426,7 @@ function FragmentRow({
         <td className="fw-semibold">{flight.flight_number}</td>
 
         <td className="text-nowrap">
-          {flight.departure_city} → {flight.arrival_city}
+          {flight.departure_airport_iata} ({flight.departure_city}) → {flight.arrival_airport_iata} ({flight.arrival_city})
         </td>
 
         <td>{flight.aircraft_name || `Aircraft ${flight.aircraft_id}`}</td>
