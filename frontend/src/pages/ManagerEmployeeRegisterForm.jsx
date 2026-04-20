@@ -389,13 +389,17 @@ function EmployeeRegisterForm() {
                                 <div className="col-md-4 mb-3 form-field">
                                     <label>Emergency Contact Phone</label>
                                     <input
-                                        type="text"
-                                        id="emergency_contact_phone"
-                                        className="form-control"
-                                        value={form.emergency_contact_phone}
-                                        onChange={handleChange}
-                                        placeholder='Contact Phone'
-                                    />
+    type="text"
+    id="emergency_contact_phone"
+    className="form-control"
+    value={form.emergency_contact_phone}
+    onChange={(e) => {
+        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+        handleChange({ target: { id: 'emergency_contact_phone', value: val } });
+    }}
+    placeholder="XXXXXXXXXX"
+    maxLength="10"
+/>
                                 </div>
 
                                 <div className="col-md-4 mb-3 form-field">
