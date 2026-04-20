@@ -256,11 +256,11 @@ function FlightManagement() {
       flight.arrival_city?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter =
-  statusFilter === 'ALL' ||
-  (statusFilter === 'ACTIVE' && [1, 2, 3, 5, 6].includes(Number(flight.status_id))) ||
-  (statusFilter === 'ATTENTION' && [3].includes(Number(flight.status_id)))
-  (statusFilter === 'IN_AIR' && [5, 6].includes(Number(flight.status_id))) ||
-  Number(flight.status_id) === Number(statusFilter);
+      statusFilter === 'ALL' ||
+      (statusFilter === 'ACTIVE' && [1, 2, 3, 5, 6].includes(Number(flight.status_id))) ||
+      (statusFilter === 'ATTENTION' && [3].includes(Number(flight.status_id))) ||
+      (statusFilter === 'IN_AIR' && [5, 6].includes(Number(flight.status_id))) ||
+      Number(flight.status_id) === Number(statusFilter);
 
     return matchesSearch && matchesFilter;
   });
