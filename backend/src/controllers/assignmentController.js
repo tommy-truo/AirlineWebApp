@@ -104,17 +104,53 @@ export const createAssignment = async (req, res) => {
       SELECT type_name FROM flight_employee_assignment_types WHERE assignment_type_id = ?
     `, [type]);
 
-    if (employee.length && assignmentType.length) {
-      const job = employee[0].job_title_id;
-      const assignmentTypeName = assignmentType[0].type_name.toLowerCase();
+    if (!employee.length || !assignmentType.length) {
+      return res.status(400).json({
+        message: 'Invalid employee or assignment type.'
+      });
+    }
 
-      if (assignmentTypeName.includes('pilot') && job !== 1) {
-        return res.status(400).json({ message: 'Only pilots can be assigned to pilot roles.' });
-      }
+    const job = employee[0].job_title_id;
+    const assignmentTypeName = assignmentType[0].type_name.toLowerCase();
 
-      if (assignmentTypeName.includes('cabin') && job !== 2) {
-        return res.status(400).json({ message: 'Only cabin crew can be assigned to cabin roles.' });
-      }
+    if (assignmentTypeName.includes('pilot') && job !== 1) {
+      return res.status(400).json({ message: 'Only pilots can be assigned to pilot roles.' });
+    }
+
+    if (assignmentTypeName.includes('cabin') && job !== 2) {
+      return res.status(400).json({ message: 'Only cabin crew can be assigned to cabin roles.' });
+    }
+
+    const [countRows] = await db.execute(`
+      SELECT COUNT(*) AS count
+      FROM flight_employee_assignments
+      WHERE flight_instance_id = ? AND assignment_type_id = ?
+    `, [flight, type]);
+
+    const currentCount = countRows[0].count;
+
+    if (assignmentTypeName.includes('captain') && currentCount >= 1) {
+      return res.status(400).json({
+        message: 'Only 1 operating captain allowed per flight.'
+      });
+    }
+
+    if (
+      (assignmentTypeName.includes('first officer') ||
+       assignmentTypeName.includes('first_officer') ||
+       assignmentTypeName.includes('copilot') ||
+       assignmentTypeName.includes('co-pilot')) &&
+      currentCount >= 1
+    ) {
+      return res.status(400).json({
+        message: 'Only 1 first officer allowed per flight.'
+      });
+    }
+
+    if (assignmentTypeName.includes('cabin') && currentCount >= 4) {
+      return res.status(400).json({
+        message: 'Maximum 4 cabin crew allowed per flight.'
+      });
     }
 
     const sql = `
@@ -128,17 +164,105 @@ export const createAssignment = async (req, res) => {
     res.json({ message: 'Assignment created' });
 
   } catch (err) {
-  console.error(err);
+    console.error(err);
 
-  if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
-    return res.status(400).json({
-      message: err.sqlMessage || err.message
-    });
+    if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+      return res.status(400).json({
+        message: err.sqlMessage || err.message
+      });
+    }
+
+    res.status(500).json({ message: 'Error creating assignment' });
   }
-
-  res.status(500).json({ message: 'Error creating assignment' });
-}
 };
+
+// old createAssignment below
+// export const createAssignment = async (req, res) => {
+//   const { employee_id, flight_instance_id, assignment_type_id } = req.body;
+
+//   const emp = Number(employee_id);
+//   const flight = Number(flight_instance_id);
+//   const type = Number(assignment_type_id);
+
+//   if (!Number.isInteger(emp) || !Number.isInteger(flight) || !Number.isInteger(type)) {
+//     return res.status(400).json({
+//       message: 'Invalid assignment data.'
+//     });
+//   }
+
+//   try {
+//     const [existing] = await db.execute(`
+//       SELECT * FROM flight_employee_assignments
+//       WHERE employee_id = ? AND flight_instance_id = ?
+//     `, [emp, flight]);
+
+//     if (existing.length > 0) {
+//       return res.status(400).json({
+//         message: 'Employee is already assigned to this flight.'
+//       });
+//     }
+
+//     const [conflict] = await db.execute(`
+//       SELECT fea.*
+//       FROM flight_employee_assignments fea
+//       JOIN flight_instances fi1 ON fea.flight_instance_id = fi1.flight_instance_id
+//       JOIN flight_instances fi2 ON fi2.flight_instance_id = ?
+//       WHERE fea.employee_id = ?
+//       AND (
+//         fi1.scheduled_departure_datetime < fi2.scheduled_arrival_datetime
+//         AND fi1.scheduled_arrival_datetime > fi2.scheduled_departure_datetime
+//       )
+//     `, [flight, emp]);
+
+//     if (conflict.length > 0) {
+//       return res.status(400).json({
+//         message: 'Employee has a scheduling conflict.'
+//       });
+//     }
+
+//     const [employee] = await db.execute(`
+//       SELECT job_title_id FROM employees WHERE employee_id = ?
+//     `, [emp]);
+
+//     const [assignmentType] = await db.execute(`
+//       SELECT type_name FROM flight_employee_assignment_types WHERE assignment_type_id = ?
+//     `, [type]);
+
+//     if (employee.length && assignmentType.length) {
+//       const job = employee[0].job_title_id;
+//       const assignmentTypeName = assignmentType[0].type_name.toLowerCase();
+
+//       if (assignmentTypeName.includes('pilot') && job !== 1) {
+//         return res.status(400).json({ message: 'Only pilots can be assigned to pilot roles.' });
+//       }
+
+//       if (assignmentTypeName.includes('cabin') && job !== 2) {
+//         return res.status(400).json({ message: 'Only cabin crew can be assigned to cabin roles.' });
+//       }
+//     }
+
+//     const sql = `
+//       INSERT INTO flight_employee_assignments
+//       (flight_instance_id, employee_id, assignment_type_id)
+//       VALUES (?, ?, ?)
+//     `;
+
+//     await db.execute(sql, [flight, emp, type]);
+
+//     res.json({ message: 'Assignment created' });
+
+//   } catch (err) {
+//   console.error(err);
+
+//   if (err.errno === 1644 || err.code === 'ER_SIGNAL_EXCEPTION') {
+//     return res.status(400).json({
+//       message: err.sqlMessage || err.message
+//     });
+//   }
+
+//   res.status(500).json({ message: 'Error creating assignment' });
+// }
+// };
 
 export const deleteAssignment = async (req, res) => {
   const { id } = req.params
