@@ -17,6 +17,7 @@ const Dashboard = ({ onLogout }) => {
     const [paymentSteps, setPaymentSteps] = useState({});
     const [cardDetails, setCardDetails] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
+    
 
     useEffect(() => {
         fetch(`${API}/api/employee/airports`).then(res => res.json()).then(setAirports);
@@ -207,6 +208,25 @@ const Dashboard = ({ onLogout }) => {
     const nextDep = departingFlights[0];
     const nextArr = arrivingFlights[0];
 
+    const getStatusClass = (status) => {
+        switch ((status || "").toLowerCase()) {
+            case "on schedule":
+                return "pill green";
+            case "delayed":
+                return "pill yellow";
+            case "cancelled":
+                return "pill red";
+            case "boarding":
+                return "pill blue";
+            case "departed":
+                return "pill gray";
+            default:
+            case "arrived":           // ✅ ADD THIS
+                return "pill blue";
+            return "pill";
+        }
+    };
+
     return (
         <div className="dashboard-container">
             <aside className="sidebar">
@@ -237,7 +257,8 @@ const Dashboard = ({ onLogout }) => {
                             <div className="hero-card dep-border">
                                 <span className="card-label">NEXT DEPARTURE</span>
                                 <div className="hero-main">
-                                        <span className="hero-id">{nextDep ? nextDep.flight_number : "None Scheduled"}</span>                                    <div className="hero-time-stack">
+                                        <span className="hero-id">{nextDep ? nextDep.flight_number : "None Scheduled"}</span>                                   
+                                         <div className="hero-time-stack">
                                         <span className="hero-date">{formatDate(nextDep?.scheduled_departure_datetime)}</span>
                                         <span className="hero-time">{formatTime(nextDep?.scheduled_departure_datetime)}</span>
                                     </div>
@@ -270,7 +291,7 @@ const Dashboard = ({ onLogout }) => {
                                                     <td><b>{f.flight_number}</b></td>
                                                     <td>{f.destination_iata}</td>
                                                     <td>{formatTime(f.scheduled_departure_datetime)}</td>
-                                                    <td><span className="pill green">ON SCHEDULE</span></td>
+                                                    <td><span className={getStatusClass(f.status_name)}>{f.status_name || "Unknown"}</span></td>
                                                 </tr>
                                             ))
                                         ) : (
@@ -291,7 +312,7 @@ const Dashboard = ({ onLogout }) => {
                                                     <td><b>{f.flight_number}</b></td>
                                                     <td>{f.origin_iata}</td>
                                                     <td>{formatTime(f.scheduled_arrival_datetime)}</td>
-                                                    <td><span className="pill blue">ON SCHEDULE</span></td>
+                                                    <td><span className={getStatusClass(f.status_name)}>{f.status_name || "Unknown"}</span></td>
                                                 </tr>
                                             ))
                                         ) : (

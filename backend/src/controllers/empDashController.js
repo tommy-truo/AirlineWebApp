@@ -20,37 +20,29 @@ export const getDashboardFlights = async (req, res) => {
         const { airport } = req.query;      // Recieve airport code from frntnd
 
         const query = `
-            SELECT 
-                fi.flight_instance_id,
-                fr.flight_number AS flight_number,
-                fi.departure_gate_id,           
-                fi.arrival_gate_id,
-                fi.scheduled_departure_datetime,
-                fi.scheduled_arrival_datetime,
-                fs.status_name,
-                dep.iata AS origin_iata,
-                arr.iata AS destination_iata   
-
-            FROM flight_instances fi
-
-            LEFT JOIN flight_statuses fs
-                ON fi.status_id = fs.flight_status_id
-
-            JOIN flight_routes fr 
-                ON fi.flight_route_id = fr.flight_route_id
-
-
-            JOIN airports dep 
-                ON fr.departure_airport_id = dep.airport_id
-
-            JOIN airports arr
-                ON fr.arrival_airport_id = arr.airport_id
-
-            WHERE 
-                (dep.iata = ? AND fi.scheduled_departure_datetime >= NOW())
-                OR 
-                (arr.iata = ? AND fi.scheduled_arrival_datetime >= NOW())
-            ORDER BY fi.scheduled_departure_datetime ASC;
+        SELECT 
+            fi.flight_instance_id,
+            fr.flight_number,
+            fi.departure_gate_id,
+            fi.arrival_gate_id,
+            fi.scheduled_departure_datetime,
+            fi.scheduled_arrival_datetime,
+            fs.status_name,
+            dep.iata AS origin_iata,
+            arr.iata AS destination_iata
+        FROM flight_instances fi
+        LEFT JOIN flight_statuses fs
+            ON fi.status_id = fs.flight_status_id
+        JOIN flight_routes fr
+            ON fi.flight_route_id = fr.flight_route_id
+        JOIN airports dep
+            ON fr.departure_airport_id = dep.airport_id
+        JOIN airports arr
+            ON fr.arrival_airport_id = arr.airport_id
+        WHERE
+            (dep.iata = ? OR arr.iata = ?)
+            AND fi.scheduled_departure_datetime >= NOW()
+        ORDER BY fi.scheduled_departure_datetime ASC;
         `; 
 
         const [rows] = await db.query(query, [airport, airport]);

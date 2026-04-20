@@ -171,6 +171,8 @@
 .flight-table { width: 100%; border-collapse: collapse; }
 .flight-table th { text-align: left; padding: 12px 20px; font-size: 0.7rem; background: #fcfcfd; color: #a0aec0; text-transform: uppercase; }
 .flight-table td { padding: 12px 20px; border-bottom: 1px solid #f7fafc; font-size: 0.85rem; color: #2d3748; }
+.flight-table td:nth-child(4),
+.flight-table th:nth-child(4) {text-align: center;}
 
 /* Passenger check in search */
 .checkin-panel { animation: fadeIn 0.3s ease-in; }
@@ -440,9 +442,23 @@
 
 .status-pending { color: #ed8936; font-weight: 800; }
 .status-done { color: #38a169; font-weight: 800; }
-.pill { padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; border: 1px solid; text-transform: uppercase; }
-.green { background: #f0fff4; color: #38a169; border-color: #c6f6d5; }
-.blue { background: #ebf8ff; color: #3182ce; border-color: #bee3f8; }
+.pill {
+    display: inline-block;
+    min-width: 100px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border: 2px solid;
+    text-transform: uppercase;
+    text-align: center;
+}
+.green  { background-color: #28a745; color: white; }
+.yellow { background-color: #ffc107; color: rgb(255, 255, 255); } 
+.red    { background-color: #dc3545; color: white; }
+.blue   { background-color: #007bff; color: white; }
+.gray   { background-color: #ffffff; color: white; }
+.orange {background-color: #fd7e14;  color: white; }
 
 @keyframes fadeIn { 
     from { opacity: 0; transform: translateY(10px); } 
