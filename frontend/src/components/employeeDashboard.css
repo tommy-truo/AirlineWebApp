@@ -457,8 +457,10 @@
 .yellow { background-color: #ffc107; color: rgb(255, 255, 255); } 
 .red    { background-color: #dc3545; color: white; }
 .blue   { background-color: #007bff; color: white; }
-.gray   { background-color: #ffffff; color: white; }
+.maroon {background-color: #800000;   /* maroon */color: white;border-color: #800000;}
 .orange {background-color: #fd7e14;  color: white; }
+.purple { background-color: #6f42c1; border-color: #6f42c1; }
+
 
 @keyframes fadeIn { 
     from { opacity: 0; transform: translateY(10px); } 

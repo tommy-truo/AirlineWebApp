@@ -217,13 +217,15 @@ const Dashboard = ({ onLogout }) => {
             case "cancelled":
                 return "pill red";
             case "boarding":
-                return "pill blue";
+                return "pill orange";
             case "departed":
-                return "pill gray";
+                return "pill maroon";
             default:
-            case "arrived":           // ✅ ADD THIS
+            case "arrived":
                 return "pill blue";
-            return "pill";
+            case "enroute":
+            return "pill purple";
+            return pill;
         }
     };
 
