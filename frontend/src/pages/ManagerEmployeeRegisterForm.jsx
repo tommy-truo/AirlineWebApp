@@ -38,17 +38,17 @@ function EmployeeRegisterForm() {
                 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
                 const res = await fetch(`${API_BASE_URL}/api/employees/dropdowns`);
-const data = await res.json();
+                const data = await res.json();
 
-if (!res.ok) {
-    throw new Error(data.message || 'Error loading dropdown options.');
-}
+                if (!res.ok) {
+                    throw new Error(data.message || 'Error loading dropdown options.');
+                }
 
-setDropdowns({
-    departments: data.departments || [],
-    jobTitles: data.jobTitles || [],
-    supervisors: data.supervisors || []
-});
+                setDropdowns({
+                    departments: data.departments || [],
+                    jobTitles: data.jobTitles || [],
+                    supervisors: data.supervisors || []
+                });
             } catch (err) {
                 console.error(err);
                 setError('Error loading dropdown options.');
@@ -60,24 +60,27 @@ setDropdowns({
 
     const handleChange = (e) => {
 
-    const { id, value } = e.target;
-    let val = value;
+        const { id, value } = e.target;
+        let val = value;
 
-    if (id === 'middle_initial' && val.length > 1) {
-        val = val.charAt(0).toUpperCase();
-    }
-
-    setForm((prev) => {
-        const updated = { ...prev, [id]: val };
-
-        if (id === 'department_id') {
-            updated.job_title_id = '';
+        if (id === 'middle_initial' && val.length > 1) {
+            val = val.charAt(0).toUpperCase();
         }
 
-        return updated;
-    });
+        setForm((prev) => {
+            const updated = { ...prev, [id]: val };
 
-};
+            if (id === 'department_id') {
+                updated.job_title_id = '';
+
+                const mappedSupervisorId = departmentSupervisorMap[Number(val)];
+                updated.supervisor_id = mappedSupervisorId ? String(mappedSupervisorId) : '';
+            }
+
+            return updated;
+        });
+
+    };
 
     const handleSubmit = async (e) => {
 
@@ -96,26 +99,34 @@ setDropdowns({
 
             const data = await res.json();
 
-if (!res.ok) {
-    throw new Error(data.message || 'Failed to register employee');
-}
+            if (!res.ok) {
+                throw new Error(data.message || 'Failed to register employee');
+            }
 
-setMessage("Employee registered successfully! Please use the temporary password to log in and change it immediately.");
-setError('');
+            setMessage("Employee registered successfully! Please use the temporary password to log in and change it immediately.");
+            setError('');
 
         } catch (err) {
 
-    console.error(err);
-    setError(err.message || "Error registering employee.");
-    setMessage('');
+            console.error(err);
+            setError(err.message || "Error registering employee.");
+            setMessage('');
 
-}
+        }
 
     };
 
+    const departmentSupervisorMap = {
+        1: 1,   // Flight Operations
+        2: 56,  // Customer Service
+        3: 8,   // Ground Operations
+        4: 9,   // Maintenance
+        5: 40   // Administration
+    };
+
     const filteredJobTitles = (dropdowns.jobTitles || []).filter(
-    (job) => String(job.department_id) === String(form.department_id)
-);
+        (job) => String(job.department_id) === String(form.department_id)
+    );
 
     return (
 
@@ -227,18 +238,18 @@ setError('');
                                 <div className="col-md-4 mb-3 form-field">
                                     <label>SSN*</label>
                                     <input
-    type="text"
-    id="ssn"
-    className="form-control"
-    value={form.ssn}
-    onChange={(e) => {
-        const val = e.target.value.replace(/\D/g, '').slice(0, 9);
-        handleChange({ target: { id: 'ssn', value: val } });
-    }}
-    placeholder='XXX-XX-XXXX'
-    maxLength="9"
-    required
-/>
+                                        type="text"
+                                        id="ssn"
+                                        className="form-control"
+                                        value={form.ssn}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                                            handleChange({ target: { id: 'ssn', value: val } });
+                                        }}
+                                        placeholder='XXX-XX-XXXX'
+                                        maxLength="9"
+                                        required
+                                    />
                                 </div>
 
                             </div>
@@ -275,28 +286,28 @@ setError('');
                                 </div>
 
                                 <div className="col-md-3 mb-3 form-field">
-    <label>Job Title*</label>
-    <select
-        id="job_title_id"
-        className="form-control"
-        value={form.job_title_id}
-        onChange={handleChange}
-        required
-        disabled={!form.department_id}
-    >
-        <option value="">
-            {form.department_id ? 'Select Job Title' : 'Select Department First'}
-        </option>
-        {filteredJobTitles.map((job) => (
-            <option
-                key={job.job_title_id}
-                value={job.job_title_id}
-            >
-                {job.title_name}
-            </option>
-        ))}
-    </select>
-</div>
+                                    <label>Job Title*</label>
+                                    <select
+                                        id="job_title_id"
+                                        className="form-control"
+                                        value={form.job_title_id}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={!form.department_id}
+                                    >
+                                        <option value="">
+                                            {form.department_id ? 'Select Job Title' : 'Select Department First'}
+                                        </option>
+                                        {filteredJobTitles.map((job) => (
+                                            <option
+                                                key={job.job_title_id}
+                                                value={job.job_title_id}
+                                            >
+                                                {job.title_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
                                 <div className="col-md-3 mb-3 form-field">
                                     <label>Salary*</label>
@@ -317,16 +328,22 @@ setError('');
                                         className="form-control"
                                         value={form.supervisor_id}
                                         onChange={handleChange}
+                                        disabled={!form.department_id}
                                     >
                                         <option value="">Select Supervisor</option>
-                                        {dropdowns.supervisors.map((supervisor) => (
-                                            <option
-                                                key={supervisor.employee_id}
-                                                value={supervisor.employee_id}
-                                            >
-                                                {supervisor.first_name} {supervisor.last_name}
-                                            </option>
-                                        ))}
+                                        {dropdowns.supervisors
+                                            .filter((supervisor) => {
+                                                const mappedSupervisorId = departmentSupervisorMap[Number(form.department_id)];
+                                                return !form.department_id || Number(supervisor.employee_id) === mappedSupervisorId;
+                                            })
+                                            .map((supervisor) => (
+                                                <option
+                                                    key={supervisor.employee_id}
+                                                    value={supervisor.employee_id}
+                                                >
+                                                    {supervisor.first_name} {supervisor.last_name}
+                                                </option>
+                                            ))}
                                     </select>
                                 </div>
 
