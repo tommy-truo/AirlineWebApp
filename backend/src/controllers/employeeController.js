@@ -48,10 +48,10 @@ export const getEmployeeDropdowns = async (req, res) => {
     `;
 
     const jobTitlesSql = `
-      SELECT job_title_id, title_name
-      FROM job_titles
-      ORDER BY title_name ASC
-    `;
+  SELECT job_title_id, title_name, department_id
+  FROM job_titles
+  ORDER BY department_id ASC, title_name ASC
+`;
 
     const supervisorsSql = `
       SELECT employee_id, first_name, last_name
