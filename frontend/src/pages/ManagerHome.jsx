@@ -125,7 +125,7 @@ function ManagerHome() {
 
             <div className="col-md-6 col-xl-3 mb-3">
               <div className="overview-card h-100">
-                <p className="overview-label">Active Employees</p>
+                <p className="overview-label">Total Active Employees</p>
                 <h3 className="overview-value">{loading ? '...' : stats.activeEmployees}</h3>
               </div>
             </div>
