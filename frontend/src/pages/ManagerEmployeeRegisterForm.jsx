@@ -94,22 +94,22 @@ setDropdowns({
                 body: JSON.stringify(form)
             });
 
-            if (!res.ok) {
-                throw new Error('Failed to register employee');
-            }
+            const data = await res.json();
 
-            await res.json();
+if (!res.ok) {
+    throw new Error(data.message || 'Failed to register employee');
+}
 
-            setMessage("Employee registered successfully! Please use the temporary password to log in and change it immediately.");
-            setError('');
+setMessage("Employee registered successfully! Please use the temporary password to log in and change it immediately.");
+setError('');
 
         } catch (err) {
 
-            console.error(err);
-            setError("Error registering employee.");
-            setMessage('');
+    console.error(err);
+    setError(err.message || "Error registering employee.");
+    setMessage('');
 
-        }
+}
 
     };
 
