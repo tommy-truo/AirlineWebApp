@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-function PilotPersonalInfo({ employeeId = 1 }) {
+function PilotPersonalInfo({ employeeId = 1, dashboardTitle = 'Pilot Dashboard' }) {
     const [info, setInfo] = useState(null);
     const [formData, setFormData] = useState({
         first_name: '',
@@ -88,7 +88,7 @@ function PilotPersonalInfo({ employeeId = 1 }) {
     return (
         <div className="page">
             <h2 style={{ textAlign: 'center', marginBottom: '6px', color: '#777' }}>
-                Pilot Dashboard
+                {dashboardTitle}
             </h2>
 
             <h1 className="title" style={{ marginBottom: '4px' }}>

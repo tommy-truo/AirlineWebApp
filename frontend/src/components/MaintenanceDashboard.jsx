@@ -46,7 +46,7 @@ function MaintenanceDashboard({ employeeId, onLogout }) {
       <main className="portal-dashboard-content">
         {page === 'maintenance' && <MaintenancePage employeeId={employeeId} />}
         {page === 'shift' && <ShiftCalendar employeeId={employeeId} />}
-        {page === 'personal' && <PersonalInfo employeeId={employeeId} />}
+        {page === 'personal' && <PersonalInfo employeeId={employeeId} dashboardTitle="Maintenance Portal" />}
       </main>
     </div>
   );
