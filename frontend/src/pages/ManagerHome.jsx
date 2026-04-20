@@ -121,7 +121,7 @@ function ManagerHome() {
             </div>
           )}
 
-          <div className="row mt-2">
+          <div className="row mt-2 justify-content-center">
 
             <div className="col-md-6 col-xl-3 mb-3">
               <div className="overview-card h-100">
